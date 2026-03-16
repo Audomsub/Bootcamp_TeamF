@@ -23,6 +23,7 @@ export default function AdminProducts() {
   const [loading, setLoading] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     loadProducts();
@@ -44,20 +45,26 @@ export default function AdminProducts() {
     if (!deleteId) return;
     try {
       setDeleting(true);
+      setError('');
       await productService.delete(deleteId);
       setProducts((prev) => prev.filter((p) => p.id !== deleteId));
-    } catch {
-      // handle error
+      setDeleteId(null);
+    } catch (err: any) {
+      const message = err.response?.data?.message || 'Failed to delete product';
+      if (message.toLowerCase().includes('order') || message.toLowerCase().includes('pending')) {
+        setError('Cannot delete product: This item is currently tied to pending orders. Please fulfill or cancel the orders before removing the product.');
+      } else {
+        setError(message);
+      }
     } finally {
       setDeleting(false);
-      setDeleteId(null);
     }
   };
 
   const columns: ColumnDef<Product>[] = [
     {
       accessorKey: 'image_url',
-      header: 'Image',
+      header: 'IMAGE',
       enableSorting: false,
       cell: ({ row }) => (
         <img
@@ -69,7 +76,7 @@ export default function AdminProducts() {
     },
     {
       accessorKey: 'name',
-      header: 'Product Name',
+      header: 'PRODUCT NAME',
       cell: ({ row }) => (
         <div>
           <p className="font-medium text-gray-900">{row.original.name}</p>
@@ -79,44 +86,50 @@ export default function AdminProducts() {
     },
     {
       accessorKey: 'cost_price',
-      header: 'Cost Price',
+      header: 'COST PRICE',
+      meta: { align: 'right' },
       cell: ({ row }) => (
-        <span className="text-gray-900 font-medium">{formatCurrency(row.original.cost_price)}</span>
+        <span className="text-neutral-900 font-bold">{formatCurrency(row.original.cost_price)}</span>
       ),
     },
     {
       accessorKey: 'min_price',
-      header: 'Min Price',
+      header: 'MIN PRICE',
+      meta: { align: 'right' },
       cell: ({ row }) => (
-        <span className="text-gray-600">{formatCurrency(row.original.min_price)}</span>
+        <span className="text-neutral-500 font-medium">{formatCurrency(row.original.min_price)}</span>
       ),
     },
     {
       accessorKey: 'stock',
-      header: 'Stock',
+      header: 'STOCK',
+      meta: { align: 'right' },
       cell: ({ row }) => (
-        <span className={`badge ${row.original.stock > 0 ? 'badge-approved' : 'badge-rejected'}`}>
-          {row.original.stock}
+        <span className={`inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${row.original.stock > 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>
+          {row.original.stock > 0 ? 'IN STOCK' : 'OUT OF STOCK'} ({row.original.stock})
         </span>
       ),
     },
     {
       id: 'actions',
-      header: 'Actions',
+      header: 'ACTIONS',
+      meta: { align: 'right' },
       enableSorting: false,
       cell: ({ row }) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-end gap-3">
           <Link
             to={`/admin/products/edit/${row.original.id}`}
-            className="p-2 rounded-lg text-gray-500 hover:text-primary-600 hover:bg-primary-50 transition-colors"
+            className="p-2.5 rounded-full bg-white text-neutral-600 border border-neutral-100 shadow-sm hover:shadow-md hover:text-primary-600 hover:border-primary-100 transition-all active:scale-90 group"
+            title="Edit Product"
           >
-            <Pencil className="h-4 w-4" />
+            <Pencil className="h-4 w-4 group-hover:scale-110 transition-transform" />
           </Link>
           <button
             onClick={() => setDeleteId(row.original.id)}
-            className="p-2 rounded-lg text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+            className="p-2.5 rounded-full bg-white text-neutral-600 border border-neutral-100 shadow-sm hover:shadow-md hover:text-rose-600 hover:border-rose-100 transition-all active:scale-90 group"
+            title="Delete Product"
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="h-4 w-4 group-hover:scale-110 transition-transform" />
           </button>
         </div>
       ),
@@ -133,6 +146,13 @@ export default function AdminProducts() {
           Add Product
         </Link>
       </PageHeader>
+
+      {error && (
+        <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-2xl text-[13px] font-bold text-rose-600 flex items-center gap-3 animate-in slide-in-from-top-2">
+          <div className="w-1.5 h-1.5 rounded-full bg-rose-600 animate-pulse"></div>
+          {error}
+        </div>
+      )}
 
       <DataTable
         columns={columns}

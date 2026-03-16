@@ -1,0 +1,87 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { ShopProduct } from '../types';
+
+interface CartItem {
+  shopProduct: ShopProduct;
+  quantity: number;
+}
+
+interface CartContextType {
+  cartItems: CartItem[];
+  addToCart: (shopProduct: ShopProduct, quantity: number) => void;
+  removeFromCart: (shopProductId: number) => void;
+  updateQuantity: (shopProductId: number, quantity: number) => void;
+  clearCart: () => void;
+  totalItems: number;
+  totalAmount: number;
+}
+
+const CartContext = createContext<CartContextType | undefined>(undefined);
+
+export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [cartItems, setCartItems] = useState<CartItem[]>(() => {
+    const savedCart = localStorage.getItem('shop_cart');
+    return savedCart ? JSON.parse(savedCart) : [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('shop_cart', JSON.stringify(cartItems));
+  }, [cartItems]);
+
+  const addToCart = (shopProduct: ShopProduct, quantity: number) => {
+    setCartItems(prev => {
+      const existing = prev.find(item => item.shopProduct.id === shopProduct.id);
+      if (existing) {
+        return prev.map(item => 
+          item.shopProduct.id === shopProduct.id 
+            ? { ...item, quantity: item.quantity + quantity } 
+            : item
+        );
+      }
+      return [...prev, { shopProduct, quantity }];
+    });
+  };
+
+  const removeFromCart = (shopProductId: number) => {
+    setCartItems(prev => prev.filter(item => item.shopProduct.id !== shopProductId));
+  };
+
+  const updateQuantity = (shopProductId: number, quantity: number) => {
+    setCartItems(prev => prev.map(item => 
+      item.shopProduct.id === shopProductId 
+        ? { ...item, quantity: Math.max(1, quantity) } 
+        : item
+    ));
+  };
+
+  const clearCart = () => {
+    setCartItems([]);
+  };
+
+  const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const totalAmount = cartItems.reduce((sum, item) => 
+    sum + (item.shopProduct.selling_price * item.quantity), 0
+  );
+
+  return (
+    <CartContext.Provider value={{ 
+      cartItems, 
+      addToCart, 
+      removeFromCart, 
+      updateQuantity, 
+      clearCart, 
+      totalItems, 
+      totalAmount 
+    }}>
+      {children}
+    </CartContext.Provider>
+  );
+};
+
+export const useCart = () => {
+  const context = useContext(CartContext);
+  if (context === undefined) {
+    throw new Error('useCart must be used within a CartProvider');
+  }
+  return context;
+};

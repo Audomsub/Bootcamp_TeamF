@@ -3,7 +3,7 @@ import { type ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/data-table';
 import { PageHeader, LoadingSpinner } from '@/components/ui/shared';
 import { orderService } from '@/services/order.service';
-import { formatCurrency, formatDate, getStatusColor } from '@/lib/utils';
+import { formatCurrency, formatDate, getStatusColor, cn } from '@/lib/utils';
 import type { Order } from '@/types';
 
 // Mock data
@@ -35,16 +35,16 @@ export default function ResellerOrders() {
   const columns: ColumnDef<Order>[] = [
     {
       accessorKey: 'order_number',
-      header: 'Order Number',
+      header: 'ORDER NUMBER',
       cell: ({ row }) => (
-        <span className="font-mono text-sm font-medium text-primary-600">
+        <span className="font-mono text-sm font-bold text-primary-600">
           {row.original.order_number}
         </span>
       ),
     },
     {
       accessorKey: 'customer_name',
-      header: 'Customer',
+      header: 'CUSTOMER',
       cell: ({ row }) => (
         <div>
           <p className="font-medium text-gray-900">{row.original.customer_name}</p>
@@ -54,7 +54,7 @@ export default function ResellerOrders() {
     },
     {
       id: 'items',
-      header: 'Items',
+      header: 'ITEMS',
       cell: ({ row }) => (
         <div className="max-w-xs">
           {row.original.items?.map((item, i) => (
@@ -68,7 +68,7 @@ export default function ResellerOrders() {
     },
     {
       accessorKey: 'total_amount',
-      header: 'Total',
+      header: 'TOTAL',
       cell: ({ row }) => (
         <span className="font-medium text-gray-900">
           {formatCurrency(row.original.total_amount)}
@@ -77,7 +77,7 @@ export default function ResellerOrders() {
     },
     {
       accessorKey: 'reseller_profit',
-      header: 'My Profit',
+      header: 'MY PROFIT',
       cell: ({ row }) => (
         <span className="font-semibold text-emerald-600">
           +{formatCurrency(row.original.reseller_profit)}
@@ -86,16 +86,24 @@ export default function ResellerOrders() {
     },
     {
       accessorKey: 'status',
-      header: 'Status',
-      cell: ({ row }) => (
-        <span className={`badge ${getStatusColor(row.original.status)}`}>
-          {row.original.status.charAt(0).toUpperCase() + row.original.status.slice(1)}
-        </span>
-      ),
+      header: 'STATUS',
+      cell: ({ row }) => {
+        const status = row.original.status;
+        return (
+          <span className={cn(
+            "inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border",
+            status === 'completed' ? "bg-emerald-50 text-emerald-700 border-emerald-100" :
+            status === 'shipped' ? "bg-primary-50 text-primary-700 border-primary-100" :
+            "bg-amber-50 text-amber-700 border-amber-100"
+          )}>
+            {status}
+          </span>
+        );
+      },
     },
     {
       accessorKey: 'created_at',
-      header: 'Date',
+      header: 'DATE',
       cell: ({ row }) => (
         <span className="text-xs text-gray-500">{formatDate(row.original.created_at)}</span>
       ),

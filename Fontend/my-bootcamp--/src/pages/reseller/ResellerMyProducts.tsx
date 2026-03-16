@@ -19,7 +19,7 @@ const mockMyProducts: MyProductItem[] = [
 export default function ResellerMyProducts() {
   const [products, setProducts] = useState<MyProductItem[]>(mockMyProducts);
   const [loading, setLoading] = useState(false);
-  
+
   const [editItem, setEditItem] = useState<MyProductItem | null>(null);
   const [editPrice, setEditPrice] = useState('');
   const [error, setError] = useState('');
@@ -46,7 +46,7 @@ export default function ResellerMyProducts() {
 
   const handleUpdatePrice = async () => {
     if (!editItem) return;
-    
+
     const price = Number(editPrice);
     if (isNaN(price) || price < editItem.product.min_price) {
       setError(`Selling price must be at least ${formatCurrency(editItem.product.min_price)}`);
@@ -57,7 +57,7 @@ export default function ResellerMyProducts() {
       setUpdating(true);
       setError('');
       await shopService.updatePrice(editItem.id, price);
-      setProducts(prev => 
+      setProducts(prev =>
         prev.map(p => p.id === editItem.id ? { ...p, selling_price: price } : p)
       );
       setEditItem(null);
@@ -85,7 +85,7 @@ export default function ResellerMyProducts() {
   const columns: ColumnDef<MyProductItem>[] = [
     {
       id: 'product',
-      header: 'Product',
+      header: 'PRODUCT',
       cell: ({ row }) => (
         <div className="flex items-center gap-3">
           <img
@@ -99,50 +99,53 @@ export default function ResellerMyProducts() {
     },
     {
       id: 'min_price',
-      header: 'Min Price',
+      header: 'MIN PRICE',
       cell: ({ row }) => (
-        <span className="text-gray-500">{formatCurrency(row.original.product.min_price)}</span>
+        <span className="text-neutral-400 font-medium">{formatCurrency(row.original.product.min_price)}</span>
       ),
     },
     {
       accessorKey: 'selling_price',
-      header: 'Your Selling Price',
+      header: 'SELLING PRICE',
       cell: ({ row }) => (
-        <span className="font-semibold text-primary-600 pb-0.5 border-b border-primary-200">
+        <span className="font-black text-primary-600 border-b-2 border-primary-500/20 pb-0.5 tracking-tight">
           {formatCurrency(row.original.selling_price)}
         </span>
       ),
     },
     {
       id: 'profit',
-      header: 'Estimated Profit',
+      header: 'ESTIMATED PROFIT',
       cell: ({ row }) => (
-        <span className="font-medium text-emerald-600">
+        <span className="font-black text-emerald-600 tracking-tight">
           {formatCurrency(row.original.selling_price - row.original.product.cost_price)}
         </span>
       ),
     },
     {
       id: 'actions',
-      header: 'Actions',
+      header: 'ACTIONS',
+      meta: { align: 'right' },
       enableSorting: false,
       cell: ({ row }) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-end gap-5 px-2">
           <button
             onClick={() => {
               setEditItem(row.original);
               setEditPrice(row.original.selling_price.toString());
               setError('');
             }}
-            className="p-2 rounded-lg text-gray-500 hover:text-primary-600 hover:bg-primary-50 transition-colors"
+            className="p-2.5 rounded-full bg-white text-neutral-600 border border-neutral-100 shadow-sm hover:shadow-md hover:text-primary-600 hover:border-primary-100 transition-all active:scale-90 group"
+            title="Edit Price"
           >
-            <Pencil className="h-4 w-4" />
+            <Pencil className="h-4 w-4 group-hover:scale-110 transition-transform" />
           </button>
           <button
             onClick={() => setDeleteId(row.original.id)}
-            className="p-2 rounded-lg text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+            className="p-2.5 rounded-full bg-white text-neutral-600 border border-neutral-100 shadow-sm hover:shadow-md hover:text-rose-600 hover:border-rose-100 transition-all active:scale-90 group"
+            title="Remove Product"
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="h-4 w-4 group-hover:scale-110 transition-transform" />
           </button>
         </div>
       ),
@@ -172,7 +175,7 @@ export default function ResellerMyProducts() {
               <p className="text-sm font-medium text-gray-900 mb-1">{editItem.product.name}</p>
               <p className="text-xs text-gray-500">Min Price: {formatCurrency(editItem.product.min_price)}</p>
             </div>
-            
+
             <div>
               <label className="label">New Selling Price</label>
               <input

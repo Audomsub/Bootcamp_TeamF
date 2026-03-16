@@ -10,9 +10,12 @@ import { productService } from '@/services/product.service';
 const productSchema = z.object({
   name: z.string().min(1, 'Product name is required'),
   description: z.string().min(1, 'Description is required'),
-  cost_price: z.coerce.number().min(0, 'Cost price must be positive'),
-  min_price: z.coerce.number().min(0, 'Minimum price must be positive'),
+  cost_price: z.coerce.number().min(0.01, 'Cost price must be greater than 0'),
+  min_price: z.coerce.number().min(0, 'Minimum price must be non-negative'),
   stock: z.coerce.number().int().min(0, 'Stock must be non-negative'),
+}).refine((data) => data.min_price >= data.cost_price, {
+  message: 'Minimum price must be greater than or equal to cost price',
+  path: ['min_price'],
 });
 
 type ProductForm = z.infer<typeof productSchema>;
@@ -65,6 +68,18 @@ export default function ProductForm() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validate file type
+      if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
+        setError('Only JPG, JPEG and PNG files are allowed');
+        return;
+      }
+      // Validate file size (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('File size must be less than 5MB');
+        return;
+      }
+
+      setError('');
       setImageFile(file);
       const reader = new FileReader();
       reader.onload = (ev) => setImagePreview(ev.target?.result as string);
@@ -142,7 +157,7 @@ export default function ProductForm() {
                       className="hidden"
                     />
                   </label>
-                  <p className="text-xs text-gray-500 mt-1">PNG, JPG up to 2MB</p>
+                  <p className="text-xs text-gray-500 mt-1">PNG, JPG up to 5MB</p>
                 </div>
               </div>
             </div>

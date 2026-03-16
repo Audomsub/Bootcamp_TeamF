@@ -5,7 +5,7 @@ import { DataTable } from '@/components/ui/data-table';
 import { PageHeader, LoadingSpinner } from '@/components/ui/shared';
 import { ConfirmDialog } from '@/components/ui/modal';
 import { orderService } from '@/services/order.service';
-import { formatCurrency, formatDate, getStatusColor } from '@/lib/utils';
+import { formatCurrency, formatDate, getStatusColor, cn } from '@/lib/utils';
 import type { Order } from '@/types';
 
 // Mock data
@@ -56,21 +56,21 @@ export default function AdminOrders() {
   const columns: ColumnDef<Order>[] = [
     {
       accessorKey: 'order_number',
-      header: 'Order Number',
+      header: 'ORDER NUMBER',
       cell: ({ row }) => (
-        <span className="font-mono text-sm font-medium text-primary-600">
+        <span className="font-mono text-sm font-bold text-primary-600">
           {row.original.order_number}
         </span>
       ),
     },
     {
       id: 'shop_name',
-      header: 'Shop Name',
-      cell: ({ row }) => <span>{row.original.shop?.shop_name || '-'}</span>,
+      header: 'Reseller Shop',
+      cell: ({ row }) => <span className="font-bold text-neutral-800">{row.original.shop?.shop_name || '-'}</span>,
     },
     {
       accessorKey: 'customer_name',
-      header: 'Customer',
+      header: 'CUSTOMER',
       cell: ({ row }) => (
         <div>
           <p className="font-medium text-gray-900">{row.original.customer_name}</p>
@@ -80,7 +80,7 @@ export default function AdminOrders() {
     },
     {
       id: 'products',
-      header: 'Products',
+      header: 'PRODUCTS',
       cell: ({ row }) => (
         <div className="max-w-xs">
           {row.original.items?.map((item, i) => (
@@ -94,43 +94,70 @@ export default function AdminOrders() {
     },
     {
       accessorKey: 'total_amount',
-      header: 'Total Amount',
+      header: 'TOTAL AMOUNT',
+      meta: { align: 'right' },
       cell: ({ row }) => (
-        <span className="font-semibold text-gray-900">
+        <span className="font-bold text-neutral-900 tracking-tight">
           {formatCurrency(row.original.total_amount)}
         </span>
       ),
     },
     {
       accessorKey: 'created_at',
-      header: 'Date',
+      header: 'DATE',
+      meta: { align: 'right' },
       cell: ({ row }) => (
-        <span className="text-gray-500">{formatDate(row.original.created_at)}</span>
+        <span className="text-neutral-500 font-medium">{formatDate(row.original.created_at)}</span>
       ),
     },
     {
       accessorKey: 'status',
-      header: 'Status',
+      header: 'STATUS',
+      meta: { align: 'center' },
+      cell: ({ row }) => {
+        const status = row.original.status;
+        return (
+          <span className={cn(
+            "inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border",
+            status === 'completed' ? "bg-emerald-50 text-emerald-700 border-emerald-100" :
+            status === 'shipped' ? "bg-primary-50 text-primary-700 border-primary-100" :
+            "bg-amber-50 text-amber-700 border-amber-100"
+          )}>
+            {status}
+          </span>
+        );
+      },
+    },
+    {
+      accessorKey: 'reseller_profit',
+      header: 'ESTIMATED PROFIT',
+      meta: { align: 'right' },
       cell: ({ row }) => (
-        <span className={`badge ${getStatusColor(row.original.status)}`}>
-          {row.original.status.charAt(0).toUpperCase() + row.original.status.slice(1)}
-        </span>
+        <div className="text-right">
+          <p className="font-bold text-emerald-600 tracking-tight">
+            +{formatCurrency(row.original.reseller_profit)}
+          </p>
+          <p className="text-[8px] font-black text-neutral-400 uppercase tracking-widest">To Wallet</p>
+        </div>
       ),
     },
     {
       id: 'actions',
-      header: 'Action',
+      header: 'ACTIONS',
+      meta: { align: 'right' },
       enableSorting: false,
       cell: ({ row }) => {
-        if (row.original.status !== 'pending') return null;
+        if (row.original.status !== 'pending') return <div className="h-9" />; // Maintain row height
         return (
-          <button
-            onClick={() => setShipId(row.original.id)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
-          >
-            <Truck className="h-3.5 w-3.5" />
-            Mark as Shipped
-          </button>
+          <div className="flex items-center justify-end">
+            <button
+              onClick={() => setShipId(row.original.id)}
+              className="flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 shadow-sm hover:shadow-md hover:bg-emerald-100/50 hover:border-emerald-200 transition-all active:scale-95 group font-bold text-xs"
+            >
+              <Truck className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+              SHIP ORDER
+            </button>
+          </div>
         );
       },
     },

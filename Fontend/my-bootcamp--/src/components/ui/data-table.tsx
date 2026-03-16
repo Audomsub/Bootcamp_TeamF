@@ -66,47 +66,63 @@ export function DataTable<TData>({
             <thead>
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id} className="border-b border-gray-100 bg-gray-50/50">
-                  {headerGroup.headers.map((header) => (
-                    <th
-                      key={header.id}
-                      className={cn(
-                        'px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider',
-                        header.column.getCanSort() && 'cursor-pointer select-none hover:text-gray-700'
-                      )}
-                      onClick={header.column.getToggleSortingHandler()}
-                    >
-                      <div className="flex items-center gap-1">
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(header.column.columnDef.header, header.getContext())}
-                        {header.column.getCanSort() && (
-                          <ArrowUpDown className="h-3.5 w-3.5 text-gray-400" />
-                        )}
-                      </div>
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {table.getRowModel().rows.length === 0 ? (
-                <tr>
-                  <td colSpan={columns.length} className="px-6 py-12 text-center text-gray-500 text-sm">
-                    No data found
-                  </td>
-                </tr>
-              ) : (
-                table.getRowModel().rows.map((row) => (
-                  <tr key={row.id} className="hover:bg-gray-50/50 transition-colors">
-                    {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id} className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </td>
-                    ))}
-                  </tr>
-                ))
-              )}
-            </tbody>
+                   {headerGroup.headers.map((header) => {
+                     const meta = header.column.columnDef.meta as any;
+                     const alignClass = meta?.align === 'right' ? 'text-right' : meta?.align === 'center' ? 'text-center' : 'text-left';
+                     const alignHeaderClass = meta?.align === 'right' ? 'justify-end' : meta?.align === 'center' ? 'justify-center' : 'justify-start';
+
+                     return (
+                       <th
+                         key={header.id}
+                         className={cn(
+                           'px-6 py-4 text-xs font-black text-neutral-600 uppercase tracking-widest transition-colors',
+                           alignClass,
+                           header.column.getCanSort() && 'cursor-pointer select-none hover:text-primary-700 hover:bg-neutral-100/50'
+                         )}
+                         onClick={header.column.getToggleSortingHandler()}
+                       >
+                         <div className={cn("flex items-center gap-2", alignHeaderClass)}>
+                           {header.isPlaceholder
+                             ? null
+                             : flexRender(header.column.columnDef.header, header.getContext())}
+                           {header.column.getCanSort() && (
+                             <ArrowUpDown className="h-3 w-3 text-neutral-400 group-hover:text-primary-500 transition-colors" />
+                           )}
+                         </div>
+                       </th>
+                     );
+                   })}
+                 </tr>
+               ))}
+             </thead>
+             <tbody className="divide-y divide-gray-100">
+               {table.getRowModel().rows.length === 0 ? (
+                 <tr>
+                   <td colSpan={columns.length} className="px-6 py-12 text-center text-gray-400 text-sm italic">
+                     No records matching your search.
+                   </td>
+                 </tr>
+               ) : (
+                 table.getRowModel().rows.map((row) => (
+                   <tr key={row.id} className="group hover:bg-gray-50/80 transition-all duration-300">
+                     {row.getVisibleCells().map((cell) => {
+                       const meta = cell.column.columnDef.meta as any;
+                       const alignClass = meta?.align === 'right' ? 'text-right' : meta?.align === 'center' ? 'text-center' : 'text-left';
+                       
+                       return (
+                         <td key={cell.id} className={cn(
+                           "px-6 py-5 text-sm transition-colors",
+                           alignClass,
+                           "text-neutral-700 group-hover:text-neutral-900"
+                         )}>
+                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                         </td>
+                       );
+                     })}
+                   </tr>
+                 ))
+               )}
+             </tbody>
           </table>
         </div>
 

@@ -3,7 +3,7 @@ import { DollarSign, ShoppingCart, Clock, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { StatCard, PageHeader, LoadingSpinner } from '@/components/ui/shared';
 import { dashboardService } from '@/services/dashboard.service';
-import { formatCurrency, formatDate, getStatusColor } from '@/lib/utils';
+import { formatCurrency, formatDate, getStatusColor, cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import type { ResellerDashboardStats } from '@/types';
 
@@ -102,11 +102,11 @@ export default function ResellerDashboard() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50/50">
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Order</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Customer</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Date</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Profit</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
+                <th className="px-6 py-4 text-left text-[10px] font-black text-neutral-400 uppercase tracking-widest">ORDER</th>
+                <th className="px-6 py-4 text-left text-[10px] font-black text-neutral-400 uppercase tracking-widest">CUSTOMER</th>
+                <th className="px-6 py-4 text-left text-[10px] font-black text-neutral-400 uppercase tracking-widest">DATE</th>
+                <th className="px-6 py-4 text-left text-[10px] font-black text-neutral-400 uppercase tracking-widest">PROFIT</th>
+                <th className="px-6 py-4 text-left text-[10px] font-black text-neutral-400 uppercase tracking-widest">STATUS</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -125,8 +125,13 @@ export default function ResellerDashboard() {
                     +{formatCurrency(order.reseller_profit)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <span className={`badge ${getStatusColor(order.status)}`}>
-                      {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                    <span className={cn(
+                      "inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border",
+                      order.status === 'completed' ? "bg-emerald-50 text-emerald-700 border-emerald-100" :
+                      order.status === 'shipped' ? "bg-primary-50 text-primary-700 border-primary-100" :
+                      "bg-amber-50 text-amber-700 border-amber-100"
+                    )}>
+                      {order.status}
                     </span>
                   </td>
                 </tr>

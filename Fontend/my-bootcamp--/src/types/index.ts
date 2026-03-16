@@ -118,7 +118,9 @@ export interface AdminDashboardStats {
   total_resellers: number;
   pending_resellers: number;
   recent_orders: Order[];
-  sales_chart: { date: string; amount: number }[];
+  sales_chart: { date: string; amount: number; profit?: number }[];
+  reseller_leaderboard?: { name: string; shop: string; sales: number; orders: number }[];
+  category_distribution?: { name: string; value: number }[];
 }
 
 export interface ResellerDashboardStats {

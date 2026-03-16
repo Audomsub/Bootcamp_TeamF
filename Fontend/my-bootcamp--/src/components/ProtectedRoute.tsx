@@ -8,8 +8,9 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ role, requireApproval = false }: ProtectedRouteProps) {
-  const { isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
 
+  // Temporarily bypass authentication check to view UX/UI without logging in
   // Temporarily bypass authentication check to view UX/UI without logging in
   // if (isLoading) {
   //   return (
@@ -24,7 +25,9 @@ export default function ProtectedRoute({ role, requireApproval = false }: Protec
   // }
 
   // if (role && user.role !== role) {
-  //   return <Navigate to="/" replace />;
+  //   // If admin tries to access reseller or vice versa
+  //   if (user.role === 'admin') return <Navigate to="/admin/dashboard" replace />;
+  //   return <Navigate to="/reseller/dashboard" replace />;
   // }
 
   // if (requireApproval && user.status !== 'approved') {

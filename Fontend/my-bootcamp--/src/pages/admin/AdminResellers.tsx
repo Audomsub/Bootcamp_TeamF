@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { type ColumnDef } from '@tanstack/react-table';
-import { UserCheck, UserX, Users } from 'lucide-react';
+import { UserCheck, UserX, Users, ShieldCheck, Clock } from 'lucide-react';
 import { DataTable } from '@/components/ui/data-table';
-import { PageHeader, LoadingSpinner } from '@/components/ui/shared';
+import { PageHeader, LoadingSpinner, StatCard } from '@/components/ui/shared';
 import { ConfirmDialog } from '@/components/ui/modal';
 import { resellerService } from '@/services/reseller.service';
-import { formatDate, getStatusColor } from '@/lib/utils';
+import { formatDate, getStatusColor, cn } from '@/lib/utils';
 import type { User } from '@/types';
 
 interface ResellerUser extends User {
@@ -34,7 +34,9 @@ export default function AdminResellers() {
     try {
       setLoading(true);
       const response = await resellerService.getAll();
-      setResellers(response.data.data.data as ResellerUser[]);
+      if (response.data.data.data) {
+        setResellers(response.data.data.data as ResellerUser[]);
+      }
     } catch {
       setResellers(mockResellers);
     } finally {
@@ -66,73 +68,93 @@ export default function AdminResellers() {
     }
   };
 
+  // Calculate stats
+  const stats = {
+    total: resellers.length,
+    approved: resellers.filter(r => r.status === 'approved').length,
+    pending: resellers.filter(r => r.status === 'pending').length,
+  };
+
   const columns: ColumnDef<ResellerUser>[] = [
     {
       accessorKey: 'name',
       header: 'Name',
       cell: ({ row }) => (
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-primary-100 rounded-full flex items-center justify-center">
-            <span className="text-sm font-semibold text-primary-700">
+          <div className="w-9 h-9 bg-primary-500/10 border border-primary-500/20 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
+            <span className="text-sm font-black text-primary-600">
               {row.original.name.charAt(0)}
             </span>
           </div>
-          <span className="font-medium text-gray-900">{row.original.name}</span>
+          <span className="font-bold text-neutral-900 tracking-tight">{row.original.name}</span>
         </div>
       ),
     },
     {
       accessorKey: 'email',
       header: 'Email',
+      cell: ({ row }) => <span className="text-neutral-500 font-medium">{row.original.email}</span>,
     },
     {
       id: 'shop_name',
       header: 'Shop Name',
       cell: ({ row }) => (
-        <span className="text-gray-700">{row.original.shop?.shop_name || '-'}</span>
+        <span className="text-neutral-800 font-bold tracking-tight">{row.original.shop?.shop_name || '-'}</span>
       ),
     },
     {
       accessorKey: 'phone',
       header: 'Phone',
+      cell: ({ row }) => <span className="text-neutral-500 font-medium tabular-nums">{row.original.phone}</span>,
     },
     {
       accessorKey: 'created_at',
       header: 'Register Date',
+      meta: { align: 'right' },
       cell: ({ row }) => (
-        <span className="text-gray-500">{formatDate(row.original.created_at)}</span>
+        <span className="text-neutral-500 font-medium tabular-nums">{formatDate(row.original.created_at)}</span>
       ),
     },
     {
       accessorKey: 'status',
-      header: 'Status',
-      cell: ({ row }) => (
-        <span className={`badge ${getStatusColor(row.original.status)}`}>
-          {row.original.status.charAt(0).toUpperCase() + row.original.status.slice(1)}
-        </span>
-      ),
+      header: 'STATUS',
+      meta: { align: 'center' },
+      cell: ({ row }) => {
+        const status = row.original.status;
+        return (
+          <span className={cn(
+            "inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border",
+            status === 'approved' ? "bg-emerald-50 text-emerald-700 border-emerald-100" :
+            status === 'pending' ? "bg-amber-50 text-amber-700 border-amber-100" :
+            "bg-rose-50 text-rose-700 border-rose-100"
+          )}>
+            {status === 'approved' ? 'Approved' : status === 'pending' ? 'Pending' : 'Rejected'}
+          </span>
+        );
+      },
     },
     {
       id: 'actions',
-      header: 'Actions',
+      header: 'ACTIONS',
+      meta: { align: 'right' },
       enableSorting: false,
       cell: ({ row }) => {
-        if (row.original.status !== 'pending') return null;
+        if (row.original.status !== 'pending') return <div className="h-9" />;
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-end gap-1.5">
             <button
               onClick={() => setAction({ id: row.original.id, type: 'approve' })}
-              className="p-2 rounded-lg text-emerald-600 hover:bg-emerald-50 transition-colors"
+              className="p-2.5 rounded-full bg-white text-emerald-600 border border-neutral-100 shadow-sm hover:shadow-md hover:border-emerald-100 transition-all active:scale-90 group"
               title="Approve"
             >
-              <UserCheck className="h-4 w-4" />
+              <UserCheck className="h-4.5 w-4.5 group-hover:scale-110 transition-transform" />
             </button>
             <button
               onClick={() => setAction({ id: row.original.id, type: 'reject' })}
-              className="p-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+              className="p-2.5 rounded-full bg-white text-rose-600 border border-neutral-100 shadow-sm hover:shadow-md hover:border-rose-100 transition-all active:scale-90 group"
               title="Reject"
             >
-              <UserX className="h-4 w-4" />
+              <UserX className="h-4.5 w-4.5 group-hover:scale-110 transition-transform" />
             </button>
           </div>
         );
@@ -143,15 +165,52 @@ export default function AdminResellers() {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div>
-      <PageHeader title="Resellers" subtitle="Manage reseller accounts and approvals" />
+    <div className="relative min-h-screen">
+      {/* Decorative Glows */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary-500/5 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-emerald-500/3 blur-[100px] rounded-full pointer-events-none" />
 
-      <DataTable
-        columns={columns}
-        data={resellers}
-        searchColumn="name"
-        searchPlaceholder="Search resellers..."
-      />
+      <div className="relative z-10 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <PageHeader 
+          title="Resellers" 
+          subtitle="Manage reseller accounts and approvals" 
+        />
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <StatCard
+            title="Total Resellers"
+            value={stats.total}
+            icon={Users}
+            trend={{ value: 12, label: 'this month' }}
+            className="glass-card border-white/5"
+          />
+          <StatCard
+            title="Approved"
+            value={stats.approved}
+            icon={ShieldCheck}
+            color="emerald"
+            className="glass-card border-white/5"
+          />
+          <StatCard
+            title="Pending"
+            value={stats.pending}
+            icon={Clock}
+            color="amber"
+            className="glass-card border-white/5"
+          />
+        </div>
+
+        {/* Data Table Container */}
+        <div className="glass-card border-white/5 overflow-hidden p-1 shadow-2xl">
+          <DataTable
+            columns={columns}
+            data={resellers}
+            searchColumn="name"
+            searchPlaceholder="Search resellers by name..."
+          />
+        </div>
+      </div>
 
       <ConfirmDialog
         isOpen={action !== null}

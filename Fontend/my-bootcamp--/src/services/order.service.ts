@@ -25,6 +25,9 @@ export const orderService = {
   trackOrder: (orderNumber: string) =>
     api.get<ApiResponse<Order>>(`/orders/track/${orderNumber}`),
 
+  getOrderById: (id: number) =>
+    api.get<ApiResponse<Order>>(`/orders/${id}`),
+
   simulatePayment: (orderId: number) =>
     api.post<ApiResponse<Order>>(`/orders/${orderId}/pay`),
 };
