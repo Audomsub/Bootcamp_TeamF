@@ -1,5 +1,6 @@
 package com.example.bootcamp.dto.Request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -17,10 +18,12 @@ public class ProductRequest {
 
     @NotNull(message = "ราคาต้นทุนห้ามว่าง")
     @DecimalMin(value = "0.0", inclusive = false, message = "ราคาทุนต้องมากกว่า 0")
+    @JsonProperty("costPrice")
     private BigDecimal costPrice;
 
     @NotNull(message = "ราคาขายขั้นต่ำห้ามว่าง")
     @DecimalMin(value = "0.0", inclusive = false, message = "ราคาขายต้องมากกว่า 0")
+    @JsonProperty("minSellPrice")
     private BigDecimal minSellPrice;
 
     @NotNull(message = "จำนวนสต็อกห้ามว่าง")
@@ -51,7 +54,7 @@ public class ProductRequest {
     }
 
     public BigDecimal getCostPrice() {
-        return costPrice;
+        return costPrice; // ต้องคืนค่า costPrice
     }
 
     public void setCostPrice(BigDecimal costPrice) {
@@ -59,7 +62,7 @@ public class ProductRequest {
     }
 
     public BigDecimal getMinSellPrice() {
-        return minSellPrice;
+        return minSellPrice; // ห้ามคืนค่า costPrice เด็ดขาด! ต้องเป็น minSellPrice
     }
 
     public void setMinSellPrice(BigDecimal minSellPrice) {

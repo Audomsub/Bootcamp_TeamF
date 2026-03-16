@@ -17,7 +17,7 @@ public class ProductsEntity {
     private Integer id;
 
     @Column(name = "name" , nullable = false)
-    private String name;
+    private String productName;
 
     @Column(name = "description" , columnDefinition = "TEXT")
     private String description;
@@ -29,7 +29,7 @@ public class ProductsEntity {
     private BigDecimal costPrice;
 
     @Column(name = "min_price" , nullable = false , precision = 10 , scale = 2)
-    private  BigDecimal minPrice;
+    private  BigDecimal minSellPrice;
 
     @Column(name = "stock")
     private Integer stock;
@@ -46,12 +46,20 @@ public class ProductsEntity {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getProductName() {
+        return productName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
+
+    public BigDecimal getMinSellPrice() {
+        return minSellPrice;
+    }
+
+    public void setMinSellPrice(BigDecimal minSellPrice) {
+        this.minSellPrice = minSellPrice;
     }
 
     public String getDescription() {
@@ -78,13 +86,6 @@ public class ProductsEntity {
         this.costPrice = costPrice;
     }
 
-    public BigDecimal getMinPrice() {
-        return minPrice;
-    }
-
-    public void setMinPrice(BigDecimal minPrice) {
-        this.minPrice = minPrice;
-    }
 
     public Integer getStock() {
         return stock;
