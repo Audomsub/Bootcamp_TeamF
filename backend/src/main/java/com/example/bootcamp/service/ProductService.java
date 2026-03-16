@@ -1,7 +1,10 @@
 package com.example.bootcamp.service;
 
 import com.example.bootcamp.dto.Request.ProductRequest;
+import com.example.bootcamp.entity.OrdersEntity;
 import com.example.bootcamp.entity.ProductsEntity;
+import com.example.bootcamp.repository.OrderItemRepository;
+import com.example.bootcamp.repository.OrderRepository;
 import com.example.bootcamp.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +18,9 @@ public class ProductService {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private OrderItemRepository orderItemRepository;
 
     @Transactional
     public String addProduct(ProductRequest request) {
@@ -38,7 +44,7 @@ public class ProductService {
     }
 
     @Transactional
-    public String editProduct(Long id , ProductRequest request) {
+    public String editProduct(Integer id , ProductRequest request) {
         Optional<ProductsEntity> optionalProductsEntity = productRepository.findById(id);
         if (optionalProductsEntity.isEmpty()) {
             return "ไม่พบสินค้านี้ในระบบ";
@@ -52,7 +58,6 @@ public class ProductService {
         }
         ProductsEntity productsEntity = optionalProductsEntity.get();
 
-        // เซตค่าใหม่ทับลงไป
         productsEntity.setProductName(request.getProductName());
         productsEntity.setImageUrl(request.getImageUrl());
         productsEntity.setDescription(request.getDescription());
@@ -62,5 +67,17 @@ public class ProductService {
 
         productRepository.save(productsEntity);
         return "แก้ไขสำเร็จ";
+    }
+
+    @Transactional
+    public String deleteProduct(Integer id) {
+        ProductsEntity productsEntity = productRepository.findById(id).orElseThrow(() -> new RuntimeException("ไม่พบสินค้านนี้ในระบบ"));
+        boolean linkToPendingOrder = orderItemRepository.existsByProductIdAndOrderStatusIn(id
+                ,List.of(OrdersEntity.Status.pending , OrdersEntity.Status.approved));
+        if (linkToPendingOrder) {
+            return "ไม่สามารถลบได้เนื่องจาก มีสินค้าคงเหลือในออเดอร์";
+        }
+        productRepository.delete(productsEntity);
+        return "ลบสินค้าสำเร็จ";
     }
 }

@@ -5,6 +5,7 @@ import com.example.bootcamp.entity.ProductsEntity;
 import com.example.bootcamp.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -37,8 +38,8 @@ public class AdminProductController {
 
     @PutMapping("/products/edit/{id}")
     public ResponseEntity<String> editProducts(
-            @PathVariable Long id,                             // รับ id จาก URL
-            @Valid @RequestBody ProductRequest request        // รับ JSON จาก Body มาใส่ใน request
+            @PathVariable Integer id,
+            @Valid @RequestBody ProductRequest request
     ) {
         String result = productService.editProduct(id, request);
 
@@ -48,6 +49,20 @@ public class AdminProductController {
             return ResponseEntity.status(404).body(result); // แนะนำให้ส่ง 404 ถ้าหาไม่เจอ
         } else {
             return ResponseEntity.badRequest().body(result);
+        }
+    }
+
+    @DeleteMapping("/products/delete/{id}")
+    public ResponseEntity<String> deleteProduct(@PathVariable Integer id) {
+        try {
+            String message = productService.deleteProduct(id);
+            if (message.equals("ลบสินค้าสำเร็จ")) {
+                return ResponseEntity.ok(message);
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
+            }
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 }

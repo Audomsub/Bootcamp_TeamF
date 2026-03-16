@@ -9,6 +9,6 @@ import java.util.Optional;
 
 @Repository
 public interface OrderRepository extends JpaRepository<OrdersEntity, Long> {
-    Optional<OrdersEntity> findByOrderNumber(String orderNumber); // ค้นหาออเดอร์จากเลข Order (หน้า Track Order)
-    List<OrdersEntity> findByShopIdOrderByCreatedAtDesc(Long shopId); // ตัวแทนดูออเดอร์ของร้านตัวเอง (เรียงจากใหม่ไปเก่า)
+    Optional<OrdersEntity> findByOrderNumber(String orderNumber);
+    List<OrdersEntity> findByShopIdOrderByCreatedAtDesc(Long shopId);
 }

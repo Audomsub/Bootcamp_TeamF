@@ -9,8 +9,8 @@ import java.util.Optional;
 
 @Repository
 public interface ShopRepository extends JpaRepository<ShopsEntity, Long> {
-    Optional<ShopsEntity> findByShopSlug(String shopSlug); // ดึงข้อมูลร้านจาก URL
-    Optional<ShopsEntity> findByUserId(Long userId);       // หาว่า User คนนี้มีร้านชื่ออะไร
-    boolean existsByShopName(String shopName);      // เช็กชื่อร้านซ้ำ
-    boolean existsByShopSlug(String shopSlug);      // เช็ก URL ซ้ำ
+    Optional<ShopsEntity> findByShopSlug(String shopSlug);
+    Optional<ShopsEntity> findByUserId(Long userId);
+    boolean existsByShopName(String shopName);
+    boolean existsByShopSlug(String shopSlug);
 }

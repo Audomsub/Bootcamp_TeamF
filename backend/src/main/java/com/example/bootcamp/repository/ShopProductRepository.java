@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface ShopProductRepository extends JpaRepository<ShopProductsEntity, Long> {
-    List<ShopProductsEntity> findByShopId(Long shopId); // ดึงสินค้าทั้งหมดในร้านของตัวแทนคนนี้
-    Optional<ShopProductsEntity> findByShopIdAndProductId(Long shopId, Long productId); // เช็กว่าร้านนี้มีสินค้านี้หรือยัง
-    boolean existsByShopIdAndProductId(Long shopId, Long productId);
+    List<ShopProductsEntity> findByShopId(Integer shopId);
+    Optional<ShopProductsEntity> findByShopIdAndProductId(Integer shopId, Integer productId);
+    boolean existsByShopIdAndProductId(Integer shopId, Integer productId);
 }

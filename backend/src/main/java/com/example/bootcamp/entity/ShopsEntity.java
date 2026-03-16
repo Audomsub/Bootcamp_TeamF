@@ -1,7 +1,6 @@
 package com.example.bootcamp.entity;
 
 import jakarta.persistence.*;
-import org.apache.catalina.User;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 

@@ -26,6 +26,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/admin/login").permitAll() // อนุญาตให้ Login ได้โดยไม่ต้องมี Token
+                        .requestMatchers("/shop/**").permitAll()
                         .requestMatchers("/admin/**").authenticated() // ทุกอย่างที่ขึ้นต้นด้วย /admin ต้อง Login (มี Token)
                         .anyRequest().permitAll() // URL อื่นๆ นอกจากนี้ปล่อยผ่านหมด
                 )
