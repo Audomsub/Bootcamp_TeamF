@@ -1,6 +1,6 @@
 package com.example.bootcamp.security;
 
-import com.example.bootcamp.utill.JwtUtill;
+import com.example.bootcamp.utill.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,7 +19,7 @@ import java.util.Collections;
 public class JwtFilter extends OncePerRequestFilter {
 
     @Autowired
-    private JwtUtill jwtUtill;
+    private JwtUtil jwtUtill;
 
     @Override
     protected void doFilterInternal(

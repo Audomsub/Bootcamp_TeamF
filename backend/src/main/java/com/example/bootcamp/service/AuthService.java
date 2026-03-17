@@ -8,7 +8,7 @@ import com.example.bootcamp.entity.WalletsEntity;
 import com.example.bootcamp.repository.ShopRepository;
 import com.example.bootcamp.repository.UserRepository;
 import com.example.bootcamp.repository.WalletRepository;
-import com.example.bootcamp.utill.JwtUtill;
+import com.example.bootcamp.utill.JwtUtil;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -19,7 +19,7 @@ import java.math.BigDecimal;
 @Service
 public class AuthService {
     @Autowired
-    private JwtUtill jwtUtill;
+    private JwtUtil jwtUtill;
 
     @Autowired
     private UserRepository userRepository;
