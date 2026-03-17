@@ -8,10 +8,10 @@ import type { Product } from '@/types';
 
 // Mock data
 const mockCatalog: Product[] = [
-  { id: 1, name: 'Premium T-Shirt', description: 'High quality cotton', image_url: 'https://placehold.co/400x300/e2e8f0/64748b?text=T-Shirt', cost_price: 150, min_price: 250, stock: 100, created_at: '' },
-  { id: 2, name: 'Classic Hoodie', description: 'Comfortable hoodie', image_url: 'https://placehold.co/400x300/e2e8f0/64748b?text=Hoodie', cost_price: 350, min_price: 500, stock: 50, created_at: '' },
-  { id: 3, name: 'Sports Cap', description: 'Adjustable sports cap', image_url: 'https://placehold.co/400x300/e2e8f0/64748b?text=Cap', cost_price: 80, min_price: 150, stock: 200, created_at: '' },
-  { id: 4, name: 'Leather Wallet', description: 'Genuine leather', image_url: 'https://placehold.co/400x300/e2e8f0/64748b?text=Wallet', cost_price: 200, min_price: 350, stock: 75, created_at: '' },
+  { id: 1, name: 'เสื้อยืดพรีเมียม', description: 'ผ้าฝ้ายคุณภาพสูง', image_url: 'https://placehold.co/400x300/e2e8f0/64748b?text=T-Shirt', cost_price: 150, min_price: 250, stock: 100, created_at: '' },
+  { id: 2, name: 'เสื้อฮู้ดคลาสสิก', description: 'เสื้อฮู้ดสวมใส่สบาย', image_url: 'https://placehold.co/400x300/e2e8f0/64748b?text=Hoodie', cost_price: 350, min_price: 500, stock: 50, created_at: '' },
+  { id: 3, name: 'หมวกแก๊ปสปอร์ต', description: 'หมวกแก๊ปสปอร์ตปรับขนาดได้', image_url: 'https://placehold.co/400x300/e2e8f0/64748b?text=Cap', cost_price: 80, min_price: 150, stock: 200, created_at: '' },
+  { id: 4, name: 'กระเป๋าสตางค์หนัง', description: 'หนังแท้', image_url: 'https://placehold.co/400x300/e2e8f0/64748b?text=Wallet', cost_price: 200, min_price: 350, stock: 75, created_at: '' },
 ];
 
 export default function ResellerCatalog() {
@@ -45,7 +45,7 @@ export default function ResellerCatalog() {
     
     const price = Number(sellingPrice);
     if (isNaN(price) || price < selectedProduct.min_price) {
-      setError(`Selling price must be at least ${formatCurrency(selectedProduct.min_price)}`);
+      setError(`ราคาขายต้องไม่ต่ำกว่า ${formatCurrency(selectedProduct.min_price)}`);
       return;
     }
 
@@ -60,7 +60,7 @@ export default function ResellerCatalog() {
       setSelectedProduct(null);
       setSellingPrice('');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to add product to shop');
+      setError(err.response?.data?.message || 'ไม่สามารถเพิ่มสินค้าลงในร้านค้าได้');
     } finally {
       setAdding(false);
     }
@@ -74,12 +74,12 @@ export default function ResellerCatalog() {
 
   return (
     <div>
-      <PageHeader title="Product Catalog" subtitle="Browse available products to add to your shop">
+      <PageHeader title="แคตตาล็อกสินค้า" subtitle="เลือกดูสินค้าที่พร้อมให้คุณเพิ่มลงในร้านค้าของคุณ">
         <div className="relative w-64">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <input
             type="text"
-            placeholder="Search products..."
+            placeholder="ค้นหาสินค้า..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="input-field pl-10"
@@ -103,11 +103,11 @@ export default function ResellerCatalog() {
               
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <p className="text-xs text-gray-500">Cost Price</p>
+                  <p className="text-xs text-gray-500">ราคาทุน</p>
                   <p className="font-semibold text-gray-900">{formatCurrency(product.cost_price)}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs text-gray-500">Min Price</p>
+                  <p className="text-xs text-gray-500">ราคาขายขั้นต่ำ</p>
                   <p className="font-medium text-emerald-600">{formatCurrency(product.min_price)}</p>
                 </div>
               </div>
@@ -116,7 +116,7 @@ export default function ResellerCatalog() {
                 <span className={`text-xs font-medium px-2 py-1 rounded-full ${
                   product.stock > 0 ? 'bg-blue-50 text-blue-700' : 'bg-red-50 text-red-700'
                 }`}>
-                  {product.stock} in stock
+                  {product.stock > 0 ? `เหลือ ${product.stock} ชิ้น` : 'สินค้าหมด'}
                 </span>
                 
                 <button
@@ -129,7 +129,7 @@ export default function ResellerCatalog() {
                   className="btn-primary py-1.5 px-3 text-sm flex items-center gap-1.5"
                 >
                   <Plus className="h-4 w-4" />
-                  Add to Shop
+                  เพิ่มลงร้านค้า
                 </button>
               </div>
             </div>
@@ -140,7 +140,7 @@ export default function ResellerCatalog() {
       <Modal
         isOpen={selectedProduct !== null}
         onClose={() => setSelectedProduct(null)}
-        title="Add Product to Shop"
+        title="เพิ่มสินค้าลงร้านค้า"
       >
         {selectedProduct && (
           <div className="space-y-4">
@@ -154,17 +154,17 @@ export default function ResellerCatalog() {
                 <h4 className="font-medium text-gray-900">{selectedProduct.name}</h4>
                 <div className="flex items-center gap-4 mt-1 text-sm">
                   <span className="text-gray-500">
-                    Cost: <strong className="text-gray-900">{formatCurrency(selectedProduct.cost_price)}</strong>
+                    ทุน: <strong className="text-gray-900">{formatCurrency(selectedProduct.cost_price)}</strong>
                   </span>
                   <span className="text-gray-500">
-                    Min Price: <strong className="text-emerald-600">{formatCurrency(selectedProduct.min_price)}</strong>
+                    ราคาขั้นต่ำ: <strong className="text-emerald-600">{formatCurrency(selectedProduct.min_price)}</strong>
                   </span>
                 </div>
               </div>
             </div>
 
             <div>
-              <label className="label">Your Selling Price (THB)</label>
+              <label className="label">ราคาขายของคุณ (บาท)</label>
               <input
                 type="number"
                 value={sellingPrice}
@@ -173,13 +173,13 @@ export default function ResellerCatalog() {
                 placeholder="0.00"
               />
               <p className="text-xs text-gray-500 mt-1">
-                Must be at least {formatCurrency(selectedProduct.min_price)}
+                ต้องไม่ต่ำกว่า {formatCurrency(selectedProduct.min_price)}
               </p>
               {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
               
               {Number(sellingPrice) >= selectedProduct.min_price && (
                 <div className="mt-3 p-3 bg-emerald-50 text-emerald-800 rounded-lg border border-emerald-100 text-sm">
-                  Estimated Profit per item: <strong>{formatCurrency(Number(sellingPrice) - selectedProduct.cost_price)}</strong>
+                  กำไรโดยประมาณต่อชิ้น: <strong>{formatCurrency(Number(sellingPrice) - selectedProduct.cost_price)}</strong>
                 </div>
               )}
             </div>
@@ -190,14 +190,14 @@ export default function ResellerCatalog() {
                 className="btn-secondary"
                 disabled={adding}
               >
-                Cancel
+                ยกเลิก
               </button>
               <button
                 onClick={handleAddProduct}
                 disabled={adding}
                 className="btn-primary"
               >
-                {adding ? 'Adding...' : 'Confirm'}
+                {adding ? 'กำลังเพิ่ม...' : 'ยืนยัน'}
               </button>
             </div>
           </div>

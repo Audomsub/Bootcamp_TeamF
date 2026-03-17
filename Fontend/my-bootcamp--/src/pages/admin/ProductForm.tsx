@@ -3,18 +3,18 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ArrowLeft, Upload, Loader2 } from 'lucide-react';
+import { ArrowLeft, Upload, Loader2, AlertCircle } from 'lucide-react';
 import { PageHeader } from '@/components/ui/shared';
 import { productService } from '@/services/product.service';
 
 const productSchema = z.object({
-  name: z.string().min(1, 'Product name is required'),
-  description: z.string().min(1, 'Description is required'),
-  cost_price: z.coerce.number().min(0.01, 'Cost price must be greater than 0'),
-  min_price: z.coerce.number().min(0, 'Minimum price must be non-negative'),
-  stock: z.coerce.number().int().min(0, 'Stock must be non-negative'),
+  name: z.string().min(1, 'กรุณาระบุชื่อสินค้า'),
+  description: z.string().min(1, 'กรุณาระบุรายละเอียดสินค้า'),
+  cost_price: z.coerce.number().min(0.01, 'ต้นทุนต้องมากกว่า 0'),
+  min_price: z.coerce.number().min(0, 'ราคาขายขั้นต่ำต้องไม่ติดลบ'),
+  stock: z.coerce.number().int().min(0, 'จำนวนสินค้าต้องไม่ติดลบ'),
 }).refine((data) => data.min_price >= data.cost_price, {
-  message: 'Minimum price must be greater than or equal to cost price',
+  message: 'ราคาขายขั้นต่ำต้องมากกว่าหรือเท่ากับต้นทุน',
   path: ['min_price'],
 });
 
@@ -70,12 +70,12 @@ export default function ProductForm() {
     if (file) {
       // Validate file type
       if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
-        setError('Only JPG, JPEG and PNG files are allowed');
+        setError('อนุญาตเฉพาะไฟล์รูปภาพ JPG, JPEG และ PNG เท่านั้น');
         return;
       }
       // Validate file size (5MB)
       if (file.size > 5 * 1024 * 1024) {
-        setError('File size must be less than 5MB');
+        setError('ขนาดไฟล์ต้องไม่เกิน 5MB');
         return;
       }
 
@@ -103,29 +103,31 @@ export default function ProductForm() {
       }
       navigate('/admin/products');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to save product');
+      setError(err.response?.data?.message || 'ไม่สามารถบันทึกข้อมูลสินค้าได้ กรุณาลองใหม่อีกครั้ง');
     }
   };
 
   return (
-    <div>
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <PageHeader
-        title={isEdit ? 'Edit Product' : 'Add Product'}
-        subtitle={isEdit ? 'Update product details' : 'Add a new product to catalog'}
+        title={isEdit ? 'แก้ไขสินค้า' : 'เพิ่มสินค้าใหม่'}
+        subtitle={isEdit ? 'อัปเดตรายละเอียดและข้อมูลของสินค้า' : 'เพิ่มรายการสินค้าใหม่เข้าสู่ระบบคลัง'}
       >
         <button
           onClick={() => navigate('/admin/products')}
-          className="btn-secondary flex items-center gap-2"
+          className="btn-secondary flex items-center gap-2 font-medium"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back
+          ย้อนกลับ
         </button>
       </PageHeader>
 
-      <div className="card max-w-2xl">
-        <div className="card-body">
+      <div className="flex items-center justify-center">
+        <div className="glass-card bg-white/80 border-white/60 shadow-xl rounded-[2rem] w-full max-w-3xl p-6 sm:p-8">
+          
           {error && (
-            <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+            <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-2xl text-sm font-medium text-rose-600 flex items-center gap-3">
+              <AlertCircle className="h-5 w-5 shrink-0" />
               {error}
             </div>
           )}
@@ -133,23 +135,24 @@ export default function ProductForm() {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Image upload */}
             <div>
-              <label className="label">Product Image</label>
-              <div className="flex items-center gap-4">
+              <label className="block text-sm font-semibold text-neutral-800 mb-3">รูปภาพสินค้า</label>
+              <div className="flex items-center gap-5">
                 {imagePreview ? (
                   <img
                     src={imagePreview}
                     alt="Preview"
-                    className="w-24 h-24 rounded-xl object-cover border border-gray-200"
+                    className="w-28 h-28 rounded-2xl object-cover border-2 border-neutral-100 shadow-sm"
                   />
                 ) : (
-                  <div className="w-24 h-24 rounded-xl bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center">
-                    <Upload className="h-6 w-6 text-gray-400" />
+                  <div className="w-28 h-28 rounded-2xl bg-neutral-50 border-2 border-dashed border-neutral-300 flex flex-col items-center justify-center text-neutral-400">
+                    <Upload className="h-6 w-6 mb-1" />
+                    <span className="text-xs font-medium">ไม่มีรูปภาพ</span>
                   </div>
                 )}
                 <div>
-                  <label className="btn-secondary cursor-pointer text-sm inline-flex items-center gap-2">
+                  <label className="btn-secondary cursor-pointer text-sm font-medium inline-flex items-center gap-2 bg-white hover:bg-neutral-50 transition-colors">
                     <Upload className="h-4 w-4" />
-                    Upload Image
+                    อัปโหลดรูปภาพ
                     <input
                       type="file"
                       accept="image/*"
@@ -157,99 +160,102 @@ export default function ProductForm() {
                       className="hidden"
                     />
                   </label>
-                  <p className="text-xs text-gray-500 mt-1">PNG, JPG up to 5MB</p>
+                  <p className="text-xs font-medium text-neutral-500 mt-2">
+                    รองรับ PNG, JPG ขนาดไม่เกิน 5MB
+                  </p>
                 </div>
               </div>
             </div>
 
             {/* Name */}
             <div>
-              <label className="label">Product Name</label>
+              <label className="block text-sm font-semibold text-neutral-800 mb-1.5">ชื่อสินค้า</label>
               <input
                 {...register('name')}
-                className="input-field"
-                placeholder="Enter product name"
+                className="input-field w-full"
+                placeholder="ระบุชื่อสินค้า"
               />
-              {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name.message}</p>}
+              {errors.name && <p className="mt-1.5 text-sm font-medium text-rose-500">{errors.name.message}</p>}
             </div>
 
             {/* Description */}
             <div>
-              <label className="label">Description</label>
+              <label className="block text-sm font-semibold text-neutral-800 mb-1.5">รายละเอียดสินค้า</label>
               <textarea
                 {...register('description')}
-                rows={3}
-                className="input-field resize-none"
-                placeholder="Enter product description"
+                rows={4}
+                className="input-field w-full resize-none"
+                placeholder="ระบุรายละเอียดสินค้า"
               />
               {errors.description && (
-                <p className="mt-1 text-xs text-red-500">{errors.description.message}</p>
+                <p className="mt-1.5 text-sm font-medium text-rose-500">{errors.description.message}</p>
               )}
             </div>
 
             {/* Prices */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
-                <label className="label">Cost Price (THB)</label>
+                <label className="block text-sm font-semibold text-neutral-800 mb-1.5">ต้นทุน (บาท)</label>
                 <input
                   type="number"
                   step="0.01"
                   {...register('cost_price')}
-                  className="input-field"
+                  className="input-field w-full"
                   placeholder="0.00"
                 />
                 {errors.cost_price && (
-                  <p className="mt-1 text-xs text-red-500">{errors.cost_price.message}</p>
+                  <p className="mt-1.5 text-sm font-medium text-rose-500">{errors.cost_price.message}</p>
                 )}
               </div>
               <div>
-                <label className="label">Minimum Selling Price (THB)</label>
+                <label className="block text-sm font-semibold text-neutral-800 mb-1.5">ราคาขายขั้นต่ำ (บาท)</label>
                 <input
                   type="number"
                   step="0.01"
                   {...register('min_price')}
-                  className="input-field"
+                  className="input-field w-full"
                   placeholder="0.00"
                 />
                 {errors.min_price && (
-                  <p className="mt-1 text-xs text-red-500">{errors.min_price.message}</p>
+                  <p className="mt-1.5 text-sm font-medium text-rose-500">{errors.min_price.message}</p>
                 )}
               </div>
             </div>
 
             {/* Stock */}
             <div>
-              <label className="label">Stock Quantity</label>
+              <label className="block text-sm font-semibold text-neutral-800 mb-1.5">จำนวนสินค้าในคลัง</label>
               <input
                 type="number"
                 {...register('stock')}
-                className="input-field max-w-xs"
+                className="input-field w-full sm:max-w-[50%]"
                 placeholder="0"
               />
               {errors.stock && (
-                <p className="mt-1 text-xs text-red-500">{errors.stock.message}</p>
+                <p className="mt-1.5 text-sm font-medium text-rose-500">{errors.stock.message}</p>
               )}
             </div>
 
             {/* Submit */}
-            <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+            <div className="flex justify-end gap-3 pt-6 border-t border-neutral-100/60 mt-8">
               <button
                 type="button"
                 onClick={() => navigate('/admin/products')}
-                className="btn-secondary"
+                className="btn-secondary font-medium bg-white hover:bg-neutral-50"
               >
-                Cancel
+                ยกเลิก
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="btn-primary flex items-center gap-2"
+                className="btn-primary flex items-center gap-2 font-semibold shadow-md hover:shadow-lg transition-all"
               >
                 {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
-                {isEdit ? 'Update Product' : 'Add Product'}
+                {isEdit ? 'บันทึกการแก้ไข' : 'เพิ่มสินค้า'}
               </button>
             </div>
           </form>
+
         </div>
       </div>
     </div>

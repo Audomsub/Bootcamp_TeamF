@@ -5,19 +5,19 @@ import { DataTable } from '@/components/ui/data-table';
 import { PageHeader, LoadingSpinner, StatCard } from '@/components/ui/shared';
 import { ConfirmDialog } from '@/components/ui/modal';
 import { resellerService } from '@/services/reseller.service';
-import { formatDate, getStatusColor, cn } from '@/lib/utils';
+import { formatDate, cn } from '@/lib/utils';
 import type { User } from '@/types';
 
 interface ResellerUser extends User {
   shop?: { shop_name: string };
 }
 
-// Mock data
+// Mock data (ปรับที่อยู่เป็นภาษาไทยเล็กน้อย)
 const mockResellers: ResellerUser[] = [
-  { id: 1, name: 'John Doe', email: 'john@example.com', phone: '0812345678', role: 'reseller', status: 'approved', address: 'Bangkok', created_at: '2025-03-01', shop: { shop_name: 'JD Store' } },
-  { id: 2, name: 'Jane Smith', email: 'jane@example.com', phone: '0898765432', role: 'reseller', status: 'pending', address: 'Chiang Mai', created_at: '2025-03-05', shop: { shop_name: 'JS Shop' } },
-  { id: 3, name: 'Bob Wilson', email: 'bob@example.com', phone: '0867891234', role: 'reseller', status: 'rejected', address: 'Phuket', created_at: '2025-03-08', shop: { shop_name: 'BW Mart' } },
-  { id: 4, name: 'Alice Brown', email: 'alice@example.com', phone: '0845678901', role: 'reseller', status: 'pending', address: 'Pattaya', created_at: '2025-03-10', shop: { shop_name: 'AB Collection' } },
+  { id: 1, name: 'John Doe', email: 'john@example.com', phone: '0812345678', role: 'reseller', status: 'approved', address: 'กรุงเทพมหานคร', created_at: '2025-03-01', shop: { shop_name: 'JD Store' } },
+  { id: 2, name: 'Jane Smith', email: 'jane@example.com', phone: '0898765432', role: 'reseller', status: 'pending', address: 'เชียงใหม่', created_at: '2025-03-05', shop: { shop_name: 'JS Shop' } },
+  { id: 3, name: 'Bob Wilson', email: 'bob@example.com', phone: '0867891234', role: 'reseller', status: 'rejected', address: 'ภูเก็ต', created_at: '2025-03-08', shop: { shop_name: 'BW Mart' } },
+  { id: 4, name: 'Alice Brown', email: 'alice@example.com', phone: '0845678901', role: 'reseller', status: 'pending', address: 'ชลบุรี', created_at: '2025-03-10', shop: { shop_name: 'AB Collection' } },
 ];
 
 export default function AdminResellers() {
@@ -78,38 +78,38 @@ export default function AdminResellers() {
   const columns: ColumnDef<ResellerUser>[] = [
     {
       accessorKey: 'name',
-      header: 'Name',
+      header: 'ชื่อตัวแทน',
       cell: ({ row }) => (
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 bg-primary-500/10 border border-primary-500/20 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
-            <span className="text-sm font-black text-primary-600">
+            <span className="text-sm font-bold text-primary-600">
               {row.original.name.charAt(0)}
             </span>
           </div>
-          <span className="font-bold text-neutral-900 tracking-tight">{row.original.name}</span>
+          <span className="font-semibold text-neutral-900">{row.original.name}</span>
         </div>
       ),
     },
     {
       accessorKey: 'email',
-      header: 'Email',
+      header: 'อีเมล',
       cell: ({ row }) => <span className="text-neutral-500 font-medium">{row.original.email}</span>,
     },
     {
       id: 'shop_name',
-      header: 'Shop Name',
+      header: 'ชื่อร้านค้า',
       cell: ({ row }) => (
-        <span className="text-neutral-800 font-bold tracking-tight">{row.original.shop?.shop_name || '-'}</span>
+        <span className="text-neutral-800 font-semibold">{row.original.shop?.shop_name || '-'}</span>
       ),
     },
     {
       accessorKey: 'phone',
-      header: 'Phone',
+      header: 'เบอร์โทรศัพท์',
       cell: ({ row }) => <span className="text-neutral-500 font-medium tabular-nums">{row.original.phone}</span>,
     },
     {
       accessorKey: 'created_at',
-      header: 'Register Date',
+      header: 'วันที่สมัคร',
       meta: { align: 'right' },
       cell: ({ row }) => (
         <span className="text-neutral-500 font-medium tabular-nums">{formatDate(row.original.created_at)}</span>
@@ -117,25 +117,25 @@ export default function AdminResellers() {
     },
     {
       accessorKey: 'status',
-      header: 'STATUS',
+      header: 'สถานะ',
       meta: { align: 'center' },
       cell: ({ row }) => {
         const status = row.original.status;
         return (
           <span className={cn(
-            "inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border",
+            "inline-flex px-3 py-1 rounded-full text-xs font-medium border",
             status === 'approved' ? "bg-emerald-50 text-emerald-700 border-emerald-100" :
             status === 'pending' ? "bg-amber-50 text-amber-700 border-amber-100" :
             "bg-rose-50 text-rose-700 border-rose-100"
           )}>
-            {status === 'approved' ? 'Approved' : status === 'pending' ? 'Pending' : 'Rejected'}
+            {status === 'approved' ? 'อนุมัติแล้ว' : status === 'pending' ? 'รอดำเนินการ' : 'ปฏิเสธ'}
           </span>
         );
       },
     },
     {
       id: 'actions',
-      header: 'ACTIONS',
+      header: 'จัดการ',
       meta: { align: 'right' },
       enableSorting: false,
       cell: ({ row }) => {
@@ -145,14 +145,14 @@ export default function AdminResellers() {
             <button
               onClick={() => setAction({ id: row.original.id, type: 'approve' })}
               className="p-2.5 rounded-full bg-white text-emerald-600 border border-neutral-100 shadow-sm hover:shadow-md hover:border-emerald-100 transition-all active:scale-90 group"
-              title="Approve"
+              title="อนุมัติ"
             >
               <UserCheck className="h-4.5 w-4.5 group-hover:scale-110 transition-transform" />
             </button>
             <button
               onClick={() => setAction({ id: row.original.id, type: 'reject' })}
               className="p-2.5 rounded-full bg-white text-rose-600 border border-neutral-100 shadow-sm hover:shadow-md hover:border-rose-100 transition-all active:scale-90 group"
-              title="Reject"
+              title="ปฏิเสธ"
             >
               <UserX className="h-4.5 w-4.5 group-hover:scale-110 transition-transform" />
             </button>
@@ -172,42 +172,42 @@ export default function AdminResellers() {
 
       <div className="relative z-10 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
         <PageHeader 
-          title="Resellers" 
-          subtitle="Manage reseller accounts and approvals" 
+          title="ตัวแทนจำหน่าย" 
+          subtitle="จัดการบัญชีและการอนุมัติการสมัครตัวแทนจำหน่าย" 
         />
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <StatCard
-            title="Total Resellers"
+            title="ตัวแทนจำหน่ายทั้งหมด"
             value={stats.total}
             icon={Users}
-            trend={{ value: 12, label: 'this month' }}
-            className="glass-card border-white/5"
+            trend={{ value: 12, label: 'เดือนนี้' }}
+            className="glass-card border-white/5 bg-white/60"
           />
           <StatCard
-            title="Approved"
+            title="อนุมัติแล้ว"
             value={stats.approved}
             icon={ShieldCheck}
             color="emerald"
-            className="glass-card border-white/5"
+            className="glass-card border-white/5 bg-white/60"
           />
           <StatCard
-            title="Pending"
+            title="รอดำเนินการ"
             value={stats.pending}
             icon={Clock}
             color="amber"
-            className="glass-card border-white/5"
+            className="glass-card border-white/5 bg-white/60"
           />
         </div>
 
         {/* Data Table Container */}
-        <div className="glass-card border-white/5 overflow-hidden p-1 shadow-2xl">
+        <div className="glass-card bg-white/80 border-white/60 shadow-xl rounded-[2rem] p-6">
           <DataTable
             columns={columns}
             data={resellers}
             searchColumn="name"
-            searchPlaceholder="Search resellers by name..."
+            searchPlaceholder="ค้นหาชื่อตัวแทนจำหน่าย..."
           />
         </div>
       </div>
@@ -216,13 +216,13 @@ export default function AdminResellers() {
         isOpen={action !== null}
         onClose={() => setAction(null)}
         onConfirm={handleAction}
-        title={action?.type === 'approve' ? 'Approve Reseller' : 'Reject Reseller'}
+        title={action?.type === 'approve' ? 'ยืนยันการอนุมัติ' : 'ยืนยันการปฏิเสธ'}
         message={
           action?.type === 'approve'
-            ? 'Are you sure you want to approve this reseller? They will gain access to the platform.'
-            : 'Are you sure you want to reject this reseller? They will not be able to access the platform.'
+            ? 'คุณแน่ใจหรือไม่ว่าต้องการอนุมัติตัวแทนจำหน่ายรายนี้? ระบบจะเปิดสิทธิ์ให้เข้าใช้งานแพลตฟอร์มได้ทันที'
+            : 'คุณแน่ใจหรือไม่ว่าต้องการปฏิเสธตัวแทนจำหน่ายรายนี้? ผู้ใช้จะไม่สามารถเข้าใช้งานระบบในฐานะตัวแทนได้'
         }
-        confirmText={action?.type === 'approve' ? 'Approve' : 'Reject'}
+        confirmText={action?.type === 'approve' ? 'อนุมัติ' : 'ปฏิเสธ'}
         variant={action?.type === 'reject' ? 'danger' : 'primary'}
         isLoading={processing}
       />

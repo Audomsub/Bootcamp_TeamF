@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { type ColumnDef } from '@tanstack/react-table';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, AlertCircle } from 'lucide-react';
 import { DataTable } from '@/components/ui/data-table';
 import { PageHeader, LoadingSpinner } from '@/components/ui/shared';
 import { Modal, ConfirmDialog } from '@/components/ui/modal';
@@ -10,10 +10,10 @@ import type { ShopProduct, Product } from '@/types';
 
 type MyProductItem = ShopProduct & { product: Product };
 
-// Mock data
+// Mock data (ปรับชื่อสินค้าให้เป็นภาษาไทยเล็กน้อยเพื่อความสมจริง)
 const mockMyProducts: MyProductItem[] = [
-  { id: 1, shop_id: 1, product_id: 1, selling_price: 299, product: { id: 1, name: 'Premium T-Shirt', description: '', image_url: 'https://placehold.co/100', cost_price: 150, min_price: 250, stock: 100, created_at: '' } },
-  { id: 2, shop_id: 1, product_id: 2, selling_price: 590, product: { id: 2, name: 'Classic Hoodie', description: '', image_url: 'https://placehold.co/100', cost_price: 350, min_price: 500, stock: 50, created_at: '' } },
+  { id: 1, shop_id: 1, product_id: 1, selling_price: 299, product: { id: 1, name: 'เสื้อยืดพรีเมียม (Premium T-Shirt)', description: '', image_url: 'https://placehold.co/100', cost_price: 150, min_price: 250, stock: 100, created_at: '' } },
+  { id: 2, shop_id: 1, product_id: 2, selling_price: 590, product: { id: 2, name: 'เสื้อฮู้ดดี้คลาสสิก (Classic Hoodie)', description: '', image_url: 'https://placehold.co/100', cost_price: 350, min_price: 500, stock: 50, created_at: '' } },
 ];
 
 export default function ResellerMyProducts() {
@@ -49,7 +49,7 @@ export default function ResellerMyProducts() {
 
     const price = Number(editPrice);
     if (isNaN(price) || price < editItem.product.min_price) {
-      setError(`Selling price must be at least ${formatCurrency(editItem.product.min_price)}`);
+      setError(`ราคาขายต้องไม่ต่ำกว่าราคาขั้นต่ำ (${formatCurrency(editItem.product.min_price)} บาท)`);
       return;
     }
 
@@ -62,7 +62,7 @@ export default function ResellerMyProducts() {
       );
       setEditItem(null);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to update price');
+      setError(err.response?.data?.message || 'ไม่สามารถอัปเดตราคาได้ กรุณาลองใหม่อีกครั้ง');
     } finally {
       setUpdating(false);
     }
@@ -85,65 +85,65 @@ export default function ResellerMyProducts() {
   const columns: ColumnDef<MyProductItem>[] = [
     {
       id: 'product',
-      header: 'PRODUCT',
+      header: 'สินค้า',
       cell: ({ row }) => (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <img
             src={row.original.product.image_url}
             alt={row.original.product.name}
-            className="w-10 h-10 rounded-lg object-cover bg-gray-100"
+            className="w-12 h-12 rounded-xl object-cover bg-neutral-50 border border-neutral-100 shadow-sm"
           />
-          <span className="font-medium text-gray-900">{row.original.product.name}</span>
+          <span className="font-semibold text-neutral-800">{row.original.product.name}</span>
         </div>
       ),
     },
     {
       id: 'min_price',
-      header: 'MIN PRICE',
+      header: 'ราคาขายขั้นต่ำ',
       cell: ({ row }) => (
-        <span className="text-neutral-400 font-medium">{formatCurrency(row.original.product.min_price)}</span>
+        <span className="text-neutral-500 font-medium">{formatCurrency(row.original.product.min_price)}</span>
       ),
     },
     {
       accessorKey: 'selling_price',
-      header: 'SELLING PRICE',
+      header: 'ราคาขายของคุณ',
       cell: ({ row }) => (
-        <span className="font-black text-primary-600 border-b-2 border-primary-500/20 pb-0.5 tracking-tight">
+        <span className="font-bold text-primary-600 bg-primary-50 px-3 py-1.5 rounded-lg border border-primary-100">
           {formatCurrency(row.original.selling_price)}
         </span>
       ),
     },
     {
       id: 'profit',
-      header: 'ESTIMATED PROFIT',
+      header: 'กำไรโดยประมาณ',
       cell: ({ row }) => (
-        <span className="font-black text-emerald-600 tracking-tight">
-          {formatCurrency(row.original.selling_price - row.original.product.cost_price)}
+        <span className="font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100">
+          +{formatCurrency(row.original.selling_price - row.original.product.cost_price)}
         </span>
       ),
     },
     {
       id: 'actions',
-      header: 'ACTIONS',
+      header: 'จัดการ',
       meta: { align: 'right' },
       enableSorting: false,
       cell: ({ row }) => (
-        <div className="flex items-center justify-end gap-5 px-2">
+        <div className="flex items-center justify-end gap-2 px-2">
           <button
             onClick={() => {
               setEditItem(row.original);
               setEditPrice(row.original.selling_price.toString());
               setError('');
             }}
-            className="p-2.5 rounded-full bg-white text-neutral-600 border border-neutral-100 shadow-sm hover:shadow-md hover:text-primary-600 hover:border-primary-100 transition-all active:scale-90 group"
-            title="Edit Price"
+            className="p-2.5 rounded-full bg-white text-neutral-500 border border-neutral-200 shadow-sm hover:shadow-md hover:text-primary-600 hover:border-primary-200 transition-all active:scale-95 group"
+            title="แก้ไขราคา"
           >
             <Pencil className="h-4 w-4 group-hover:scale-110 transition-transform" />
           </button>
           <button
             onClick={() => setDeleteId(row.original.id)}
-            className="p-2.5 rounded-full bg-white text-neutral-600 border border-neutral-100 shadow-sm hover:shadow-md hover:text-rose-600 hover:border-rose-100 transition-all active:scale-90 group"
-            title="Remove Product"
+            className="p-2.5 rounded-full bg-white text-neutral-500 border border-neutral-200 shadow-sm hover:shadow-md hover:text-rose-600 hover:border-rose-200 transition-all active:scale-95 group"
+            title="ลบสินค้า"
           >
             <Trash2 className="h-4 w-4 group-hover:scale-110 transition-transform" />
           </button>
@@ -155,42 +155,74 @@ export default function ResellerMyProducts() {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div>
-      <PageHeader title="My Products" subtitle="Manage pricing for products in your shop" />
-
-      <DataTable
-        columns={columns}
-        data={products}
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <PageHeader 
+        title="สินค้าของฉัน" 
+        subtitle="จัดการรายการสินค้าและกำหนดราคาขายบนหน้าร้านค้าของคุณ" 
       />
+
+      <div className="glass-card bg-white/80 border-white/60 shadow-xl rounded-[2rem] p-6">
+        <DataTable
+          columns={columns}
+          data={products}
+        />
+      </div>
 
       <Modal
         isOpen={editItem !== null}
         onClose={() => setEditItem(null)}
-        title="Edit Selling Price"
+        title="แก้ไขราคาขาย"
         size="sm"
       >
         {editItem && (
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm font-medium text-gray-900 mb-1">{editItem.product.name}</p>
-              <p className="text-xs text-gray-500">Min Price: {formatCurrency(editItem.product.min_price)}</p>
+          <div className="space-y-5">
+            <div className="bg-neutral-50 p-4 rounded-xl border border-neutral-100 flex items-center gap-4">
+              <img
+                src={editItem.product.image_url}
+                alt={editItem.product.name}
+                className="w-12 h-12 rounded-lg object-cover bg-white shadow-sm border border-neutral-200"
+              />
+              <div>
+                <p className="text-sm font-semibold text-neutral-800 mb-0.5 line-clamp-1">{editItem.product.name}</p>
+                <p className="text-xs font-medium text-neutral-500">
+                  ราคาขายขั้นต่ำ: <span className="text-neutral-700">{formatCurrency(editItem.product.min_price)}</span>
+                </p>
+              </div>
             </div>
 
             <div>
-              <label className="label">New Selling Price</label>
+              <label className="block text-sm font-semibold text-neutral-800 mb-1.5">
+                ราคาขายใหม่ (บาท)
+              </label>
               <input
                 type="number"
                 value={editPrice}
                 onChange={(e) => setEditPrice(e.target.value)}
-                className="input-field"
+                className="input-field w-full text-lg font-bold text-primary-600"
+                placeholder="ระบุราคาที่ต้องการขาย"
               />
-              {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+              {error && (
+                <p className="text-sm font-medium text-rose-500 mt-2 flex items-center gap-1.5">
+                  <AlertCircle className="w-4 h-4" />
+                  {error}
+                </p>
+              )}
             </div>
 
-            <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
-              <button onClick={() => setEditItem(null)} className="btn-secondary" disabled={updating}>Cancel</button>
-              <button onClick={handleUpdatePrice} disabled={updating} className="btn-primary">
-                {updating ? 'Saving...' : 'Update Price'}
+            <div className="flex justify-end gap-3 pt-5 border-t border-neutral-100">
+              <button 
+                onClick={() => setEditItem(null)} 
+                className="btn-secondary font-medium bg-white hover:bg-neutral-50" 
+                disabled={updating}
+              >
+                ยกเลิก
+              </button>
+              <button 
+                onClick={handleUpdatePrice} 
+                disabled={updating} 
+                className="btn-primary font-semibold shadow-md hover:shadow-lg transition-all"
+              >
+                {updating ? 'กำลังบันทึก...' : 'บันทึกราคา'}
               </button>
             </div>
           </div>
@@ -201,9 +233,9 @@ export default function ResellerMyProducts() {
         isOpen={deleteId !== null}
         onClose={() => setDeleteId(null)}
         onConfirm={handleRemove}
-        title="Remove Product"
-        message="Are you sure you want to remove this product from your shop?"
-        confirmText="Remove"
+        title="ยืนยันการลบสินค้า"
+        message="คุณแน่ใจหรือไม่ว่าต้องการลบสินค้านี้ออกจากหน้าร้านของคุณ? (การลบสินค้านี้จะไม่ส่งผลต่อประวัติคำสั่งซื้อที่ผ่านมา)"
+        confirmText="ลบสินค้า"
         variant="danger"
         isLoading={deleting}
       />

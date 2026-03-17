@@ -28,10 +28,10 @@ export default function ShopLayout() {
               </div>
               <div className="flex flex-col">
                 <span className="font-display font-black text-xl tracking-tighter text-neutral-900 leading-none">
-                  {slug?.replace(/-/g, ' ').toUpperCase() || 'RESELLER SHOP'}
+                  {slug?.replace(/-/g, ' ').toUpperCase() || 'ร้านค้าตัวแทนจำหน่าย'}
                 </span>
-                <span className="text-[10px] font-black tracking-[0.3em] text-primary-500 uppercase mt-2">
-                  Premium Experience
+                <span className="text-[12px] font-black  text-primary-500 uppercase mt-2">
+                  ประสบการณ์ระดับพรีเมียม
                 </span>
               </div>
             </Link>
@@ -44,7 +44,7 @@ export default function ShopLayout() {
                     to={`/shop/${slug}`}
                     className="px-6 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest text-neutral-500 hover:text-neutral-900 transition-all"
                   >
-                    Products
+                    สินค้า
                   </Link>
                 )}
 
@@ -64,9 +64,9 @@ export default function ShopLayout() {
 
               <Link
                 to="/track-order"
-                className="btn-primary !px-8 !py-3 font-black text-[10px] tracking-[0.2em]"
+                className="btn-primary !px-8 !py-3 font-black text-[14px] "
               >
-                Track Journey
+                ติดตามสถานะ
               </Link>
             </div>
           </div>
@@ -92,11 +92,11 @@ export default function ShopLayout() {
             </div>
             <div className="space-y-3">
               <p className="text-[11px] font-black text-neutral-400 uppercase tracking-[0.4em]">
-                Verified Premium Commercial Node
+                ร้านค้าพาณิชย์ระดับพรีเมียมที่ได้รับการยืนยัน
               </p>
               <div className="h-px w-16 bg-gradient-to-r from-transparent via-neutral-200 to-transparent mx-auto"></div>
               <p className="text-[11px] font-bold text-neutral-500 max-w-sm leading-relaxed">
-                Experience high-performance commerce. Powered by the next generation of logistics technology and premium unit distribution.
+                สัมผัสประสบการณ์คอมเมิร์ซประสิทธิภาพสูง ขับเคลื่อนด้วยเทคโนโลยีโลจิสติกส์แห่งอนาคตและการจัดจำหน่ายสินค้าระดับพรีเมียม
               </p>
             </div>
           </div>

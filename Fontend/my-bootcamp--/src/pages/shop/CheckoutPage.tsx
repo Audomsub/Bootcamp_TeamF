@@ -20,9 +20,9 @@ import type { Shop } from '../../types';
 import { LoadingSpinner } from '../../components/ui/shared';
 
 const checkoutSchema = z.object({
-  customer_name: z.string().min(2, 'Name is required'),
-   customer_phone: z.string().regex(/^[0-9]{10}$/, 'Phone must be exactly 10 digits'),
-  shipping_address: z.string().min(10, 'Complete address is required'),
+  customer_name: z.string().min(2, 'กรุณาระบุชื่อ-นามสกุล'),
+  customer_phone: z.string().regex(/^[0-9]{10}$/, 'เบอร์โทรศัพท์ต้องเป็นตัวเลข 10 หลัก'),
+  shipping_address: z.string().min(10, 'กรุณาระบุที่อยู่จัดส่งให้ครบถ้วน'),
 });
 
 type CheckoutForm = z.infer<typeof checkoutSchema>;
@@ -48,7 +48,7 @@ export default function CheckoutPage() {
   }, [slug]);
 
   useEffect(() => {
-    // If cart is empty after loading, redirect back to shop
+    // หากตะกร้าสินค้าว่างเปล่า ให้กลับไปหน้าหลักของร้าน
     if (!loading && cartItems.length === 0) {
       navigate(`/shop/${slug}`);
     }
@@ -60,8 +60,7 @@ export default function CheckoutPage() {
       const response = await shopService.getBySlug(shopSlug);
       setShop(response.data.data);
     } catch (err) {
-      console.warn("Shop initialization failed, using neural fallback.");
-      // Fallback mock for demonstration if API fails
+      console.warn("โหลดข้อมูลร้านค้าไม่สำเร็จ, ใช้งานข้อมูลจำลอง (Mock fallback)");
       setShop({
         id: 1,
         user_id: 1,
@@ -78,11 +77,11 @@ export default function CheckoutPage() {
     if (!item || !item.shopProduct.product) return;
 
     if (newQuantity > item.shopProduct.product.stock) {
-      setError(`Insufficient stock for ${item.shopProduct.product.name}. Max available: ${item.shopProduct.product.stock}`);
+      setError(`สินค้า ${item.shopProduct.product.name} มีจำนวนไม่พอ (เหลือสูงสุด: ${item.shopProduct.product.stock} ชิ้น)`);
       return;
     }
 
-    if (newQuantity < 1) return; // Prevent 0 or negative via controls
+    if (newQuantity < 1) return; // ป้องกันการปรับจำนวนติดลบหรือเท่ากับ 0
     
     setError(null);
     updateQuantity(shopProductId, newQuantity);
@@ -91,10 +90,10 @@ export default function CheckoutPage() {
   const onSubmit = async (data: CheckoutForm) => {
     if (!shop || cartItems.length === 0) return;
 
-    // Final BR-27 Check before submission
+    // ตรวจสอบสต๊อกสินค้าครั้งสุดท้ายก่อนยืนยันออเดอร์
     for (const item of cartItems) {
       if (item.shopProduct.product && item.quantity > item.shopProduct.product.stock) {
-        setError(`Insufficient stock for ${item.shopProduct.product.name}. Please adjust your order.`);
+        setError(`สินค้า ${item.shopProduct.product.name} มีไม่เพียงพอ กรุณาปรับจำนวนใหม่อีกครั้ง`);
         return;
       }
     }
@@ -114,202 +113,199 @@ export default function CheckoutPage() {
       };
 
       const response = await orderService.createOrder(orderData).catch(() => ({
-        data: { data: { id: Date.now() } } // Mock fallback
+        data: { data: { id: Date.now() } } // Mock fallback สำหรับจำลอง
       }));
 
       clearCart();
       navigate(`/shop/${slug}/payment/${response.data.data.id}`);
     } catch (err) {
-      setError('Transaction could not be processed. Please verify your details.');
+      setError('ไม่สามารถทำรายการได้ในขณะนี้ กรุณาตรวจสอบข้อมูลและลองใหม่อีกครั้ง');
     }
   };
 
   if (loading) return <LoadingSpinner />;
   if (cartItems.length === 0) return null;
 
-  const shippingCost = 50;
+  const shippingCost = 50; // ค่าจัดส่งคงที่ (ตัวอย่าง)
   const grandTotal = totalAmount + shippingCost;
 
   return (
-    <div className="pb-32 px-4 sm:px-0 animate-in fade-in duration-1000">
+    <div className="pb-32 px-4 sm:px-0 animate-in fade-in duration-1000 font-sans">
       {/* Visual background gradient */}
       <div className="fixed inset-0 bg-[radial-gradient(circle_at_top_right,rgba(var(--primary-rgb),0.03),transparent_40%)] pointer-events-none"></div>
 
-      <div className="relative z-10">
-        {/* Breadcrumbs / Back Navigation */}
-        <div className="mb-12 pt-8">
+      <div className="relative z-10 max-w-7xl mx-auto">
+        {/* ย้อนกลับ */}
+        <div className="mb-8 pt-8 lg:mb-12">
           <Link
             to={`/shop/${slug}`}
-            className="group inline-flex items-center gap-4 text-[11px] font-black uppercase tracking-[0.2em] text-neutral-400 hover:text-primary-600 transition-all"
+            className="group inline-flex items-center gap-4 text-xs font-bold uppercase tracking-wider text-neutral-400 hover:text-primary-600 transition-all"
           >
             <div className="w-12 h-12 rounded-2xl bg-white shadow-sm border border-neutral-100 flex items-center justify-center group-hover:bg-primary-50 group-hover:border-primary-200 transition-all duration-500">
               <ChevronLeft className="h-5 w-5 text-neutral-500 group-hover:text-primary-600" />
             </div>
-            <span>Continue Shopping</span>
+            <span>เลือกซื้อสินค้าต่อ</span>
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
           {/* Main Checkout Section */}
           <div className="lg:col-span-7 space-y-10">
-            <div className="glass-card !bg-white/80 backdrop-blur-3xl !rounded-[2.5rem] border-white/60 shadow-2xl overflow-hidden">
-              <div className="p-10 lg:p-14 border-b border-neutral-100 bg-neutral-50/20">
+            <div className="glass-card !bg-white/80 backdrop-blur-3xl !rounded-[2.5rem] border-white/60 shadow-xl overflow-hidden">
+              <div className="p-8 lg:p-12 border-b border-neutral-100 bg-neutral-50/50">
                 <div className="flex items-center gap-5">
-                  <div className="w-14 h-14 rounded-2xl bg-primary-500/10 flex items-center justify-center">
+                  <div className="w-14 h-14 rounded-2xl bg-primary-100 flex items-center justify-center shadow-inner">
                     <Store className="h-7 w-7 text-primary-600" />
                   </div>
                   <div>
-                    <h1 className="text-3xl font-black text-neutral-900 tracking-tighter uppercase">Shipping Details</h1>
-                    <p className="text-xs font-black text-neutral-400 uppercase tracking-[0.2em] mt-1">Please provide your delivery information</p>
+                    <h1 className="text-2xl lg:text-3xl font-black text-neutral-900 tracking-tight">ข้อมูลการจัดส่ง</h1>
+                    <p className="text-sm font-medium text-neutral-500 mt-1">กรุณาระบุที่อยู่สำหรับจัดส่งสินค้า</p>
                   </div>
                 </div>
               </div>
 
-              <div className="p-10 lg:p-14">
+              <div className="p-8 lg:p-12">
                 {error && (
-                  <div className="mb-10 p-5 bg-rose-50 border border-rose-100 rounded-3xl text-sm font-bold text-rose-600 flex items-center gap-4 animate-in slide-in-from-top-4 duration-500">
-                    <div className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></div>
+                  <div className="mb-8 p-4 bg-rose-50 border border-rose-100 rounded-2xl text-sm font-bold text-rose-600 flex items-center gap-4 animate-in slide-in-from-top-4 duration-500">
+                    <div className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse shrink-0"></div>
                     {error}
                   </div>
                 )}
 
-                <form id="checkout-form" onSubmit={handleSubmit(onSubmit)} className="space-y-10">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                    <div className="space-y-4">
-                      <label className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.3em] ml-2">Recipient Name</label>
+                <form id="checkout-form" onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+                    <div className="space-y-3">
+                      <label className="text-xs font-bold text-neutral-500 ml-1">ชื่อ-นามสกุลผู้รับ</label>
                       <input
                         {...register('customer_name')}
-                        className="w-full px-8 py-5 rounded-2xl bg-neutral-50 border border-neutral-200 focus:bg-white focus:border-primary-500 focus:ring-8 focus:ring-primary-500/5 transition-all duration-500 font-bold text-neutral-900 placeholder:text-neutral-300 placeholder:font-medium"
-                        placeholder="e.g. Alexander Pierce"
+                        className="w-full px-6 py-4 rounded-2xl bg-neutral-50 border border-neutral-200 focus:bg-white focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all duration-300 font-medium text-neutral-900 placeholder:text-neutral-400"
+                        placeholder="เช่น สมชาย รักดี"
                       />
-                      {errors.customer_name && <p className="text-[10px] font-bold text-rose-500 ml-2 mt-2">{errors.customer_name.message}</p>}
+                      {errors.customer_name && <p className="text-xs font-semibold text-rose-500 ml-1">{errors.customer_name.message}</p>}
                     </div>
 
-                    <div className="space-y-4">
-                      <label className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.3em] ml-2">Phone Number</label>
+                    <div className="space-y-3">
+                      <label className="text-xs font-bold text-neutral-500 ml-1">เบอร์โทรศัพท์ติดต่อ</label>
                       <input
                         {...register('customer_phone')}
-                        className="w-full px-8 py-5 rounded-2xl bg-neutral-50 border border-neutral-200 focus:bg-white focus:border-primary-500 focus:ring-8 focus:ring-primary-500/5 transition-all duration-500 font-bold text-neutral-900 placeholder:text-neutral-300 placeholder:font-medium"
-                        placeholder="0XXXXXXXXX (10 digits)"
+                        className="w-full px-6 py-4 rounded-2xl bg-neutral-50 border border-neutral-200 focus:bg-white focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all duration-300 font-medium text-neutral-900 placeholder:text-neutral-400"
+                        placeholder="08X-XXX-XXXX (10 หลัก)"
                       />
-                      {errors.customer_phone && <p className="text-[10px] font-bold text-rose-500 ml-2 mt-2">{errors.customer_phone.message}</p>}
+                      {errors.customer_phone && <p className="text-xs font-semibold text-rose-500 ml-1">{errors.customer_phone.message}</p>}
                     </div>
                   </div>
 
-                  <div className="space-y-4">
-                    <label className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.3em] ml-2">Shipping Address</label>
+                  <div className="space-y-3">
+                    <label className="text-xs font-bold text-neutral-500 ml-1">ที่อยู่จัดส่ง</label>
                     <textarea
                       {...register('shipping_address')}
-                      rows={5}
-                      className="w-full px-8 py-6 rounded-2xl bg-neutral-50 border border-neutral-200 focus:bg-white focus:border-primary-500 focus:ring-8 focus:ring-primary-500/5 transition-all duration-500 font-bold text-neutral-900 placeholder:text-neutral-300 placeholder:font-medium resize-none leading-relaxed"
-                      placeholder="Street, District, City, Province, Postal Code"
+                      rows={4}
+                      className="w-full px-6 py-5 rounded-2xl bg-neutral-50 border border-neutral-200 focus:bg-white focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all duration-300 font-medium text-neutral-900 placeholder:text-neutral-400 resize-none leading-relaxed"
+                      placeholder="บ้านเลขที่, อาคาร/หมู่บ้าน, ซอย, ถนน, ตำบล/แขวง, อำเภอ/เขต, จังหวัด, รหัสไปรษณีย์"
                     />
-                    {errors.shipping_address && <p className="text-[10px] font-bold text-rose-500 ml-2 mt-2">{errors.shipping_address.message}</p>}
-                    <p className="text-[9px] text-neutral-400 font-black uppercase tracking-[0.1em] ml-2">Please ensure your address is accurate for timely delivery.</p>
+                    {errors.shipping_address && <p className="text-xs font-semibold text-rose-500 ml-1">{errors.shipping_address.message}</p>}
+                    <p className="text-[11px] text-neutral-400 font-medium ml-1 mt-1">* โปรดตรวจสอบที่อยู่ให้ถูกต้อง เพื่อการจัดส่งที่รวดเร็ว</p>
                   </div>
                 </form>
               </div>
             </div>
 
-            <div className="flex items-center gap-10 px-6">
-              <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-6 px-4 sm:px-6">
+              <div className="flex items-center gap-2">
                 <Lock className="h-4 w-4 text-emerald-500" />
-                <span className="text-[10px] font-black uppercase tracking-[0.15em] text-neutral-400">256-bit AES Encryption</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                <span className="text-[10px] font-black uppercase tracking-[0.15em] text-neutral-400">Secure Checkout</span>
+                <span className="text-xs font-bold text-neutral-500">ข้อมูลของคุณถูกเข้ารหัสอย่างปลอดภัย</span>
               </div>
             </div>
           </div>
 
           {/* Order Summary Sidebar */}
           <div className="lg:col-span-5">
-            <div className="glass-card !bg-white/95 backdrop-blur-3xl !rounded-[3rem] shadow-2xl p-10 lg:p-12 sticky top-10 overflow-hidden border-white">
-              <div className="relative z-10 space-y-12">
-                {/* Receipt Header Area */}
+            <div className="glass-card !bg-white/95 backdrop-blur-3xl !rounded-[2.5rem] shadow-2xl p-8 lg:p-10 sticky top-10 border-white/60">
+              <div className="relative z-10 space-y-8">
+                {/* Header */}
                 <div className="flex justify-between items-start">
                   <div>
-                    <h2 className="text-2xl font-black text-neutral-900 tracking-tighter uppercase mb-2">Order Summary</h2>
+                    <h2 className="text-2xl font-black text-neutral-900 tracking-tight mb-2">สรุปคำสั่งซื้อ</h2>
                     <div className="flex items-center gap-3">
                       <div className="flex items-center gap-1.5 px-2.5 py-1 bg-primary-50 rounded-lg border border-primary-100">
-                        <div className="w-1 h-1 rounded-full bg-primary-600"></div>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-primary-600">Secure</span>
+                        <div className="w-1.5 h-1.5 rounded-full bg-primary-600"></div>
+                        <span className="text-[10px] font-bold uppercase text-primary-600">Secure Payment</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Logistics Details Grid */}
-                <div className="grid grid-cols-2 gap-y-6 gap-x-12 border-y border-neutral-100 py-8">
+                {/* รายละเอียด */}
+                <div className="grid grid-cols-2 gap-y-6 gap-x-8 border-y border-neutral-100 py-6">
                   <div>
-                    <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-1.5">Total Items</p>
-                    <p className="text-lg font-black text-neutral-900 tracking-tight">{totalItems}</p>
+                    <p className="text-xs font-bold text-neutral-400 mb-1">จำนวนสินค้า</p>
+                    <p className="text-base font-black text-neutral-900">{totalItems} ชิ้น</p>
                   </div>
                   <div>
-                    <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-1.5">Store</p>
-                    <p className="text-lg font-black text-neutral-900 tracking-tight">{slug?.toUpperCase()}</p>
+                    <p className="text-xs font-bold text-neutral-400 mb-1">ร้านค้า</p>
+                    <p className="text-base font-black text-neutral-900 truncate pr-2" title={slug?.toUpperCase()}>
+                      {slug?.toUpperCase()}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-1.5">Shipping</p>
-                    <p className="text-lg font-black text-emerald-500 tracking-tight">Express</p>
+                    <p className="text-xs font-bold text-neutral-400 mb-1">การจัดส่ง</p>
+                    <p className="text-base font-black text-emerald-600">Express Delivery</p>
                   </div>
                   <div>
-                    <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-1.5">Status</p>
-                    <p className="text-lg font-black text-neutral-900 tracking-tight">Ready</p>
+                    <p className="text-xs font-bold text-neutral-400 mb-1">สถานะ</p>
+                    <p className="text-base font-black text-neutral-900">พร้อมดำเนินการ</p>
                   </div>
                 </div>
 
-                {/* Items Subsection */}
+                {/* รายการสินค้าในตะกร้า */}
                 <div>
-                <div className="mb-8">
-                  <h3 className="text-sm font-black text-neutral-900 uppercase tracking-widest">Order Info</h3>
-                </div>
+                  <div className="mb-4">
+                    <h3 className="text-sm font-bold text-neutral-900">รายการสินค้า</h3>
+                  </div>
 
-                  <div className="space-y-4">
+                  <div className="space-y-3 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
                     {cartItems.map((item) => (
-                      <div key={item.shopProduct.id} className="group/item relative bg-white rounded-3xl border border-neutral-100 p-4 hover:border-primary-100 transition-all duration-300 shadow-sm">
-                        <div className="flex gap-5">
-                          <div className="w-20 h-20 rounded-2xl overflow-hidden bg-neutral-50 flex-shrink-0 border border-neutral-100">
+                      <div key={item.shopProduct.id} className="group/item relative bg-white rounded-2xl border border-neutral-100 p-3 hover:border-primary-200 hover:shadow-md transition-all duration-300">
+                        <div className="flex gap-4">
+                          <div className="w-20 h-20 rounded-xl overflow-hidden bg-neutral-50 flex-shrink-0 border border-neutral-100">
                             <img 
                               src={item.shopProduct.product?.image_url} 
                               alt={item.shopProduct.product?.name}
-                              className="w-full h-full object-cover group-hover/item:scale-110 transition-transform duration-1000"
+                              className="w-full h-full object-cover group-hover/item:scale-110 transition-transform duration-700"
                             />
                           </div>
-                          <div className="flex-1 min-w-0 flex flex-col justify-between">
+                          <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
                             <div>
-                              <div className="flex justify-between items-start">
-                                <h4 className="font-bold text-neutral-900 truncate pr-2 text-sm leading-snug">
-                                  {item.shopProduct.product?.name}
-                                </h4>
-                              </div>
-                              <div className="flex items-center justify-between mt-1">
+                              <h4 className="font-bold text-neutral-800 text-sm leading-tight line-clamp-2" title={item.shopProduct.product?.name}>
+                                {item.shopProduct.product?.name}
+                              </h4>
+                              <div className="flex items-center justify-between mt-1.5">
                                 <p className="text-primary-600 font-bold text-xs">
-                                  {formatCurrency(item.shopProduct.selling_price)}
-                                </p>
-                                <p className="text-xs font-black text-neutral-900">
-                                  {formatCurrency(item.shopProduct.selling_price * item.quantity)}
+                                  {formatCurrency(item.shopProduct.selling_price)} / ชิ้น
                                 </p>
                               </div>
                             </div>
 
-                            <div className="flex items-center mt-3">
-                              <div className="flex items-center bg-neutral-50 rounded-xl border border-neutral-200/50 p-1">
+                            <div className="flex items-center justify-between mt-2">
+                              {/* ปุ่มปรับจำนวน */}
+                              <div className="flex items-center bg-neutral-50 rounded-lg border border-neutral-200/60 p-0.5">
                                 <button 
                                   onClick={(e) => { e.preventDefault(); handleUpdateQuantity(item.shopProduct.id, item.quantity - 1); }}
-                                  className="w-7 h-7 rounded-lg hover:bg-white flex items-center justify-center text-neutral-400 hover:text-neutral-900 transition-all border border-transparent hover:border-neutral-100"
+                                  className="w-7 h-7 rounded-md hover:bg-white flex items-center justify-center text-neutral-500 hover:text-neutral-900 transition-colors shadow-sm"
                                 >
                                   <Minus className="h-3 w-3" />
                                 </button>
-                                <span className="w-8 text-center text-xs font-black text-neutral-900">{item.quantity}</span>
+                                <span className="w-8 text-center text-xs font-bold text-neutral-900">{item.quantity}</span>
                                 <button 
                                   onClick={(e) => { e.preventDefault(); handleUpdateQuantity(item.shopProduct.id, item.quantity + 1); }}
-                                  className="w-7 h-7 rounded-lg hover:bg-white flex items-center justify-center text-neutral-400 hover:text-neutral-900 transition-all border border-transparent hover:border-neutral-100"
+                                  className="w-7 h-7 rounded-md hover:bg-white flex items-center justify-center text-neutral-500 hover:text-neutral-900 transition-colors shadow-sm"
                                 >
                                   <Plus className="h-3 w-3" />
                                 </button>
                               </div>
+                              <p className="text-sm font-black text-neutral-900">
+                                {formatCurrency(item.shopProduct.selling_price * item.quantity)}
+                              </p>
                             </div>
                           </div>
                         </div>
@@ -318,57 +314,50 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                {/* Final Breakdown */}
-                <div className="space-y-8 pt-10 border-t border-neutral-100">
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-[11px] font-black uppercase tracking-[0.2em] text-neutral-400">Subtotal</span>
-                      <span className="text-base font-bold text-neutral-900">{formatCurrency(totalAmount)}</span>
+                {/* สรุปยอดเงิน */}
+                <div className="space-y-6 pt-6 border-t border-neutral-100">
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center text-sm font-bold">
+                      <span className="text-neutral-500">มูลค่าสินค้า</span>
+                      <span className="text-neutral-900">{formatCurrency(totalAmount)}</span>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-[11px] font-black uppercase tracking-[0.2em] text-neutral-400">Shipping</span>
-                      <span className="text-base font-bold text-neutral-900">{formatCurrency(shippingCost)}</span>
+                    <div className="flex justify-between items-center text-sm font-bold">
+                      <span className="text-neutral-500">ค่าจัดส่ง</span>
+                      <span className="text-neutral-900">{formatCurrency(shippingCost)}</span>
                     </div>
                   </div>
 
-                  <div className="pt-10 border-t border-neutral-900">
+                  <div className="pt-6 border-t border-neutral-200">
                     <div className="flex justify-between items-end">
-                      <span className="text-xl font-black text-neutral-900 uppercase tracking-tight">Total Amount</span>
-                      <p className="text-5xl font-black text-neutral-900 tracking-tighter leading-none">{formatCurrency(grandTotal)}</p>
+                      <span className="text-lg font-bold text-neutral-900 pb-1">ยอดรวมทั้งสิ้น</span>
+                      <p className="text-4xl lg:text-5xl font-black text-primary-600 tracking-tight">{formatCurrency(grandTotal)}</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Authorization Action */}
-                <div className="pt-4">
+                {/* ปุ่มยืนยันชำระเงิน */}
+                <div className="pt-2">
                   <button
                     type="submit"
                     form="checkout-form"
                     disabled={isSubmitting}
                     className="group relative w-full"
                   >
-                    <div className="absolute -inset-1 bg-primary-600/20 rounded-[2rem] blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                    <div className="relative w-full py-6 bg-neutral-900 text-white rounded-[2rem] font-black uppercase tracking-[0.3em] text-[11px] flex items-center justify-center gap-4 transition-all duration-500 group-hover:bg-black group-hover:scale-[1.01] active:scale-[0.98] shadow-2xl">
+                    <div className="absolute -inset-1 bg-primary-500/30 rounded-[1.5rem] blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
+                    <div className="relative w-full py-5 bg-neutral-900 text-white rounded-[1.5rem] font-bold text-base lg:text-lg flex items-center justify-center gap-3 transition-all duration-300 group-hover:bg-neutral-800 shadow-xl disabled:opacity-70 disabled:cursor-not-allowed">
                       {isSubmitting ? (
                         <>
                           <Loader2 className="h-5 w-5 animate-spin" />
-                          Processing Order...
+                          กำลังดำเนินการ...
                         </>
                       ) : (
                         <>
-                          Pay Now {formatCurrency(grandTotal)}
-                          <ShoppingCart className="h-4 w-4" />
+                          ยืนยันคำสั่งซื้อ
+                          <ShoppingCart className="h-5 w-5" />
                         </>
                       )}
                     </div>
                   </button>
-
-                  <div className="mt-8 flex items-center justify-center gap-4">
-                    <div className="flex -space-x-2">
-                      {[1, 2, 3].map((i) => <div key={i} className="w-6 h-6 rounded-full border-2 border-white bg-neutral-100"></div>)}
-                    </div>
-                    <p className="text-[9px] font-black text-neutral-400 uppercase tracking-[0.1em]">Secured by Standard Payment Protocols</p>
-                  </div>
                 </div>
               </div>
             </div>

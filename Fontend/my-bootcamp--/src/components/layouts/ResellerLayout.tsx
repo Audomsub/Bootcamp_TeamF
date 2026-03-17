@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -34,6 +34,17 @@ export default function ResellerLayout() {
     navigate('/login');
   };
 
+  /*system time*/
+  const [time, setTime] = useState(new Date());
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+
   return (
     <div className="min-h-screen mesh-bg flex flex-col lg:flex-row overflow-hidden">
       {/* Mobile overlay */}
@@ -55,7 +66,7 @@ export default function ResellerLayout() {
         <div className="h-44 flex flex-col justify-center px-10 relative overflow-hidden group">
           {/* Subtle background glow */}
           <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-accent-500/5 to-transparent pointer-events-none"></div>
-          
+
           <div className="relative z-10 flex items-center gap-5">
             <div className="relative">
               <div className="absolute -inset-3 bg-accent-500/20 rounded-2xl blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
@@ -89,7 +100,7 @@ export default function ResellerLayout() {
             <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] leading-none mb-1">Navigation</p>
             <div className="h-0.5 w-8 bg-accent-500/30 rounded-full"></div>
           </div>
-          
+
           {navItems.map((item) => {
             const isActive = location.pathname === item.to;
             return (
@@ -100,8 +111,8 @@ export default function ResellerLayout() {
                 className={cn(
                   'group relative flex items-center gap-4 px-6 py-4 rounded-2xl transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]',
                   'hover:bg-white/5 active:scale-[0.98]',
-                  isActive 
-                    ? 'bg-accent-500/10 text-white' 
+                  isActive
+                    ? 'bg-accent-500/10 text-white'
                     : 'text-neutral-400 hover:text-white'
                 )}
               >
@@ -112,11 +123,11 @@ export default function ResellerLayout() {
                     <div className="absolute right-6 w-1 h-1 rounded-full bg-accent-400 shadow-[0_0_8px_oklch(0.62_0.25_160)]"></div>
                   </>
                 )}
-                
+
                 <item.icon className={cn(
-                   "h-5 w-5 transition-all duration-500",
-                   isActive 
-                    ? "text-accent-400 scale-110 drop-shadow-[0_0_10px_oklch(0.62_0.25_160_/_0.5)]" 
+                  "h-5 w-5 transition-all duration-500",
+                  isActive
+                    ? "text-accent-400 scale-110 drop-shadow-[0_0_10px_oklch(0.62_0.25_160_/_0.5)]"
                     : "text-neutral-500 group-hover:text-neutral-300 group-hover:scale-110"
                 )} />
                 <span className={cn(
@@ -133,7 +144,7 @@ export default function ResellerLayout() {
         {/* Public Store Quick Link */}
         {shop && (
           <div className="px-6 mb-4">
-            <a 
+            <a
               href={`/shop/${shop.shop_slug}`}
               target="_blank"
               rel="noopener noreferrer"
@@ -168,18 +179,18 @@ export default function ResellerLayout() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-xs font-black text-white truncate tracking-tight">{user?.name || 'Administrator'}</p>
+                    <p className="text-xs font-black text-accent-600 truncate tracking-tight">{user?.name || 'Administrator'}</p>
                     <Store className="h-3 w-3 text-accent-400 shrink-0" />
                   </div>
                   <p className="text-[10px] text-neutral-500 truncate leading-none mt-1.5 font-black uppercase tracking-tighter">Certified Reseller</p>
                 </div>
               </div>
-              
+
               <button
                 onClick={handleLogout}
-                className="w-full mt-5 flex items-center justify-between px-4 py-3 rounded-xl bg-white/5 text-[9px] font-black uppercase tracking-[0.2em] text-neutral-400 hover:text-white hover:bg-rose-600 transition-all duration-500 group/logout"
+                className="w-full mt-5 flex items-center justify-between px-4 py-3 rounded-xl bg-white/5 text-[12px] font-black text-neutral-400 hover:text-white hover:bg-rose-600 transition-all duration-500 group/logout"
               >
-                <span>Sign Out</span>
+                <span>ออกจากระบบ</span>
                 <LogOut className="h-3.5 w-3.5 group-hover/logout:translate-x-1 transition-transform" />
               </button>
             </div>
@@ -208,7 +219,7 @@ export default function ResellerLayout() {
               </h1>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-6">
             {shop && (
               <a
@@ -220,8 +231,12 @@ export default function ResellerLayout() {
                 Launch Store
               </a>
             )}
+            <div className="hidden md:flex flex-col items-end mr-2">
+              <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest leading-none">Time</span>
+              <span className="text-xs font-bold text-neutral-900 mt-1">{time.toLocaleTimeString()}</span>
+            </div>
             <div className="h-10 w-px bg-neutral-200/50 hidden sm:block"></div>
-            <div className="flex flex-col items-end">
+            <div className="flex flex-col items-end ">
               <span className="text-[9px] font-black text-neutral-400 uppercase tracking-widest leading-none">Operations Mode</span>
               <span className="text-[11px] font-bold text-neutral-900 mt-1 uppercase">Active</span>
             </div>

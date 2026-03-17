@@ -6,10 +6,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('th-TH', {
-    style: 'currency',
-    currency: 'THB',
-  }).format(amount);
+  return `${new Intl.NumberFormat('th-TH').format(amount)}  บาท`;
 }
 
 export function formatDate(date: string): string {

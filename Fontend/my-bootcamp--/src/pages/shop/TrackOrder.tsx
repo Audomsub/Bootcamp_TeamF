@@ -16,43 +16,43 @@ export default function TrackOrder() {
 
   useEffect(() => {
     if (location.state?.success && location.state?.orderId) {
-      setSuccessMsg('Payment confirmed. Your order is being processed.');
+      setSuccessMsg('ยืนยันการชำระเงินแล้ว คำสั่งซื้อของคุณกำลังดำเนินการ');
       handleSearch(String(location.state.orderId));
     }
   }, [location]);
 
   const handleSearch = async (queryNumber: string = orderNumber) => {
     if (!queryNumber.trim() && !queryNumber) return;
-    
+
     try {
       setLoading(true);
       setError('');
-      
+
       const response = await orderService.trackOrder(queryNumber).catch(() => null);
-      
+
       if (response && response.data.data) {
         setOrder(response.data.data);
       } else {
-        // Mock fallback for high-fidelity demonstration
+        // ข้อมูลจำลอง (Mock data) สำหรับการสาธิต
         setOrder({
           id: Number(queryNumber) || 999,
           order_number: queryNumber.startsWith('ORD') ? queryNumber : `ORD-${queryNumber}`,
           shop_id: 1,
-          customer_name: 'Alexander Pierce',
+          customer_name: 'อเล็กซานเดอร์ เพียร์ซ',
           customer_phone: '0812345678',
-          shipping_address: '123 Premium Way, Sector 7G, Metropolitan Node 10000',
+          shipping_address: '123 ถนนพรีเมียม แขวงลุมพินี เขตปทุมวัน กรุงเทพมหานคร 10330',
           total_amount: 24500,
           reseller_profit: 4500,
           status: 'pending',
           created_at: new Date().toISOString(),
           items: [
-            { id: 1, order_id: 1, product_id: 1, product_name: 'Carbon Heritage Wallet', cost_price: 1500, selling_price: 1850, quantity: 1 },
-            { id: 2, order_id: 1, product_id: 2, product_name: 'Apex Chrono Smartwatch', cost_price: 9000, selling_price: 12900, quantity: 1 }
+            { id: 1, order_id: 1, product_id: 1, product_name: 'กระเป๋าสตางค์ Carbon Heritage', cost_price: 1500, selling_price: 1850, quantity: 1 },
+            { id: 2, order_id: 1, product_id: 2, product_name: 'สมาร์ทวอทช์ Apex Chrono', cost_price: 9000, selling_price: 12900, quantity: 1 }
           ]
         });
       }
     } catch {
-      setError('Search failed. Order not found in our records.');
+      setError('ค้นหาไม่สำเร็จ ไม่พบคำสั่งซื้อนี้ในระบบของเรา');
       setOrder(null);
     } finally {
       setLoading(false);
@@ -77,10 +77,10 @@ export default function TrackOrder() {
         <div className="text-center mb-16 pt-8">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-500/10 border border-primary-500/20 mb-6">
             <Truck className="h-4 w-4 text-primary-600" />
-            <span className="text-[10px] font-black text-primary-700 uppercase tracking-[0.2em]">Real-time Order Tracking</span>
+            <span className="text-[14px] font-black text-primary-700 ">ติดตามสถานะคำสั่งซื้อแบบเรียลไทม์</span>
           </div>
-          <h1 className="text-5xl font-black text-neutral-900 tracking-tighter uppercase mb-4">Track Order</h1>
-          <p className="text-neutral-500 font-bold uppercase tracking-widest text-xs">Stay updated on your order's journey to your doorstep</p>
+          <h1 className="text-5xl font-black text-neutral-900 tracking-tighter uppercase mb-4">ติดตามคำสั่งซื้อ</h1>
+          <p className="text-neutral-500 font-bold uppercase tracking-widest text-s">อัปเดตสถานะการจัดส่งสินค้าส่งตรงถึงหน้าบ้านคุณ</p>
         </div>
 
         {successMsg && (
@@ -90,7 +90,7 @@ export default function TrackOrder() {
                 <CheckCircle2 className="h-6 w-6" />
               </div>
               <div>
-                <p className="font-black text-sm uppercase tracking-widest">Payment Confirmed</p>
+                <p className="font-black text-sm uppercase tracking-widest">ยืนยันการชำระเงินแล้ว</p>
                 <p className="text-white/70 text-xs font-bold uppercase tracking-widest mt-0.5">{successMsg}</p>
               </div>
             </div>
@@ -100,7 +100,7 @@ export default function TrackOrder() {
         {/* Search Panel - High Contrast Refinement */}
         <div className="glass-card !bg-white border-neutral-200/60 !rounded-[2.5rem] p-10 mb-16 shadow-2xl relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/5 blur-[100px] rounded-full -mr-32 -mt-32"></div>
-          
+
           <div className="relative z-10 flex flex-col md:flex-row gap-6 items-center">
             <div className="relative flex-1 w-full">
               <div className="absolute left-6 top-1/2 -translate-y-1/2 text-primary-600">
@@ -111,7 +111,7 @@ export default function TrackOrder() {
                 value={orderNumber}
                 onChange={(e) => setOrderNumber(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                placeholder="ENTER ORDER NUMBER (e.g. ORD-123)"
+                placeholder="กรอกหมายเลขคำสั่งซื้อ (เช่น ORD-123)"
                 className="w-full bg-neutral-50 border border-neutral-200/50 rounded-2xl py-6 pl-16 pr-8 text-lg font-black text-neutral-900 placeholder:text-neutral-300 focus:bg-white focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500/50 transition-all uppercase tracking-widest"
               />
             </div>
@@ -123,13 +123,22 @@ export default function TrackOrder() {
               <div className="flex items-center justify-center gap-3">
                 {loading ? (
                   <>
-                    <LoadingSpinner className="!w-5 !h-5 !border-white" />
-                    <span className="font-black text-[12px] uppercase tracking-[0.2em]">Searching...</span>
+
+                    <div className="flex items-center gap-2">
+                      <div className="flex gap-1">
+                        <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce"></span>
+                        <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce [animation-delay:0.15s]"></span>
+                        <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce [animation-delay:0.3s]"></span>
+                      </div>
+
+
+                      <span className="font-black text-[12px] uppercase "> กำลังค้นหา...</span>
+                    </div>
                   </>
                 ) : (
                   <>
                     <Search className="h-5 w-5 group-hover/btn:scale-110 transition-transform" />
-                    <span className="font-black text-[12px] uppercase tracking-[0.2em]">Track Now</span>
+                    <span className="font-black text-[12px] uppercase ">ติดตามสถานะ</span>
                   </>
                 )}
               </div>
@@ -142,7 +151,7 @@ export default function TrackOrder() {
             <div className="w-20 h-20 bg-rose-50 rounded-3xl flex items-center justify-center mb-6">
               <AlertCircle className="h-10 w-10 text-rose-500" />
             </div>
-            <h2 className="text-2xl font-black text-neutral-900 uppercase tracking-tighter mb-4">Sequence Not Found</h2>
+            <h2 className="text-2xl font-black text-neutral-900 uppercase tracking-tighter mb-4">ไม่พบข้อมูลคำสั่งซื้อ</h2>
             <p className="text-neutral-500 font-bold text-sm uppercase tracking-widest max-w-sm leading-relaxed">
               {error}
             </p>
@@ -155,50 +164,49 @@ export default function TrackOrder() {
             <div className="glass-card !bg-white/80 p-14 relative overflow-hidden shadow-2xl">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-6">
                 <div>
-                  <p className="text-[10px] font-black text-primary-600 uppercase tracking-[0.4em] mb-3">Order Progress</p>
+                  <p className="text-[16px] font-black text-primary-600  mb-3">สถานะคำสั่งซื้อ</p>
                   <h3 className="text-4xl font-black text-neutral-900 tracking-tighter uppercase leading-none">
-                    {order.status === 'pending' ? 'Processing Order' : order.status === 'shipped' ? 'Shipped' : 'Order Completed'}
+                    {order.status === 'pending' ? 'กำลังดำเนินการ' : order.status === 'shipped' ? 'จัดส่งแล้ว' : 'คำสั่งซื้อเสร็จสิ้น'}
                   </h3>
                 </div>
                 <div className="flex items-center gap-4 px-6 py-3 bg-neutral-50 rounded-2xl border border-neutral-100">
                   <Clock className="h-4 w-4 text-neutral-400" />
-                  <p className="text-[11px] font-black text-neutral-500 uppercase tracking-widest">Updated {formatDate(order.created_at)}</p>
+                  <p className="text-[11px] font-black text-neutral-500 uppercase tracking-widest">อัปเดตเมื่อ {formatDate(order.created_at)}</p>
                 </div>
               </div>
-              
+
               <div className="relative pt-10 px-8">
                 {/* Visual Connector Line base */}
                 <div className="absolute top-[68px] left-[15%] right-[15%] h-2 bg-neutral-100 rounded-full" />
-                
+
                 {/* Active Connector Line with Pulse */}
-                <div 
+                <div
                   className="absolute top-[68px] left-[15%] h-2 bg-gradient-to-r from-primary-600 via-primary-400 to-accent-500 rounded-full transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(var(--primary-rgb),0.4)]"
                   style={{ width: `${((getStatusStep(order.status) - 1) / 2) * 70}%` }}
                 />
 
                 <div className="relative flex justify-between">
                   {[
-                    { id: 1, label: 'Order Confirmed', icon: Package, desc: 'Ready for shipping' },
-                    { id: 2, label: 'Shipped', icon: Truck, desc: 'Package in transit' },
-                    { id: 3, label: 'Delivered', icon: CheckCircle2, desc: 'Order completed' }
+                    { id: 1, label: 'ยืนยันคำสั่งซื้อ', icon: Package, desc: 'เตรียมจัดส่ง' },
+                    { id: 2, label: 'จัดส่งแล้ว', icon: Truck, desc: 'อยู่ระหว่างการจัดส่ง' },
+                    { id: 3, label: 'ส่งมอบสำเร็จ', icon: CheckCircle2, desc: 'คำสั่งซื้อเสร็จสมบูรณ์' }
                   ].map((step) => {
                     const isActive = getStatusStep(order.status) >= step.id;
                     const isCurrent = getStatusStep(order.status) === step.id;
-                    
+
                     return (
                       <div key={step.id} className="flex flex-col items-center w-1/4 relative z-10 transition-all duration-700">
-                        <div className={`w-16 h-16 rounded-[1.8rem] flex items-center justify-center border-4 transition-all duration-700 ${
-                          isActive 
-                            ? 'bg-neutral-900 border-white text-white shadow-[0_15px_30px_-5px_rgba(0,0,0,0.2)] scale-110' 
-                            : 'bg-white border-neutral-50 text-neutral-200'
-                        } ${isCurrent ? 'ring-[12px] ring-primary-500/10' : ''}`}>
+                        <div className={`w-16 h-16 rounded-[1.8rem] flex items-center justify-center border-4 transition-all duration-700 ${isActive
+                          ? 'bg-neutral-900 border-white text-white shadow-[0_15px_30px_-5px_rgba(0,0,0,0.2)] scale-110'
+                          : 'bg-white border-neutral-50 text-neutral-200'
+                          } ${isCurrent ? 'ring-[12px] ring-primary-500/10' : ''}`}>
                           <step.icon className={`h-7 w-7 ${isActive && isCurrent ? 'animate-pulse text-accent-400' : ''}`} />
                         </div>
                         <div className="mt-8 text-center space-y-1">
-                          <p className={`text-[12px] font-black uppercase tracking-widest ${isActive ? 'text-neutral-900' : 'text-neutral-300'}`}>
+                          <p className={`text-[16px] font-black  ${isActive ? 'text-neutral-900' : 'text-neutral-300'}`}>
                             {step.label}
                           </p>
-                          <p className={`text-[9px] font-bold uppercase tracking-[0.2em] transform transition-all duration-500 ${isActive ? 'text-neutral-500' : 'text-neutral-300'}`}>
+                          <p className={`text-[12px] font-bold uppercase  transform transition-all duration-500 ${isActive ? 'text-neutral-500' : 'text-neutral-300'}`}>
                             {step.desc}
                           </p>
                         </div>
@@ -218,22 +226,22 @@ export default function TrackOrder() {
                       <MapPin className="h-6 w-6 text-primary-600" />
                     </div>
                     <div>
-                      <h4 className="text-sm font-black text-neutral-900 uppercase tracking-widest">Shipping Destination</h4>
-                      <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mt-1">Delivery Address</p>
+                      <h4 className="text-sm font-black text-neutral-900 ">สถานที่จัดส่ง</h4>
+                      <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mt-1">ที่อยู่สำหรับจัดส่ง</p>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-6">
                     <div>
-                      <p className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.3em] mb-2">Recipient</p>
+                      <p className="text-[10px] font-black text-neutral-400 uppercase mb-2">ผู้รับ</p>
                       <p className="text-sm font-black text-neutral-900">{order.customer_name}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.3em] mb-2">Contact Number</p>
+                      <p className="text-[10px] font-black text-neutral-400 uppercase mb-2">เบอร์ติดต่อ</p>
                       <p className="text-sm font-black text-neutral-900">{order.customer_phone}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.3em] mb-2">Destination</p>
+                      <p className="text-[10px] font-black text-neutral-400 uppercase mb-2">ปลายทาง</p>
                       <p className="text-sm font-bold text-neutral-800 leading-relaxed">{order.shipping_address}</p>
                     </div>
                   </div>
@@ -242,10 +250,10 @@ export default function TrackOrder() {
                 <div className="glass-card p-10 !bg-neutral-900 text-white">
                   <div className="flex items-center gap-4 mb-4">
                     <ShieldCheck className="h-5 w-5 text-primary-500" />
-                    <span className="text-[10px] font-black uppercase tracking-widest">Secure Tracking</span>
+                    <span className="text-[16px] font-black text-primary-400 ">ติดตามอย่างปลอดภัย</span>
                   </div>
-                  <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest leading-relaxed">
-                    Your order is handled with care and tracked at every stage of delivery.
+                  <p className="text-[14px] text-black font-bold ">
+                    คำสั่งซื้อของคุณได้รับการดูแลอย่างดีและสามารถติดตามได้ทุกขั้นตอนการจัดส่ง
                   </p>
                 </div>
               </div>
@@ -258,11 +266,11 @@ export default function TrackOrder() {
                       <div className="w-12 h-12 rounded-2xl bg-primary-500/10 flex items-center justify-center">
                         <Package className="h-6 w-6 text-primary-600" />
                       </div>
-                      <h4 className="text-sm font-black text-neutral-900 uppercase tracking-widest">Order Summary</h4>
+                      <h4 className="text-sm font-black text-neutral-900 ">สรุปคำสั่งซื้อ</h4>
                     </div>
-                    <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">Items</span>
+                    <span className="text-[14px] font-black text-neutral-400 ">รายการ</span>
                   </div>
-                  
+
                   <div className="p-10">
                     <div className="space-y-8">
                       {order.items?.map((item, idx) => (
@@ -274,7 +282,7 @@ export default function TrackOrder() {
                             <div className="min-w-0">
                               <p className="font-black text-neutral-900 text-base truncate pr-4 uppercase tracking-tighter">{item.product_name}</p>
                               <p className="text-[10px] font-black text-primary-600 uppercase tracking-widest mt-1">
-                                {item.quantity} Unit{item.quantity > 1 ? 's' : ''} @ {formatCurrency(item.selling_price)}
+                                {item.quantity} ชิ้น @ {formatCurrency(item.selling_price)}
                               </p>
                             </div>
                           </div>
@@ -288,8 +296,8 @@ export default function TrackOrder() {
                     <div className="mt-12 pt-10 border-t border-neutral-100">
                       <div className="flex justify-between items-end">
                         <div>
-                          <p className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.4em] mb-2 text-right lg:text-left">Payment Summary</p>
-                          <span className="text-sm font-black text-neutral-900 uppercase tracking-tight">Grand Total</span>
+                          <p className="text-[12px] font-black text-neutral-400 uppercase  mb-2 text-right lg:text-left">สรุปการชำระเงิน</p>
+                          <span className="text-sm font-black text-neutral-900 uppercase tracking-tight">ยอดรวมทั้งสิ้น</span>
                         </div>
                         <p className="text-4xl font-black text-neutral-900 tracking-tighter leading-none">{formatCurrency(order.total_amount)}</p>
                       </div>

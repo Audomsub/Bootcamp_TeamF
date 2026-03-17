@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { DollarSign, ShoppingCart, Clock, ArrowRight, Copy, Check } from 'lucide-react';
+import { DollarSign, ShoppingCart, Clock, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { StatCard, PageHeader, LoadingSpinner } from '@/components/ui/shared';
 import { dashboardService } from '@/services/dashboard.service';
-import { formatCurrency, formatDate, getStatusColor, cn } from '@/lib/utils';
+import { formatCurrency, formatDate, cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import type { ResellerDashboardStats } from '@/types';
 
@@ -23,7 +23,6 @@ export default function ResellerDashboard() {
   const { shop } = useAuth();
   const [stats, setStats] = useState<ResellerDashboardStats>(mockStats);
   const [loading, setLoading] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     loadStats();
@@ -43,123 +42,107 @@ export default function ResellerDashboard() {
 
   const shopUrl = `${window.location.origin}/shop/${shop?.shop_slug}`;
 
-  const handleCopyLink = () => {
-    if (!shopUrl) return;
-    navigator.clipboard.writeText(shopUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div>
-      <PageHeader title="Dashboard" subtitle="Overview of your store performance" />
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <PageHeader
+        title="ภาพรวมร้านค้า"
+        subtitle="ตรวจสอบยอดขาย สรุปกำไร และสถานะการสั่งซื้อทั้งหมดของคุณ"
+      />
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
         <StatCard
-          title="Total Profit"
+          title="กำไรทั้งหมด"
           value={formatCurrency(stats.total_profit)}
           icon={DollarSign}
           iconColor="text-emerald-600"
           iconBg="bg-emerald-50"
+          className="glass-card bg-white/80 border-white/60 shadow-md"
         />
         <StatCard
-          title="Total Orders"
+          title="คำสั่งซื้อทั้งหมด"
           value={stats.total_orders}
           icon={ShoppingCart}
           iconColor="text-blue-600"
           iconBg="bg-blue-50"
+          className="glass-card bg-white/80 border-white/60 shadow-md"
         />
         <StatCard
-          title="Pending Orders"
+          title="รอดำเนินการ"
           value={stats.pending_orders}
           icon={Clock}
           iconColor="text-amber-600"
           iconBg="bg-amber-50"
+          className="glass-card bg-white/80 border-white/60 shadow-md"
         />
-        <div className="card p-6 bg-primary-600 text-white border-0">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-primary-100 text-sm font-medium">Your Shop Link</p>
-            <button
-              onClick={handleCopyLink}
-              className="p-1.5 bg-white/10 hover:bg-white/20 rounded-md transition-colors"
-              title="Copy Shop Link"
-            >
-              {copied ? (
-                <span className="flex items-center gap-1 text-[10px] uppercase font-bold px-1">
-                  <Check className="h-3 w-3" /> Copied
-                </span>
-              ) : (
-                <Copy className="h-3.5 w-3.5" />
-              )}
-            </button>
-          </div>
-          <div className="mb-4 overflow-hidden">
-            <p className="text-lg font-bold truncate leading-tight" title={shop?.shop_name}>
-              {shop?.shop_name}
-            </p>
-            <p className="text-primary-200 text-[11px] truncate mt-1 opacity-70" title={shopUrl}>
-              {shopUrl}
+        <div className="bg-gradient-to-br from-primary-500 to-primary-600 text-white rounded-[2rem] p-6 shadow-lg relative overflow-hidden flex flex-col justify-between border border-primary-400/30">
+          <div className="relative z-10">
+            <p className="text-primary-100 text-sm font-medium mb-1.5">ลิงก์ร้านค้าของคุณ</p>
+            <p className="text-lg font-bold mb-4 truncate" title={shopUrl}>
+              {shop?.shop_name || 'ไม่ได้ตั้งชื่อร้าน'}
             </p>
           </div>
           <a
             href={shopUrl}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 text-sm font-medium bg-white text-primary-700 hover:bg-white/90 px-3 py-2 rounded-lg transition-colors w-full justify-center shadow-sm"
+            className="relative z-10 inline-flex items-center gap-2 text-sm font-semibold bg-white/20 hover:bg-white/30 px-4 py-2.5 rounded-xl transition-all w-full justify-center active:scale-95 border border-white/10"
           >
-            Visit Shop <ArrowRight className="h-4 w-4" />
+            ไปที่หน้าร้าน <ArrowRight className="h-4 w-4" />
           </a>
+          {/* Decorative Background */}
+          <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none" />
         </div>
       </div>
 
       {/* Recent Orders */}
-      <div className="card">
-        <div className="card-header flex items-center justify-between">
+      <div className="glass-card bg-white/80 border-white/60 shadow-xl rounded-[2rem] p-6 sm:p-8">
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">Recent Orders</h2>
-            <p className="text-sm text-gray-500 mt-0.5">Latest transactions from your shop</p>
+            <h2 className="text-lg font-bold text-neutral-900">คำสั่งซื้อล่าสุด</h2>
+            <p className="text-sm font-medium text-neutral-500 mt-1">รายการสั่งซื้อใหม่จากหน้าร้านของคุณ</p>
           </div>
-          <Link to="/reseller/orders" className="text-sm font-medium text-primary-600 hover:text-primary-700">
-            View All
+          <Link to="/reseller/orders" className="text-sm font-semibold text-primary-600 hover:text-primary-700 transition-colors">
+            ดูทั้งหมด
           </Link>
         </div>
+
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-100 bg-gray-50/50">
-                <th className="px-6 py-4 text-left text-[10px] font-black text-neutral-400 uppercase tracking-widest">ORDER</th>
-                <th className="px-6 py-4 text-left text-[10px] font-black text-neutral-400 uppercase tracking-widest">CUSTOMER</th>
-                <th className="px-6 py-4 text-left text-[10px] font-black text-neutral-400 uppercase tracking-widest">DATE</th>
-                <th className="px-6 py-4 text-left text-[10px] font-black text-neutral-400 uppercase tracking-widest">PROFIT</th>
-                <th className="px-6 py-4 text-left text-[10px] font-black text-neutral-400 uppercase tracking-widest">STATUS</th>
+              <tr className="border-b-2 border-neutral-100/80">
+                <th className="px-4 py-4 text-left text-xs font-bold text-neutral-500 whitespace-nowrap">รหัสออเดอร์</th>
+                <th className="px-4 py-4 text-left text-xs font-bold text-neutral-500 whitespace-nowrap">ลูกค้า</th>
+                <th className="px-4 py-4 text-left text-xs font-bold text-neutral-500 whitespace-nowrap">วันที่</th>
+                <th className="px-4 py-4 text-left text-xs font-bold text-neutral-500 whitespace-nowrap">กำไร</th>
+                <th className="px-4 py-4 text-left text-xs font-bold text-neutral-500 whitespace-nowrap">สถานะ</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-neutral-100/80">
               {stats.recent_orders.map((order) => (
-                <tr key={order.id} className="hover:bg-gray-50/50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-primary-600">
+                <tr key={order.id} className="hover:bg-neutral-50/50 transition-colors">
+                  <td className="px-4 py-4 whitespace-nowrap text-sm font-semibold text-primary-600">
                     {order.order_number}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-neutral-800">
                     {order.customer_name}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-neutral-500">
                     {formatDate(order.created_at)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-emerald-600">
+                  <td className="px-4 py-4 whitespace-nowrap text-sm font-bold text-emerald-600">
                     +{formatCurrency(order.reseller_profit)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <td className="px-4 py-4 whitespace-nowrap text-sm">
                     <span className={cn(
-                      "inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border",
+                      "inline-flex px-3 py-1.5 rounded-full text-xs font-medium border",
                       order.status === 'completed' ? "bg-emerald-50 text-emerald-700 border-emerald-100" :
-                      order.status === 'shipped' ? "bg-primary-50 text-primary-700 border-primary-100" :
-                      "bg-amber-50 text-amber-700 border-amber-100"
+                        order.status === 'shipped' ? "bg-primary-50 text-primary-700 border-primary-100" :
+                          "bg-amber-50 text-amber-700 border-amber-100"
                     )}>
-                      {order.status}
+                      {order.status === 'completed' ? 'เสร็จสิ้น' : order.status === 'shipped' ? 'จัดส่งแล้ว' : 'รอดำเนินการ'}
                     </span>
                   </td>
                 </tr>

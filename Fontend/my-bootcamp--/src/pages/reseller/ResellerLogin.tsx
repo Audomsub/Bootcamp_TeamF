@@ -8,8 +8,8 @@ import { authService } from '@/services/auth.service';
 import { Store, Eye, EyeOff, Loader2 } from 'lucide-react';
 
 const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  email: z.string().email('รูปแบบอีเมลไม่ถูกต้อง'),
+  password: z.string().min(6, 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร'),
 });
 
 type LoginForm = z.infer<typeof loginSchema>;
@@ -34,7 +34,7 @@ export default function ResellerLogin() {
       const response = await authService.loginReseller(data);
       const { token, role, email } = response.data;
       if (role?.toLowerCase() !== 'reseller') {
-        setError('Access denied. Reseller credentials required.');
+        setError('ปฏิเสธการเข้าถึง อนุญาตเฉพาะบัญชีตัวแทนจำหน่ายเท่านั้น');
         return;
       }
       
@@ -52,14 +52,14 @@ export default function ResellerLogin() {
       const mockShop = {
         id: Date.now(),
         user_id: mockUser.id,
-        shop_name: `${mockUser.name}'s Shop`,
+        shop_name: `ร้านค้าของ ${mockUser.name}`,
         shop_slug: `${mockUser.name}-shop`,
       };
 
       login(token, mockUser, mockShop);
       navigate('/reseller/dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.message || err.response?.data || 'Login failed. Please try again.');
+      setError(err.response?.data?.message || err.response?.data || 'เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
     }
   };
 
@@ -72,12 +72,12 @@ export default function ResellerLogin() {
           </div>
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Sign in to your shop
+          เข้าสู่ระบบร้านค้าของคุณ
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Or{' '}
+          หรือ{' '}
           <Link to="/register" className="font-medium text-primary-600 hover:text-primary-500">
-            register to become a reseller
+            สมัครสมาชิกเพื่อเป็นตัวแทนจำหน่าย
           </Link>
         </p>
       </div>
@@ -92,7 +92,7 @@ export default function ResellerLogin() {
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div>
-              <label className="label">Email address</label>
+              <label className="label">อีเมล</label>
               <div className="mt-1">
                 <input
                   type="email"
@@ -107,7 +107,7 @@ export default function ResellerLogin() {
             </div>
 
             <div>
-              <label className="label">Password</label>
+              <label className="label">รหัสผ่าน</label>
               <div className="mt-1 relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
@@ -137,7 +137,7 @@ export default function ResellerLogin() {
                   className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                  Remember me
+                  จดจำการเข้าสู่ระบบ
                 </label>
               </div>
             </div>
@@ -151,10 +151,10 @@ export default function ResellerLogin() {
                 {isSubmitting ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Signing in...
+                    กำลังเข้าสู่ระบบ...
                   </>
                 ) : (
-                  'Sign in'
+                  'เข้าสู่ระบบ'
                 )}
               </button>
             </div>
