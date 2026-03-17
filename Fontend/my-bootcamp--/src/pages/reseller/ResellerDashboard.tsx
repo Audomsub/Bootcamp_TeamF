@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { DollarSign, ShoppingCart, Clock, ArrowRight } from 'lucide-react';
+import { DollarSign, ShoppingCart, Clock, ArrowRight, Copy, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { StatCard, PageHeader, LoadingSpinner } from '@/components/ui/shared';
 import { dashboardService } from '@/services/dashboard.service';
@@ -23,6 +23,7 @@ export default function ResellerDashboard() {
   const { shop } = useAuth();
   const [stats, setStats] = useState<ResellerDashboardStats>(mockStats);
   const [loading, setLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     loadStats();
@@ -41,6 +42,13 @@ export default function ResellerDashboard() {
   };
 
   const shopUrl = `${window.location.origin}/shop/${shop?.shop_slug}`;
+
+  const handleCopyLink = () => {
+    if (!shopUrl) return;
+    navigator.clipboard.writeText(shopUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   if (loading) return <LoadingSpinner />;
 
@@ -72,15 +80,35 @@ export default function ResellerDashboard() {
           iconBg="bg-amber-50"
         />
         <div className="card p-6 bg-primary-600 text-white border-0">
-          <p className="text-primary-100 text-sm font-medium mb-2">Your Shop Link</p>
-          <p className="text-lg font-bold mb-4 truncate" title={shopUrl}>
-            {shop?.shop_name}
-          </p>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-primary-100 text-sm font-medium">Your Shop Link</p>
+            <button
+              onClick={handleCopyLink}
+              className="p-1.5 bg-white/10 hover:bg-white/20 rounded-md transition-colors"
+              title="Copy Shop Link"
+            >
+              {copied ? (
+                <span className="flex items-center gap-1 text-[10px] uppercase font-bold px-1">
+                  <Check className="h-3 w-3" /> Copied
+                </span>
+              ) : (
+                <Copy className="h-3.5 w-3.5" />
+              )}
+            </button>
+          </div>
+          <div className="mb-4 overflow-hidden">
+            <p className="text-lg font-bold truncate leading-tight" title={shop?.shop_name}>
+              {shop?.shop_name}
+            </p>
+            <p className="text-primary-200 text-[11px] truncate mt-1 opacity-70" title={shopUrl}>
+              {shopUrl}
+            </p>
+          </div>
           <a
             href={shopUrl}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 text-sm font-medium bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-lg transition-colors w-full justify-center"
+            className="inline-flex items-center gap-2 text-sm font-medium bg-white text-primary-700 hover:bg-white/90 px-3 py-2 rounded-lg transition-colors w-full justify-center shadow-sm"
           >
             Visit Shop <ArrowRight className="h-4 w-4" />
           </a>
