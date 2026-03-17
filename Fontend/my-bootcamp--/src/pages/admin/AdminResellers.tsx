@@ -139,23 +139,27 @@ export default function AdminResellers() {
       meta: { align: 'right' },
       enableSorting: false,
       cell: ({ row }) => {
-        if (row.original.status !== 'pending') return <div className="h-9" />;
+        const { status, id } = row.original;
         return (
-          <div className="flex items-center justify-end gap-1.5">
-            <button
-              onClick={() => setAction({ id: row.original.id, type: 'approve' })}
-              className="p-2.5 rounded-full bg-white text-emerald-600 border border-neutral-100 shadow-sm hover:shadow-md hover:border-emerald-100 transition-all active:scale-90 group"
-              title="อนุมัติ"
-            >
-              <UserCheck className="h-4.5 w-4.5 group-hover:scale-110 transition-transform" />
-            </button>
-            <button
-              onClick={() => setAction({ id: row.original.id, type: 'reject' })}
-              className="p-2.5 rounded-full bg-white text-rose-600 border border-neutral-100 shadow-sm hover:shadow-md hover:border-rose-100 transition-all active:scale-90 group"
-              title="ปฏิเสธ"
-            >
-              <UserX className="h-4.5 w-4.5 group-hover:scale-110 transition-transform" />
-            </button>
+          <div className="flex items-center justify-end gap-1.5 h-9">
+            {status !== 'approved' && (
+              <button
+                onClick={() => setAction({ id, type: 'approve' })}
+                className="p-2.5 rounded-full bg-white text-emerald-600 border border-neutral-100 shadow-sm hover:shadow-md hover:border-emerald-100 transition-all active:scale-90 group"
+                title="อนุมัติ"
+              >
+                <UserCheck className="h-4.5 w-4.5 group-hover:scale-110 transition-transform" />
+              </button>
+            )}
+            {status !== 'rejected' && (
+              <button
+                onClick={() => setAction({ id, type: 'reject' })}
+                className="p-2.5 rounded-full bg-white text-rose-600 border border-neutral-100 shadow-sm hover:shadow-md hover:border-rose-100 transition-all active:scale-90 group"
+                title="ปฏิเสธ"
+              >
+                <UserX className="h-4.5 w-4.5 group-hover:scale-110 transition-transform" />
+              </button>
+            )}
           </div>
         );
       },

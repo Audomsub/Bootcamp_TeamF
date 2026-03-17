@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Outlet, Link, useParams } from 'react-router-dom';
 import { Store, ShoppingBag, Truck, ShoppingCart } from 'lucide-react';
 import { useCart } from '../../contexts/CartContext';
-import CartDrawer from '../shop/CartDrawer';
+import CartDrawer from '../../pages/shop/CartDrawer';
 
 export default function ShopLayout() {
   const { slug } = useParams();

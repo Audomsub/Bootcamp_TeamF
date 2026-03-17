@@ -16,12 +16,20 @@ import {
 import { cn } from '@/lib/utils';
 
 const navItems = [
-  { to: '/reseller/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/reseller/catalog', icon: ShoppingBag, label: 'Catalog' },
-  { to: '/reseller/my-products', icon: Package, label: 'My Products' },
-  { to: '/reseller/orders', icon: ShoppingCart, label: 'Orders' },
-  { to: '/reseller/wallet', icon: Wallet, label: 'Wallet' },
+  { to: '/reseller/dashboard', icon: LayoutDashboard, label: 'แดชบอร์ด' },
+  { to: '/reseller/catalog', icon: ShoppingBag, label: 'แคตตาล็อกสินค้า' },
+  { to: '/reseller/my-products', icon: Package, label: 'สินค้าของฉัน' },
+  { to: '/reseller/orders', icon: ShoppingCart, label: 'รายการสั่งซื้อ' },
+  { to: '/reseller/wallet', icon: Wallet, label: 'กระเป๋าเงิน' },
 ];
+
+const pageTitles: Record<string, string> = {
+  'dashboard': 'แดชบอร์ด',
+  'catalog': 'แคตตาล็อกสินค้า',
+  'my-products': 'สินค้าของฉัน',
+  'orders': 'รายการสั่งซื้อ',
+  'wallet': 'กระเป๋าเงิน',
+};
 
 export default function ResellerLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -77,12 +85,12 @@ export default function ResellerLayout() {
             </div>
             <div className="flex flex-col min-w-0">
               <h1 className="font-display font-black text-xl tracking-tighter text-white truncate leading-none group-hover:text-accent-400 transition-colors">
-                {shop?.shop_name || 'My Shop'}
+                {shop?.shop_name || 'ร้านค้าของฉัน'}
               </h1>
               <div className="flex items-center gap-2 mt-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-accent-500 animate-pulse"></div>
                 <p className="text-[10px] font-black tracking-[0.3em] text-accent-600 uppercase leading-none">
-                  Reseller Portal
+                  ระบบตัวแทนจำหน่าย
                 </p>
               </div>
             </div>
@@ -97,7 +105,7 @@ export default function ResellerLayout() {
         {/* Navigation - Emerald Elite Look */}
         <nav className="flex-1 px-5 space-y-1.5 overflow-y-auto custom-scrollbar pt-2">
           <div className="px-6 mb-6">
-            <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] leading-none mb-1">Navigation</p>
+            <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] leading-none mb-1">เมนูหลัก</p>
             <div className="h-0.5 w-8 bg-accent-500/30 rounded-full"></div>
           </div>
 
@@ -151,12 +159,12 @@ export default function ResellerLayout() {
               className="block group bg-gradient-to-br from-neutral-800 to-neutral-900 rounded-[2rem] p-6 border border-white/5 hover:border-accent-500/30 transition-all duration-500"
             >
               <div className="flex items-center justify-between mb-4">
-                <span className="text-[9px] font-black text-accent-500 uppercase tracking-widest">Live Preview</span>
+                <span className="text-[9px] font-black text-accent-500 uppercase tracking-widest">ดูตัวอย่างร้านค้า</span>
                 <div className="w-8 h-8 bg-white/5 rounded-xl flex items-center justify-center group-hover:bg-accent-500/20 transition-all">
                   <ChevronRight className="h-4 w-4 text-white" />
                 </div>
               </div>
-              <p className="text-white font-black text-sm tracking-tight leading-tight">Your Digital Store</p>
+              <p className="text-white font-black text-sm tracking-tight leading-tight">ร้านค้าออนไลน์ของคุณ</p>
               <p className="text-neutral-500 text-[10px] mt-1.5 font-bold truncate">/shop/{shop.shop_slug}</p>
             </a>
           </div>
@@ -179,10 +187,10 @@ export default function ResellerLayout() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-xs font-black text-accent-600 truncate tracking-tight">{user?.name || 'Administrator'}</p>
+                    <p className="text-xs font-black text-accent-600 truncate tracking-tight">{user?.name || 'ผู้ดูแลระบบ'}</p>
                     <Store className="h-3 w-3 text-accent-400 shrink-0" />
                   </div>
-                  <p className="text-[10px] text-neutral-500 truncate leading-none mt-1.5 font-black uppercase tracking-tighter">Certified Reseller</p>
+                  <p className="text-[10px] text-neutral-500 truncate leading-none mt-1.5 font-black uppercase tracking-tighter">ตัวแทนจำหน่ายที่ได้รับการรับรอง</p>
                 </div>
               </div>
 
@@ -212,10 +220,10 @@ export default function ResellerLayout() {
             <div className="hidden sm:flex flex-col">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-accent-500 animate-pulse"></div>
-                <h2 className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em]">Store Status: Live</h2>
+                <h2 className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em]">สถานะร้านค้า: ออนไลน์</h2>
               </div>
               <h1 className="text-lg font-black text-neutral-900 tracking-tight mt-1 capitalize leading-none">
-                {location.pathname.split('/').pop()?.replace(/-/g, ' ')}
+                {pageTitles[location.pathname.split('/').pop() || ''] || location.pathname.split('/').pop()?.replace(/-/g, ' ')}
               </h1>
             </div>
           </div>
@@ -228,17 +236,17 @@ export default function ResellerLayout() {
                 rel="noopener noreferrer"
                 className="hidden md:inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] text-accent-600 bg-accent-50 border border-accent-100 px-6 py-3 rounded-2xl hover:bg-accent-100 transition-all duration-300 shadow-sm active:scale-95"
               >
-                Launch Store
+                เปิดหน้าเว็บไซต์
               </a>
             )}
             <div className="hidden md:flex flex-col items-end mr-2">
-              <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest leading-none">Time</span>
+              <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest leading-none">เวลา</span>
               <span className="text-xs font-bold text-neutral-900 mt-1">{time.toLocaleTimeString()}</span>
             </div>
             <div className="h-10 w-px bg-neutral-200/50 hidden sm:block"></div>
             <div className="flex flex-col items-end ">
-              <span className="text-[9px] font-black text-neutral-400 uppercase tracking-widest leading-none">Operations Mode</span>
-              <span className="text-[11px] font-bold text-neutral-900 mt-1 uppercase">Active</span>
+              <span className="text-[9px] font-black text-neutral-400 uppercase tracking-widest leading-none">โหมดการทำงาน</span>
+              <span className="text-[11px] font-bold text-neutral-900 mt-1 uppercase">ปกติ</span>
             </div>
           </div>
         </header>
