@@ -2,9 +2,9 @@ import api from '@/lib/axios';
 import type { AdminDashboardStats, ResellerDashboardStats, ApiResponse } from '@/types';
 
 export const dashboardService = {
-  getAdminStats: () =>
-    api.get<ApiResponse<AdminDashboardStats>>('/admin/dashboard'),
+  getAdminStats: (params?: { period?: string; startDate?: string; endDate?: string }) =>
+    api.get<ApiResponse<AdminDashboardStats>>('/admin/dashboard', { params }),
 
-  getResellerStats: () =>
-    api.get<ApiResponse<ResellerDashboardStats>>('/reseller/dashboard'),
+  getResellerStats: (params?: { period?: string; startDate?: string; endDate?: string }) =>
+    api.get<ApiResponse<ResellerDashboardStats>>('/reseller/dashboard', { params }),
 };

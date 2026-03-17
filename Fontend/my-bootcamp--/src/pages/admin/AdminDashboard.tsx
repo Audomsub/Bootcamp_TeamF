@@ -6,6 +6,8 @@ import {
   Clock,
   TrendingUp,
   UserCheck,
+  Calendar,
+  ChevronDown,
 } from 'lucide-react';
 import {
   AreaChart,
@@ -70,16 +72,23 @@ const COLORS = ['oklch(0.52 0.25 260)', 'oklch(0.62 0.17 180)', 'oklch(0.72 0.15
 export default function AdminDashboard() {
   const [stats, setStats] = useState<AdminDashboardStats>(mockStats);
   const [loading, setLoading] = useState(false);
+  const [period, setPeriod] = useState('30days');
+  const [customDates, setCustomDates] = useState({ start: '', end: '' });
   const { user } = useAuth();
 
   useEffect(() => {
     loadStats();
-  }, []);
+  }, [period, customDates]);
 
   const loadStats = async () => {
     try {
       setLoading(true);
-      const response = await dashboardService.getAdminStats();
+      const params: any = { period };
+      if (period === 'custom' && customDates.start && customDates.end) {
+        params.startDate = customDates.start;
+        params.endDate = customDates.end;
+      }
+      const response = await dashboardService.getAdminStats(params);
       setStats(response.data.data);
     } catch {
       setStats(mockStats);
@@ -96,11 +105,42 @@ export default function AdminDashboard() {
         title={`ภาพรวมแดชบอร์ด`}
         subtitle={`ยินดีต้อนรับกลับ ${user?.name || 'ผู้ดูแลระบบ'} นี่คือสรุปผลประกอบการทางธุรกิจปัจจุบันของคุณ`}
       >
-        <div className="flex items-center gap-3 px-6 py-3 glass-card !rounded-2xl border-white/60">
-          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-          <span className="text-s font-medium text-neutral-700 pt-0.5">
-            สถานะระบบ: ทำงานปกติ
-          </span>
+        <div className="flex flex-col sm:flex-row items-end sm:items-center gap-4">
+          {period === 'custom' && (
+            <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-4">
+              <input
+                type="date"
+                value={customDates.start}
+                onChange={(e) => setCustomDates(prev => ({ ...prev, start: e.target.value }))}
+                className="px-3 py-2 bg-white/50 border border-neutral-200 rounded-xl text-xs font-bold text-neutral-600 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+              />
+              <span className="text-neutral-400 text-xs font-bold">ถึง</span>
+              <input
+                type="date"
+                value={customDates.end}
+                onChange={(e) => setCustomDates(prev => ({ ...prev, end: e.target.value }))}
+                className="px-3 py-2 bg-white/50 border border-neutral-200 rounded-xl text-xs font-bold text-neutral-600 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+              />
+            </div>
+          )}
+          
+          <div className="relative group/select">
+            <select
+              value={period}
+              onChange={(e) => setPeriod(e.target.value)}
+              className="appearance-none pl-10 pr-10 py-3 bg-white/80 border border-neutral-200/50 rounded-2xl text-xs font-black uppercase tracking-widest text-neutral-600 hover:text-neutral-900 hover:border-primary-500/30 transition-all cursor-pointer focus:outline-none shadow-sm"
+            >
+              <option value="today">วันนี้</option>
+              <option value="yesterday">เมื่อวาน</option>
+              <option value="7days">7 วันล่าสุด</option>
+              <option value="30days">30 วันล่าสุด</option>
+              <option value="thisMonth">เดือนนี้</option>
+              <option value="thisYear">ปีนี้</option>
+              <option value="custom">กำหนดช่วงเวลาเอง</option>
+            </select>
+            <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400 group-hover/select:text-primary-500 transition-colors pointer-events-none" />
+            <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400 group-hover/select:text-primary-500 transition-colors pointer-events-none" />
+          </div>
         </div>
       </PageHeader>
 

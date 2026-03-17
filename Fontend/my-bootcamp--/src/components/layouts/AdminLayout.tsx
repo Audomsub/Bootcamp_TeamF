@@ -192,10 +192,6 @@ export default function AdminLayout() {
               <Menu className="h-6 w-6 text-neutral-900" />
             </button>
             <div className="hidden sm:flex flex-col">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                <h2 className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em]">สถานะระบบ: ออนไลน์</h2>
-              </div>
               <h1 className="text-lg font-black text-neutral-900 tracking-tight mt-1 capitalize leading-none">
                 {getPageTitle(location.pathname)}
               </h1>
