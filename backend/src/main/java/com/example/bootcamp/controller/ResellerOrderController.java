@@ -23,7 +23,15 @@ public class ResellerOrderController {
         if (authentication == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        List<ResellerOrderResponse> orderResponses = resellerService.getMyOrder(authentication.getName());
-        return ResponseEntity.ok(orderResponses);
+        try {
+            List<ResellerOrderResponse> orderResponses = resellerService.getMyOrder(authentication.getName());
+            return ResponseEntity.ok(orderResponses);
+        } catch (Exception e) {
+            e.printStackTrace();
+            List<ResellerOrderResponse> errorList = new java.util.ArrayList<>();
+            errorList.add(new ResellerOrderResponse(null, e.getMessage(), null, null, null, null));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(errorList);
+        }
     }
 }

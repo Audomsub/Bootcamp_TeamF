@@ -141,7 +141,7 @@ public class ResellerService {
                     productName.toString(),
                     orderTotalSelling,
                     orderTotalProfit,
-                    ordersEntity.getStatus().name()
+                    ordersEntity.getStatus() != null ? ordersEntity.getStatus().name() : "pending"
             ));
         }
         return resellerOrderResponses;
