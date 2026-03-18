@@ -45,17 +45,14 @@ public class AuthService {
         }
         return userRepository.findByEmail(email)
                 .map(user -> {
-                    // 1. ตรวจสอบรหัสผ่าน (รองรับทั้ง BCrypt และ Plain Text ที่มาจาก CSV)
                     boolean passwordMatches = false;
                     try {
                         passwordMatches = bCryptPasswordEncoder.matches(password, user.getPassword());
                     } catch (IllegalArgumentException e) {
-                        // In case of invalid bcrypt hash (e.g. plain text from DB)
+
                     }
                     if (passwordMatches || password.equals(user.getPassword())) {
 
-                        // 2. ถ้าเป็น Role "reseller" ต้องตรวจสอบสถานะการอนุมัติ
-                        // ใช้ .name().equalsIgnoreCase() เพื่อป้องกันปัญหา String vs Enum และตัวพิมพ์เล็ก/ใหญ่
                         if ("reseller".equalsIgnoreCase(user.getRole().name())) {
 
                             if ("pending".equalsIgnoreCase(user.getStatus().name())) {
@@ -77,17 +74,17 @@ public class AuthService {
                         return AdminLoginResponse.builder()
                                 .token(token)
                                 .email(email)
-                                .role(roleName) // ส่ง Role กลับไปให้ Frontend จัดการหน้า UI
-                                .message("เข้าสู่ระบบสำเร็จ") // (BR-15)
+                                .role(roleName)
+                                .message("เข้าสู่ระบบสำเร็จ")
                                 .build();
                     }
 
-                    // กรณีรหัสผ่านไม่ตรงกัน (BR-18)
+
                     return AdminLoginResponse.builder()
                             .message("อีเมลหรือรหัสผ่านไม่ถูกต้อง")
                             .build();
                 })
-                // กรณีหาอีเมลนี้ไม่เจอในระบบ (BR-18)
+
                 .orElse(AdminLoginResponse.builder()
                         .message("อีเมลหรือรหัสผ่านไม่ถูกต้อง")
                         .build());

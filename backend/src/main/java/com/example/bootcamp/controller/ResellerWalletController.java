@@ -25,4 +25,13 @@ public class ResellerWalletController {
         ResellerWalletResponse response = resellerService.getWalletDetails(authentication.getName());
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/dashboard")
+    public ResponseEntity<com.example.bootcamp.dto.Response.ResellerDashboardResponse> getDashboard(Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        com.example.bootcamp.dto.Response.ResellerDashboardResponse response = resellerService.getDashboardData(authentication.getName());
+        return ResponseEntity.ok(response);
+    }
 }

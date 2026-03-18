@@ -20,17 +20,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // ปิด CSRF เพราะเราใช้ JWT (Stateless)
+                .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // บอก Spring ไม่ต้องสร้าง Session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/admin/login").permitAll() // อนุญาตให้ Login ได้โดยไม่ต้องมี Token
+                        .requestMatchers("/admin/login").permitAll()
                         .requestMatchers("/shop/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .anyRequest().permitAll() // URL อื่นๆ นอกจากนี้ปล่อยผ่านหมด
+                        .anyRequest().permitAll()
                 )
-                // วาง JwtFilter ไว้ก่อน Filter หลักของ Spring เพื่อตรวจ Token ก่อน
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

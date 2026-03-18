@@ -3,16 +3,13 @@ server:
 
 spring:
   datasource:
-    # 1. เปลี่ยนจาก 127.0.0.1 เป็น IP Server
     url: jdbc:postgresql://10.202.10.36:5432/bootcamp_db
-    # 2. ใช้ User ที่เราตั้งค่าไว้ (เช่น dev_beam)
     username: dev_dew
     password: password
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
-      # ใช้ validate เพื่อให้มันตรวจสอบโครงสร้างตารางที่เรา Import ไว้แล้ว
       ddl-auto: validate
     show-sql: true
     properties:

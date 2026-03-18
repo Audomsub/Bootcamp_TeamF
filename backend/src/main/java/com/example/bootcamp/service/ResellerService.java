@@ -166,4 +166,25 @@ public class ResellerService {
         }
         return new ResellerWalletResponse(balance, history);
     }
+
+    @Transactional
+    public com.example.bootcamp.dto.Response.ResellerDashboardResponse getDashboardData(String email) {
+        UsersEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("ไม่พบผู้ใช้งาน"));
+        ShopsEntity shop = shopRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new RuntimeException("ไม่พบร้านค้าของคุณ"));
+
+        WalletsEntity wallet = walletRepository.findByUserId(user.getId()).orElse(null);
+        BigDecimal balance = wallet != null ? wallet.getBalance() : BigDecimal.ZERO;
+        
+        List<OrdersEntity> orders = orderRepository.findByShopIdOrderByCreatedAtDesc(shop.getId());
+        long orderCount = orders.size();
+
+        return com.example.bootcamp.dto.Response.ResellerDashboardResponse.builder()
+                .shopName(shop.getShopName())
+                .shopSlug(shop.getShopSlug())
+                .totalProfit(balance)
+                .orderCount(orderCount)
+                .build();
+    }
 }
