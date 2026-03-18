@@ -103,6 +103,20 @@ public class ResellerService {
         }
     }
 
+    @Transactional
+    public String removeProductFromShop(String email, Integer productId) {
+        UsersEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("ไม่พบผู้ใช้งาน: " + email));
+        ShopsEntity shop = shopRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new RuntimeException("ไม่พบร้านค้าของคุณ"));
+
+        ShopProductsEntity shopProduct = shopProductRepository.findByShopIdAndProductId(shop.getId(), productId)
+                .orElseThrow(() -> new RuntimeException("ไม่พบสินค้านี้ในร้านของคุณ"));
+
+        shopProductRepository.delete(shopProduct);
+        return "นำสินค้าออกจากร้านสำเร็จ";
+    }
+
     @Transactional()
     public List<ResellerOrderResponse> getMyOrder(String email) {
         // 1. หา User และ Shop

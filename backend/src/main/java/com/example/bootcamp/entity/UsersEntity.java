@@ -25,7 +25,7 @@ public class UsersEntity {
     private String email;
 
     @Column(name = "password" , nullable = false)
-    private String password = "password123";
+    private String password;
 
     @Column(name = "phone" , length = 20)
     private String phone;

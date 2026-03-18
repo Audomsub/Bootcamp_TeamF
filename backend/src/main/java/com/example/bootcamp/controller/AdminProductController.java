@@ -73,24 +73,6 @@ public class AdminProductController {
         }
     }
 
-    @GetMapping("/orders")
-    public ResponseEntity<List<AdminOrderResponse>> getAllOrder() {
-        List<AdminOrderResponse> adminOrderResponses = adminService.getAllOrder();
-        return ResponseEntity.ok(adminOrderResponses);
-    }
-
-    @PostMapping("/orders/status")
-    public ResponseEntity<String> updateOrderStatus(
-            @Valid @RequestBody UpdateOrderStatusRequest request,
-            @RequestParam OrdersEntity.Status status) {
-        try {
-            String message = adminService.updateOrderStatus(request.getOrderId(), status);
-            return ResponseEntity.ok(message);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
-    }
-
     @GetMapping("/dashboard")
     public ResponseEntity<com.example.bootcamp.dto.Response.AdminDashboardResponse> getDashboard() {
         return ResponseEntity.ok(adminService.getDashboardStatistics());

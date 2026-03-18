@@ -12,7 +12,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/")
-public class ResellerAuthController {
+public class AuthController {
 
     @Autowired
     private AuthService authService;
