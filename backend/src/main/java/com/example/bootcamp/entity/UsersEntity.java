@@ -25,9 +25,9 @@ public class UsersEntity {
     private String email;
 
     @Column(name = "password" , nullable = false)
-    private String password;
+    private String password = "password123";
 
-    @Column(name = "phone" , nullable = false)
+    @Column(name = "phone" , length = 20)
     private String phone;
 
     @Enumerated(EnumType.STRING)

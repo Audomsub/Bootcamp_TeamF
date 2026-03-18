@@ -29,14 +29,14 @@ public class OrdersEntity {
     @JoinColumn(name = "shop_id", nullable = false)
     private ShopsEntity shop;
 
-    @Column(name = "customer_name", nullable = false)
-    private String customerName;
+    @Column(name = "customer_name")
+    private String customerName = "Unknown Customer";
 
-    @Column(name = "customer_phone", nullable = false)
+    @Column(name = "customer_phone")
     private String customerPhone;
 
-    @Column(name = "shipping_address", nullable = false, columnDefinition = "TEXT")
-    private String shippingAddress;
+    @Column(name = "shipping_address", columnDefinition = "TEXT")
+    private String shippingAddress = "No Address Provided";
 
     @Column(name = "total_amount", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalAmount;
@@ -53,7 +53,6 @@ public class OrdersEntity {
     private LocalDateTime createdAt;
 
     public enum Status {
-        unpaid,
         pending,
         shipped,
         completed

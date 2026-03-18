@@ -3,12 +3,12 @@ package com.example.bootcamp.service;
 import com.example.bootcamp.dto.Request.OrderRequest;
 import com.example.bootcamp.dto.Response.ShopFrontResponse;
 import com.example.bootcamp.dto.Response.ShopProductResponse;
-import com.example.bootcamp.dto.Response.AdminOrderResponse;
+
 import com.example.bootcamp.dto.Response.TrackOrderResponse;
 import com.example.bootcamp.entity.*;
 import com.example.bootcamp.repository.*;
 import jakarta.transaction.Transactional;
-import org.hibernate.query.Order;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -78,7 +78,7 @@ public class CustomerService {
         ordersEntity.setCustomerName(orderRequest.getCustomerName());
         ordersEntity.setCustomerPhone(orderRequest.getCustomerPhone());
         ordersEntity.setShippingAddress(orderRequest.getCustomerAddress());
-        ordersEntity.setStatus(OrdersEntity.Status.unpaid);
+        ordersEntity.setStatus(OrdersEntity.Status.pending);
 
         BigDecimal quantityBD = new BigDecimal(orderRequest.getAmountProduct());
         BigDecimal totalAmount = shopProductsEntity.getSellingPrice().multiply(quantityBD);
@@ -110,7 +110,7 @@ public class CustomerService {
             throw new RuntimeException("ออเดอร์นี้ไม่ได้อยู่ในร้านค้านี้");
         }
 
-        if (order.getStatus() != OrdersEntity.Status.unpaid) {
+        if (order.getStatus() != OrdersEntity.Status.pending) {
             throw new RuntimeException("ออเดอร์นี้ชำระเงินแล้วหรือถูกยกเลิก");
         }
 

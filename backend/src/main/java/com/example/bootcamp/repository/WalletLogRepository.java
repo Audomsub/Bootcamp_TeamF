@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface WalletLogRepository extends JpaRepository<WalletLogsEntity, Integer> {
-    List<WalletLogsEntity> findByWalletIdOrderByCreatedAtDesc(Integer walletId); // ดึงประวัติเงินเข้า เรียงจากใหม่ไปเก่า
+    List<WalletLogsEntity> findByUserIdOrderByCreatedAtDesc(Integer userId); // ดึงประวัติเงินเข้า เรียงจากใหม่ไปเก่า
 }

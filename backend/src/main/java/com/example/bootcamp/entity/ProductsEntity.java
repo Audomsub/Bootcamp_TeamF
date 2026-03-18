@@ -22,7 +22,7 @@ public class ProductsEntity {
     @Column(name = "description" , columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "image_url" , length = 500 , nullable = false)
+    @Column(name = "image_url" , length = 500)
     private String imageUrl;
 
     @Column(name = "cost_price", nullable = false, precision = 10, scale = 2)
@@ -32,7 +32,7 @@ public class ProductsEntity {
     private  BigDecimal minSellPrice;
 
     @Column(name = "stock")
-    private Integer stock;
+    private Integer stock = 0;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

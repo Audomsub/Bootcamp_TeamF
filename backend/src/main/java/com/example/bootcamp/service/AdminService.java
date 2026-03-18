@@ -101,7 +101,8 @@ public class AdminService {
             walletRepository.save(wallet);
 
             WalletLogsEntity log = new WalletLogsEntity();
-            log.setWallet(wallet);
+            log.setUser(reseller);
+            log.setOrder(order);
             log.setAmount(order.getResellerProfit());
             walletLogRepository.save(log);
         }

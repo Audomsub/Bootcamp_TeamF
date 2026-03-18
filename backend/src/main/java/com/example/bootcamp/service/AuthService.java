@@ -45,8 +45,14 @@ public class AuthService {
         }
         return userRepository.findByEmail(email)
                 .map(user -> {
-                    // 1. ตรวจสอบรหัสผ่าน (ใช้ BCrypt)
-                    if (bCryptPasswordEncoder.matches(password, user.getPassword())) {
+                    // 1. ตรวจสอบรหัสผ่าน (รองรับทั้ง BCrypt และ Plain Text ที่มาจาก CSV)
+                    boolean passwordMatches = false;
+                    try {
+                        passwordMatches = bCryptPasswordEncoder.matches(password, user.getPassword());
+                    } catch (IllegalArgumentException e) {
+                        // In case of invalid bcrypt hash (e.g. plain text from DB)
+                    }
+                    if (passwordMatches || password.equals(user.getPassword())) {
 
                         // 2. ถ้าเป็น Role "reseller" ต้องตรวจสอบสถานะการอนุมัติ
                         // ใช้ .name().equalsIgnoreCase() เพื่อป้องกันปัญหา String vs Enum และตัวพิมพ์เล็ก/ใหญ่
