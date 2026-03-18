@@ -15,9 +15,11 @@ const mockCatalog: Product[] = [
 ];
 
 export default function ResellerCatalog() {
-  const [products, setProducts] = useState<Product[]>(mockCatalog);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
   
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [sellingPrice, setSellingPrice] = useState('');
@@ -25,18 +27,44 @@ export default function ResellerCatalog() {
   const [adding, setAdding] = useState(false);
 
   useEffect(() => {
-    loadCatalog();
+    loadCatalog(0, true);
   }, []);
 
-  const loadCatalog = async () => {
+  const loadCatalog = async (pageToLoad: number, isInitial: boolean = false) => {
     try {
       setLoading(true);
-      const response = await shopService.getCatalog();
-      setProducts(response.data.data);
-    } catch {
-      setProducts(mockCatalog);
+      const response = await shopService.getCatalog(pageToLoad);
+      const data = response.data; // Spring Page object
+      
+      const mappedProducts = data.content.map((p: any) => ({
+        id: p.id,
+        name: p.productName,
+        description: p.description,
+        image_url: p.imageUrl,
+        cost_price: p.costPrice,
+        min_price: p.minSellPrice,
+        stock: p.stock,
+        created_at: p.createdAt || ''
+      }));
+
+      if (isInitial) {
+        setProducts(mappedProducts);
+      } else {
+        setProducts(prev => [...prev, ...mappedProducts]);
+      }
+      
+      setHasMore(!data.last);
+      setPage(data.number);
+    } catch (err) {
+      console.error('Failed to load catalog:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLoadMore = () => {
+    if (!loading && hasMore) {
+      loadCatalog(page + 1);
     }
   };
 
@@ -53,8 +81,8 @@ export default function ResellerCatalog() {
       setAdding(true);
       setError('');
       await shopService.addProduct({
-        product_id: selectedProduct.id,
-        selling_price: price,
+        productId: selectedProduct.id,
+        sellingPrice: price,
       });
       // Show success toast or feedback
       setSelectedProduct(null);
@@ -136,6 +164,25 @@ export default function ResellerCatalog() {
           </div>
         ))}
       </div>
+
+      {hasMore && (
+        <div className="mt-12 flex justify-center">
+          <button
+            onClick={handleLoadMore}
+            disabled={loading}
+            className="btn-secondary px-8 py-2.5 flex items-center gap-2"
+          >
+            {loading ? (
+              <>
+                <LoadingSpinner />
+                กำลังโหลด...
+              </>
+            ) : (
+              'โหลดเพิ่มเติม'
+            )}
+          </button>
+        </div>
+      )}
 
       <Modal
         isOpen={selectedProduct !== null}

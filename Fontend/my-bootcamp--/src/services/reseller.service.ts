@@ -1,16 +1,46 @@
 import api from '@/lib/axios';
-import type { User, ApiResponse, PaginatedResponse } from '@/types';
+import type { User } from '@/types';
+
+// Backend UsersEntity structure (camelCase from Spring Boot JSON)
+interface BackendUser {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  role: string;
+  status: string;
+  address: string;
+  createdAt: string;
+}
+
+interface ResellerUser extends User {
+  shop?: { shop_name: string };
+}
+
+const mapUser = (u: BackendUser): ResellerUser => ({
+  id: u.id,
+  name: u.name,
+  email: u.email,
+  phone: u.phone,
+  role: (u.role?.toLowerCase() || 'reseller') as 'admin' | 'reseller',
+  status: (u.status?.toLowerCase() || 'pending') as 'pending' | 'approved' | 'rejected',
+  address: u.address || '',
+  created_at: u.createdAt || '',
+});
 
 export const resellerService = {
-  getAll: (params?: { page?: number; status?: string }) =>
-    api.get<ApiResponse<PaginatedResponse<User & { shop?: { shop_name: string } }>>>(
-      '/resellers',
-      { params }
-    ),
+  // GET /admin/resellers
+  getAll: async (_params?: { page?: number; status?: string }) => {
+    const res = await api.get<BackendUser[]>('/admin/resellers');
+    const mapped = res.data.map(mapUser);
+    return { data: { data: { data: mapped } } };
+  },
 
+  // POST /admin/reseller/{id}/status?status=approved
   approve: (id: number) =>
-    api.patch<ApiResponse<User>>(`/resellers/${id}/approve`),
+    api.post(`/admin/reseller/${id}/status`, null, { params: { status: 'approved' } }),
 
+  // POST /admin/reseller/{id}/status?status=rejected
   reject: (id: number) =>
-    api.patch<ApiResponse<User>>(`/resellers/${id}/reject`),
+    api.post(`/admin/reseller/${id}/status`, null, { params: { status: 'rejected' } }),
 };

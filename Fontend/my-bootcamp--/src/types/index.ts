@@ -98,9 +98,10 @@ export interface RegisterData {
   name: string;
   email: string;
   password: string;
+  confirmPassword: string;
   phone: string;
   address: string;
-  shop_name: string;
+  shopName: string;
 }
 
 export interface AuthResponse {

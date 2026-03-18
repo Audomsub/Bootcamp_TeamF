@@ -149,26 +149,7 @@ export default function ResellerLayout() {
           })}
         </nav>
 
-        {/* Public Store Quick Link */}
-        {shop && (
-          <div className="px-6 mb-4">
-            <a
-              href={`/shop/${shop.shop_slug}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block group bg-white rounded-[2rem] p-6 border border-neutral-100 shadow-sm hover:border-accent-500/30 transition-all duration-500"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-[9px] font-black text-accent-600 uppercase tracking-widest">ดูตัวอย่างร้านค้า</span>
-                <div className="w-8 h-8 bg-neutral-50 rounded-xl flex items-center justify-center group-hover:bg-accent-500/10 transition-all">
-                  <ChevronRight className="h-4 w-4 text-neutral-400 group-hover:text-accent-600" />
-                </div>
-              </div>
-              <p className="text-neutral-900 font-black text-sm tracking-tight leading-tight">ร้านค้าออนไลน์ของคุณ</p>
-              <p className="text-neutral-400 text-[10px] mt-1.5 font-bold truncate">/shop/{shop.shop_slug}</p>
-            </a>
-          </div>
-        )}
+
 
         {/* User Footer - Command Center Status Card */}
         <div className="p-6 mt-auto">

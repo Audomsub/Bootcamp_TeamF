@@ -8,7 +8,7 @@ import { orderService } from '@/services/order.service';
 import { formatCurrency, formatDate, cn } from '@/lib/utils';
 import type { Order } from '@/types';
 
-// Mock data
+// Mock data (fallback)
 const mockOrders: Order[] = [
   { id: 1, order_number: 'ORD-ABC123', shop_id: 1, customer_name: 'สมชาย', customer_phone: '0812345678', shipping_address: 'กรุงเทพ', total_amount: 1500, reseller_profit: 300, status: 'pending', created_at: '2025-03-12', shop: { id: 1, user_id: 1, shop_name: 'JD Store', shop_slug: 'jd-store' }, items: [{ id: 1, order_id: 1, product_id: 1, product_name: 'Premium T-Shirt', cost_price: 150, selling_price: 250, quantity: 2 }, { id: 2, order_id: 1, product_id: 2, product_name: 'Classic Hoodie', cost_price: 350, selling_price: 500, quantity: 1 }] },
   { id: 2, order_number: 'ORD-DEF456', shop_id: 1, customer_name: 'สมหญิง', customer_phone: '0898765432', shipping_address: 'เชียงใหม่', total_amount: 2400, reseller_profit: 600, status: 'shipped', created_at: '2025-03-11', shop: { id: 1, user_id: 1, shop_name: 'JD Store', shop_slug: 'jd-store' }, items: [{ id: 3, order_id: 2, product_id: 5, product_name: 'Running Shoes', cost_price: 800, selling_price: 1200, quantity: 2 }] },
@@ -16,7 +16,7 @@ const mockOrders: Order[] = [
 ];
 
 export default function AdminOrders() {
-  const [orders, setOrders] = useState<Order[]>(mockOrders);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [shipId, setShipId] = useState<number | null>(null);
   const [processing, setProcessing] = useState(false);
@@ -29,8 +29,14 @@ export default function AdminOrders() {
     try {
       setLoading(true);
       const response = await orderService.getAllOrders();
-      setOrders(response.data.data.data);
+      const data = response.data?.data?.data;
+      if (data && Array.isArray(data) && data.length > 0) {
+        setOrders(data);
+      } else {
+        setOrders(mockOrders);
+      }
     } catch {
+      console.error('Failed to load orders from backend, using mock data');
       setOrders(mockOrders);
     } finally {
       setLoading(false);

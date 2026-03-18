@@ -6,92 +6,59 @@ import {
   Clock,
   TrendingUp,
   UserCheck,
-  Calendar,
-  ChevronDown,
+  Package,
+  ArrowUpRight,
 } from 'lucide-react';
 import {
-  AreaChart,
-  Area,
-  BarChart,
-  Bar,
   PieChart,
   Pie,
   Cell,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
-  CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
+  CartesianGrid,
 } from 'recharts';
-import { StatCard, PageHeader, LoadingSpinner } from '@/components/ui/shared';
+import { PageHeader, LoadingSpinner } from '@/components/ui/shared';
 import { dashboardService } from '@/services/dashboard.service';
-import { formatCurrency, formatDate } from '@/lib/utils';
-import type { AdminDashboardStats } from '@/types';
+import { formatCurrency } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 
-// Mock data for demo
-const mockStats: AdminDashboardStats = {
-  total_sales: 285400,
-  total_reseller_profit: 42600,
-  total_orders: 156,
-  pending_orders: 12,
-  total_resellers: 24,
-  pending_resellers: 3,
-  recent_orders: [],
-  sales_chart: [
-    { date: '2025-03-01', amount: 12000, profit: 2400 },
-    { date: '2025-03-02', amount: 18000, profit: 3600 },
-    { date: '2025-03-03', amount: 15000, profit: 3000 },
-    { date: '2025-03-04', amount: 22000, profit: 4400 },
-    { date: '2025-03-05', amount: 28000, profit: 5600 },
-    { date: '2025-03-06', amount: 25000, profit: 5000 },
-    { date: '2025-03-07', amount: 32000, profit: 6400 },
-    { date: '2025-03-08', amount: 29000, profit: 5800 },
-    { date: '2025-03-09', amount: 35000, profit: 7000 },
-    { date: '2025-03-10', amount: 31000, profit: 6200 },
-    { date: '2025-03-11', amount: 38000, profit: 7600 },
-    { date: '2025-03-12', amount: 42000, profit: 8400 },
-  ],
-  reseller_leaderboard: [
-    { name: 'John Doe', shop: 'JD Store', sales: 85200, orders: 42 },
-    { name: 'Jane Smith', shop: 'JS Shop', sales: 64500, orders: 31 },
-    { name: 'Bob Wilson', shop: 'BW Mart', sales: 42100, orders: 19 },
-    { name: 'Alice Brown', shop: 'AB Collection', sales: 38900, orders: 18 },
-  ],
-  category_distribution: [
-    { name: 'Apparel', value: 45 },
-    { name: 'Electronics', value: 25 },
-    { name: 'Accessories', value: 20 },
-    { name: 'Footwear', value: 10 },
-  ],
-};
+interface DashboardData {
+  total_sales: number;
+  total_reseller_profit: number;
+  total_orders: number;
+  pending_orders: number;
+  total_resellers: number;
+  pending_resellers: number;
+}
 
-const COLORS = ['oklch(0.52 0.25 260)', 'oklch(0.62 0.17 180)', 'oklch(0.72 0.15 80)', 'oklch(0.55 0.2 30)'];
+const PIE_COLORS = ['#4F46E5', '#06B6D4'];
+const BAR_COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444'];
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<AdminDashboardStats>(mockStats);
-  const [loading, setLoading] = useState(false);
-  const [period, setPeriod] = useState('30days');
-  const [customDates, setCustomDates] = useState({ start: '', end: '' });
+  const [stats, setStats] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const { user } = useAuth();
 
   useEffect(() => {
     loadStats();
-  }, [period, customDates]);
+  }, []);
 
   const loadStats = async () => {
     try {
       setLoading(true);
-      const params: any = { period };
-      if (period === 'custom' && customDates.start && customDates.end) {
-        params.startDate = customDates.start;
-        params.endDate = customDates.end;
+      setError('');
+      const response = await dashboardService.getAdminStats();
+      if (response?.data?.data) {
+        setStats(response.data.data);
       }
-      const response = await dashboardService.getAdminStats(params);
-      setStats(response.data.data);
-    } catch {
-      setStats(mockStats);
+    } catch (err) {
+      console.error('Dashboard error:', err);
+      setError('ไม่สามารถโหลดข้อมูลแดชบอร์ดได้');
     } finally {
       setLoading(false);
     }
@@ -99,291 +66,239 @@ export default function AdminDashboard() {
 
   if (loading) return <LoadingSpinner />;
 
-  return (
-    <div className="space-y-12">
-      <PageHeader
-        title={`ภาพรวมแดชบอร์ด`}
-        subtitle={`ยินดีต้อนรับกลับ ${user?.name || 'ผู้ดูแลระบบ'} นี่คือสรุปผลประกอบการทางธุรกิจปัจจุบันของคุณ`}
-      >
-        <div className="flex flex-col sm:flex-row items-end sm:items-center gap-4">
-          {period === 'custom' && (
-            <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-4">
-              <input
-                type="date"
-                value={customDates.start}
-                onChange={(e) => setCustomDates(prev => ({ ...prev, start: e.target.value }))}
-                className="px-3 py-2 bg-white/50 border border-neutral-200 rounded-xl text-xs font-bold text-neutral-600 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-              />
-              <span className="text-neutral-400 text-xs font-bold">ถึง</span>
-              <input
-                type="date"
-                value={customDates.end}
-                onChange={(e) => setCustomDates(prev => ({ ...prev, end: e.target.value }))}
-                className="px-3 py-2 bg-white/50 border border-neutral-200 rounded-xl text-xs font-bold text-neutral-600 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-              />
-            </div>
-          )}
-          
-          <div className="relative group/select">
-            <select
-              value={period}
-              onChange={(e) => setPeriod(e.target.value)}
-              className="appearance-none pl-10 pr-10 py-3 bg-white/80 border border-neutral-200/50 rounded-2xl text-xs font-black uppercase tracking-widest text-neutral-600 hover:text-neutral-900 hover:border-primary-500/30 transition-all cursor-pointer focus:outline-none shadow-sm"
-            >
-              <option value="today">วันนี้</option>
-              <option value="yesterday">เมื่อวาน</option>
-              <option value="7days">7 วันล่าสุด</option>
-              <option value="30days">30 วันล่าสุด</option>
-              <option value="thisMonth">เดือนนี้</option>
-              <option value="thisYear">ปีนี้</option>
-              <option value="custom">กำหนดช่วงเวลาเอง</option>
-            </select>
-            <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400 group-hover/select:text-primary-500 transition-colors pointer-events-none" />
-            <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400 group-hover/select:text-primary-500 transition-colors pointer-events-none" />
-          </div>
+  if (error || !stats) {
+    return (
+      <div className="space-y-6">
+        <PageHeader title="ภาพรวมระบบ" subtitle="Dashboard" />
+        <div className="bg-white rounded-2xl border border-red-100 p-8 text-center">
+          <p className="text-red-500 font-medium">{error || 'ไม่พบข้อมูล'}</p>
+          <button onClick={loadStats} className="mt-4 px-6 py-2 bg-neutral-900 text-white rounded-xl text-sm font-medium hover:bg-neutral-800 transition-colors">
+            ลองใหม่อีกครั้ง
+          </button>
         </div>
-      </PageHeader>
+      </div>
+    );
+  }
 
-      {/* Stats Grid - High Impact */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        <StatCard
-          title="ยอดขายรวม (จัดส่งแล้ว)"
-          value={formatCurrency(stats.total_sales)}
-          icon={DollarSign}
-          iconColor="text-primary-500"
-          iconBg="bg-primary-500/5"
-          subtitle="คำสั่งซื้อที่จัดส่งและเสร็จสมบูรณ์"
-        />
-        <StatCard
-          title="จ่ายกำไรแล้วรวม"
-          value={formatCurrency(stats.total_reseller_profit)}
-          icon={TrendingUp}
-          iconColor="text-accent-500"
-          iconBg="bg-accent-500/5"
-          subtitle="ผลรวมกระเป๋าเงินตัวแทนจำหน่ายทั้งหมด"
-        />
-        <StatCard
-          title="คำสั่งซื้อรวมทั้งหมด"
-          value={stats.total_orders}
-          icon={ShoppingCart}
-          iconColor="text-primary-400"
-          iconBg="bg-primary-500/5"
-          subtitle="ปริมาณออเดอร์ทั้งหมดในระบบ"
-        />
-        <StatCard
-          title="รอดำเนินการ"
-          value={stats.pending_orders}
-          icon={Clock}
-          iconColor="text-amber-500"
-          iconBg="bg-amber-500/5"
-          subtitle="คำสั่งซื้อที่กำลังรอการจัดส่ง"
-        />
-        <StatCard
-          title="ตัวแทนจำหน่ายที่ใช้งานอยู่"
-          value={stats.total_resellers}
-          icon={Users}
-          iconColor="text-neutral-900"
-          iconBg="bg-neutral-900/5"
-          subtitle="พาร์ทเนอร์ที่ได้รับการอนุมัติแล้ว"
-        />
-        <StatCard
-          title="คิวรออนุมัติ"
-          value={stats.pending_resellers}
-          icon={UserCheck}
-          iconColor="text-accent-600"
-          iconBg="bg-accent-500/5"
-          subtitle="ผู้สมัครที่กำลังรอการตรวจสอบ"
-        />
+  // คำนวณข้อมูลสรุป
+  const completedOrders = stats.total_orders - stats.pending_orders;
+  const avgOrderValue = stats.total_orders > 0 ? stats.total_sales / stats.total_orders : 0;
+  const completionRate = stats.total_orders > 0 ? (completedOrders / stats.total_orders) * 100 : 0;
+  const profitRate = stats.total_sales > 0 ? (stats.total_reseller_profit / stats.total_sales) * 100 : 0;
+  const adminRevenue = stats.total_sales - stats.total_reseller_profit;
+
+  // ── Chart Data (คำนวณจากข้อมูลจริง) ──
+  const revenueBreakdown = [
+    { name: 'รายได้แอดมิน', value: adminRevenue },
+    { name: 'กำไรตัวแทน', value: stats.total_reseller_profit },
+  ];
+
+  const orderStatusData = [
+    { name: 'สำเร็จ', value: completedOrders },
+    { name: 'รอดำเนินการ', value: stats.pending_orders },
+  ];
+
+  const overviewBarData = [
+    { name: 'ยอดขาย', value: stats.total_sales, fill: BAR_COLORS[0] },
+    { name: 'กำไรตัวแทน', value: stats.total_reseller_profit, fill: BAR_COLORS[1] },
+    { name: 'รายได้แอดมิน', value: adminRevenue, fill: BAR_COLORS[2] },
+  ];
+
+  return (
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <PageHeader
+        title="ภาพรวมระบบ"
+        subtitle={`ยินดีต้อนรับ ${user?.name || 'ผู้ดูแลระบบ'} — ข้อมูลสรุปจากระบบจริง`}
+      />
+
+      {/* ── Stat Cards 6 ช่อง ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <StatCard label="ยอดขายรวม" value={formatCurrency(stats.total_sales)} sub="ออเดอร์ที่จัดส่ง/เสร็จสมบูรณ์" icon={DollarSign} color="emerald" />
+        <StatCard label="กำไรตัวแทนรวม" value={formatCurrency(stats.total_reseller_profit)} sub="ผลรวมกระเป๋าเงินตัวแทนทั้งหมด" icon={TrendingUp} color="blue" />
+        <StatCard label="คำสั่งซื้อทั้งหมด" value={stats.total_orders.toLocaleString()} sub="ออเดอร์ทั้งหมดในระบบ" icon={ShoppingCart} color="violet" />
+        <StatCard label="รอดำเนินการ" value={stats.pending_orders.toLocaleString()} sub="คำสั่งซื้อรอจัดส่ง" icon={Clock} color="amber" />
+        <StatCard label="ตัวแทนที่อนุมัติ" value={stats.total_resellers.toLocaleString()} sub="พาร์ทเนอร์ที่ใช้งานอยู่" icon={Users} color="cyan" />
+        <StatCard label="รออนุมัติ" value={stats.pending_resellers.toLocaleString()} sub="ผู้สมัครรอการตรวจสอบ" icon={UserCheck} color="rose" />
       </div>
 
-      {/* Advanced Analytics Board */}
-      <div className="relative group">
-        <div className="absolute -inset-1 bg-gradient-to-r from-primary-500/20 to-accent-500/20 rounded-[2.5rem] blur-2xl opacity-20 group-hover:opacity-40 transition-opacity duration-1000"></div>
+      {/* ── Charts Row ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        <div className="card !p-0 overflow-hidden !bg-white/90 backdrop-blur-xl border-white/60 shadow-xl relative rounded-[2rem]">
-          <div className="p-8 border-b border-neutral-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div>
-              <h2 className="text-2xl font-bold text-neutral-800 tracking-tight">การวิเคราะห์ยอดขาย</h2>
-              <p className="text-sm font-medium text-neutral-500 mt-1">แนวโน้มการเติบโตของรายได้ในระบบ</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 px-4 py-2 bg-neutral-100/80 rounded-xl">
-                <div className="w-2.5 h-2.5 rounded-full bg-primary-500"></div>
-                <span className="text-xs font-semibold text-neutral-600">ปริมาณรวม</span>
-              </div>
-              <div className="flex items-center gap-2 px-4 py-2 bg-neutral-100/80 rounded-xl">
-                <div className="w-2.5 h-2.5 rounded-full bg-accent-500"></div>
-                <span className="text-xs font-semibold text-neutral-600">อัตราการเติบโต</span>
-              </div>
-            </div>
+        {/* Bar Chart - เปรียบเทียบรายได้ */}
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden">
+          <div className="p-6 border-b border-neutral-100">
+            <h3 className="text-lg font-bold text-neutral-800">เปรียบเทียบรายได้</h3>
+            <p className="text-sm text-neutral-500 mt-1">ยอดขาย vs กำไรตัวแทน vs รายได้แอดมิน</p>
           </div>
-
-          <div className="p-8 pt-6">
-            <div className="h-[400px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={stats.sales_chart} margin={{ top: 20, right: 30, left: 10, bottom: 20 }}>
-                  <defs>
-                    <linearGradient id="primaryGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="oklch(0.52 0.25 260)" stopOpacity={0.15} />
-                      <stop offset="95%" stopColor="oklch(0.52 0.25 260)" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f5f5f5" />
-                  <XAxis
-                    dataKey="date"
-                    tickFormatter={(val) => {
-                      const d = new Date(val);
-                      return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
-                    }}
-                    tick={{ fontSize: 12, fill: '#737373', fontWeight: 500 }}
-                    axisLine={false}
-                    tickLine={false}
-                    dy={15}
-                  />
+          <div className="p-6">
+            <div style={{ width: '100%', height: 300 }}>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={overviewBarData} margin={{ top: 10, right: 20, left: 10, bottom: 10 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                  <XAxis dataKey="name" tick={{ fontSize: 13, fill: '#6B7280' }} axisLine={false} tickLine={false} />
                   <YAxis
-                    tickFormatter={(val) => `฿${(val / 1000).toFixed(0)}K`}
-                    tick={{ fontSize: 12, fill: '#737373', fontWeight: 500 }}
+                    tickFormatter={(val: any) => val >= 1000000 ? `${(val / 1000000).toFixed(1)}M` : val >= 1000 ? `${(val / 1000).toFixed(0)}K` : `${val}`}
+                    tick={{ fontSize: 12, fill: '#9CA3AF' }}
                     axisLine={false}
                     tickLine={false}
-                    dx={-15}
                   />
                   <Tooltip
-                    cursor={{ stroke: 'oklch(0.52 0.25 260)', strokeWidth: 2, strokeDasharray: '6 6' }}
-                    content={({ active, payload, label }) => {
+                    content={({ active, payload }: any) => {
                       if (active && payload && payload.length) {
                         return (
-                          <div className="bg-white/95 p-5 shadow-xl border border-neutral-100 rounded-2xl">
-                            <p className="text-xs font-medium text-neutral-500 mb-2">{formatDate(label as string)}</p>
-                            <div className="flex items-end gap-3">
-                              <p className="text-2xl font-bold text-neutral-800 tracking-tight">
-                                {formatCurrency(payload[0].value as number)}
-                              </p>
-                              <div className="mb-1 text-emerald-600 text-xs font-semibold bg-emerald-50 px-2 py-0.5 rounded-md">
-                                เติบโต +12%
-                              </div>
-                            </div>
+                          <div className="bg-white p-4 shadow-xl border border-neutral-100 rounded-xl">
+                            <p className="text-xs text-neutral-500 mb-1">{payload[0].payload.name}</p>
+                            <p className="text-lg font-bold text-neutral-800">{formatCurrency(payload[0].value)}</p>
                           </div>
                         );
                       }
                       return null;
                     }}
                   />
-                  <Area
-                    type="monotone"
-                    dataKey="amount"
-                    stroke="oklch(0.52 0.25 260)"
-                    strokeWidth={4}
-                    fill="url(#primaryGradient)"
-                    animationDuration={1500}
-                    activeDot={{ r: 6, stroke: '#fff', strokeWidth: 3, fill: 'oklch(0.52 0.25 260)' }}
-                  />
-                </AreaChart>
+                  <Bar dataKey="value" radius={[8, 8, 0, 0]} barSize={60}>
+                    {overviewBarData.map((entry, index) => (
+                      <Cell key={`bar-${index}`} fill={entry.fill} />
+                    ))}
+                  </Bar>
+                </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
+        </div>
 
-          <div className="bg-neutral-50/70 p-8 border-t border-neutral-100 flex items-center justify-between">
-            <div className="flex gap-16">
-              <div className="space-y-1">
-                <p className="text-xs font-medium text-neutral-500">ยอดสูงสุดปัจจุบัน</p>
-                <p className="text-xl font-bold text-neutral-800 tracking-tight">฿42,000.00</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-xs font-medium text-neutral-500">อัตราความสำเร็จ</p>
-                <div className="flex items-center gap-2">
-                  <p className="text-xl font-bold text-emerald-600 tracking-tight">98.4%</p>
-                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+        {/* Donut Chart - สัดส่วนรายได้ */}
+        <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden">
+          <div className="p-6 border-b border-neutral-100">
+            <h3 className="text-lg font-bold text-neutral-800">สัดส่วนรายได้</h3>
+            <p className="text-sm text-neutral-500 mt-1">แอดมิน vs ตัวแทนจำหน่าย</p>
+          </div>
+          <div className="p-6 flex flex-col items-center justify-center" style={{ minHeight: 280 }}>
+            {stats.total_sales > 0 ? (
+              <>
+                <div style={{ width: '100%', height: 200 }}>
+                  <ResponsiveContainer width="100%" height={200}>
+                    <PieChart>
+                      <Pie
+                        data={revenueBreakdown}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={55}
+                        outerRadius={85}
+                        paddingAngle={3}
+                        dataKey="value"
+                        animationDuration={1000}
+                        stroke="none"
+                      >
+                        {revenueBreakdown.map((_, index) => (
+                          <Cell key={`pie-${index}`} fill={PIE_COLORS[index]} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        content={({ active, payload }: any) => {
+                          if (active && payload && payload.length) {
+                            return (
+                              <div className="bg-white p-3 shadow-lg border border-neutral-100 rounded-xl text-sm">
+                                <p className="font-medium text-neutral-700">{payload[0].name}</p>
+                                <p className="font-bold text-neutral-900">{formatCurrency(payload[0].value)}</p>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
                 </div>
+                {/* Legend */}
+                <div className="flex flex-col gap-3 mt-2 w-full">
+                  <div className="flex items-center justify-between px-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: PIE_COLORS[0] }} />
+                      <span className="text-sm text-neutral-600">รายได้แอดมิน</span>
+                    </div>
+                    <span className="text-sm font-bold text-neutral-800">{(100 - profitRate).toFixed(1)}%</span>
+                  </div>
+                  <div className="flex items-center justify-between px-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: PIE_COLORS[1] }} />
+                      <span className="text-sm text-neutral-600">กำไรตัวแทน</span>
+                    </div>
+                    <span className="text-sm font-bold text-neutral-800">{profitRate.toFixed(1)}%</span>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="text-center text-neutral-400 py-10">
+                <Package className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                <p className="text-sm">ยังไม่มีข้อมูลรายได้</p>
               </div>
-            </div>
-            <button className="btn-secondary !px-8 font-medium">ส่งออกรายงานยอดขาย</button>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Secondary Intelligence Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pb-12">
-        {/* Reseller Leaderboard */}
-        <div className="glass-card !bg-white/80 border-white/60 shadow-xl overflow-hidden flex flex-col rounded-[2rem]">
-          <div className="p-8 border-b border-neutral-100">
-            <h3 className="text-lg font-bold text-neutral-800 tracking-tight">สุดยอดตัวแทนจำหน่าย</h3>
-            <p className="text-sm font-medium text-neutral-500 mt-1">ผลการดำเนินงานของพาร์ทเนอร์ชั้นนำ</p>
-          </div>
-          <div className="flex-1 p-6 space-y-3">
-            {(stats as any).reseller_leaderboard?.map((reseller: any, i: number) => (
-              <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-white border border-neutral-50 hover:shadow-md hover:border-neutral-100 transition-all duration-300">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center font-bold text-primary-600 text-sm">
-                    {i + 1}
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-neutral-800">{reseller.name}</h4>
-                    <p className="text-xs text-neutral-500 mt-0.5">{reseller.shop}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-bold text-neutral-800">{formatCurrency(reseller.sales)}</p>
-                  <p className="text-xs font-medium text-accent-600 mt-0.5">{reseller.orders} คำสั่งซื้อ</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="p-5 bg-neutral-50 border-t border-neutral-100">
-            <button className="w-full py-2 text-sm font-semibold text-neutral-600 hover:text-primary-600 transition-colors">
-              ดูพาร์ทเนอร์ทั้งหมด
-            </button>
-          </div>
-        </div>
+      {/* ── Summary Cards ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <SummaryCard icon={ArrowUpRight} color="emerald" label="ค่าเฉลี่ยต่อออเดอร์" value={formatCurrency(avgOrderValue)} />
+        <SummaryCard icon={TrendingUp} color="blue" label="อัตรากำไรตัวแทน" value={`${profitRate.toFixed(1)}%`} />
+        <SummaryCard icon={Package} color="violet" label="ออเดอร์สำเร็จ" value={`${completedOrders.toLocaleString()} (${completionRate.toFixed(1)}%)`} />
+        <SummaryCard icon={Clock} color="amber" label="ออเดอร์ค้างส่ง" value={`${stats.pending_orders.toLocaleString()} รายการ`} />
+      </div>
+    </div>
+  );
+}
 
-        {/* Category Distribution */}
-        <div className="glass-card !bg-white/80 border-white/60 shadow-xl overflow-hidden flex flex-col rounded-[2rem]">
-          <div className="p-8 border-b border-neutral-100">
-            <h3 className="text-lg font-bold text-neutral-800 tracking-tight">สัดส่วนยอดขาย</h3>
-            <p className="text-sm font-medium text-neutral-500 mt-1">ส่วนแบ่งการตลาดแบ่งตามหมวดหมู่สินค้า</p>
-          </div>
-          <div className="flex-1 p-6 flex flex-col items-center justify-center min-h-[350px]">
-            <ResponsiveContainer width="100%" height={280}>
-              <PieChart>
-                <Pie
-                  data={(stats as any).category_distribution}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={70}
-                  outerRadius={100}
-                  paddingAngle={5}
-                  dataKey="value"
-                  animationDuration={1500}
-                  stroke="none"
-                >
-                  {(stats as any).category_distribution?.map((_: any, index: number) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)', fontWeight: 500, fontSize: '12px', fontFamily: 'inherit' }}
-                />
-                <Legend
-                  verticalAlign="bottom"
-                  height={36}
-                  formatter={(value) => <span className="text-sm font-medium text-neutral-600 px-1">{value}</span>}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="p-6 bg-neutral-50/70 border-t border-neutral-100">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 rounded-2xl bg-white shadow-sm border border-neutral-100">
-                <p className="text-xs font-medium text-neutral-500 mb-1">หมวดหมู่หลัก</p>
-                <p className="text-sm font-bold text-neutral-800">เครื่องแต่งกาย (45%)</p>
-              </div>
-              <div className="p-4 rounded-2xl bg-white shadow-sm border border-neutral-100">
-                <p className="text-xs font-medium text-neutral-500 mb-1">กลุ่มที่กำลังเติบโต</p>
-                <p className="text-sm font-bold text-emerald-600">อิเล็กทรอนิกส์ (+12%)</p>
-              </div>
-            </div>
-          </div>
+// ── Sub Components ──
+
+function StatCard({ label, value, sub, icon: Icon, color }: {
+  label: string; value: string; sub: string; icon: any; color: string;
+}) {
+  const colors: Record<string, { border: string; bg: string; text: string }> = {
+    emerald: { border: 'border-emerald-100', bg: 'bg-emerald-50', text: 'text-emerald-600' },
+    blue: { border: 'border-blue-100', bg: 'bg-blue-50', text: 'text-blue-600' },
+    violet: { border: 'border-violet-100', bg: 'bg-violet-50', text: 'text-violet-600' },
+    amber: { border: 'border-amber-100', bg: 'bg-amber-50', text: 'text-amber-600' },
+    cyan: { border: 'border-cyan-100', bg: 'bg-cyan-50', text: 'text-cyan-600' },
+    rose: { border: 'border-rose-100', bg: 'bg-rose-50', text: 'text-rose-600' },
+  };
+  const c = colors[color] || colors.blue;
+
+  return (
+    <div className={`bg-white rounded-2xl border ${c.border} p-6 shadow-sm hover:shadow-lg transition-all group relative overflow-hidden`}>
+      <div className={`absolute -top-6 -right-6 w-20 h-20 ${c.bg} rounded-full blur-2xl opacity-50 group-hover:opacity-80 transition-opacity`} />
+      <div className="relative flex items-start justify-between">
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-neutral-500">{label}</p>
+          <p className="text-2xl font-bold text-neutral-900">{value}</p>
+          <p className="text-xs text-neutral-400">{sub}</p>
+        </div>
+        <div className={`w-11 h-11 ${c.bg} rounded-xl flex items-center justify-center`}>
+          <Icon className={`w-5 h-5 ${c.text}`} />
         </div>
       </div>
+    </div>
+  );
+}
+
+function SummaryCard({ icon: Icon, color, label, value }: {
+  icon: any; color: string; label: string; value: string;
+}) {
+  const bgMap: Record<string, string> = {
+    emerald: 'bg-emerald-50', blue: 'bg-blue-50', violet: 'bg-violet-50', amber: 'bg-amber-50',
+  };
+  const textMap: Record<string, string> = {
+    emerald: 'text-emerald-500', blue: 'text-blue-500', violet: 'text-violet-500', amber: 'text-amber-500',
+  };
+
+  return (
+    <div className="bg-white rounded-2xl border border-neutral-100 p-5 shadow-sm">
+      <div className="flex items-center gap-2 mb-2">
+        <div className={`w-7 h-7 ${bgMap[color]} rounded-lg flex items-center justify-center`}>
+          <Icon className={`w-3.5 h-3.5 ${textMap[color]}`} />
+        </div>
+        <span className="text-xs font-semibold text-neutral-500">{label}</span>
+      </div>
+      <p className="text-xl font-bold text-neutral-900">{value}</p>
     </div>
   );
 }

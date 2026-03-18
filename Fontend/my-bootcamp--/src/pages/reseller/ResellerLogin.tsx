@@ -32,31 +32,34 @@ export default function ResellerLogin() {
     try {
       setError('');
       const response = await authService.loginReseller(data);
-      const { token, role, email } = response.data;
+      const { token, role, user, shop } = response.data;
+      
       if (role?.toLowerCase() !== 'reseller') {
         setError('ปฏิเสธการเข้าถึง อนุญาตเฉพาะบัญชีตัวแทนจำหน่ายเท่านั้น');
         return;
       }
-      
-      const mockUser = {
-        id: Date.now(),
-        name: email.split('@')[0],
-        email: email,
-        phone: '',
-        role: 'reseller' as const,
-        status: 'approved' as const,
-        address: '',
-        created_at: new Date().toISOString()
-      };
-      
-      const mockShop = {
-        id: Date.now(),
-        user_id: mockUser.id,
-        shop_name: `ร้านค้าของ ${mockUser.name}`,
-        shop_slug: `${mockUser.name}-shop`,
-      };
 
-      login(token, mockUser, mockShop);
+      if (!user) {
+        setError('พบข้อผิดพลาด: ไม่พบข้อมูลผู้ใช้');
+        return;
+      }
+      
+      const userData = {
+        ...user,
+        phone: user.phone || '',
+        status: user.status || 'approved',
+        address: user.address || '',
+        created_at: user.created_at || new Date().toISOString()
+      };
+      
+      const shopData = shop ? {
+        id: shop.id,
+        user_id: user.id,
+        shop_name: shop.shopName,
+        shop_slug: shop.shopSlug,
+      } : null;
+
+      login(token, userData, shopData as any);
       navigate('/reseller/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.message || err.response?.data || 'เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');

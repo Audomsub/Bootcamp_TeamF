@@ -9,10 +9,14 @@ import { Store, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 const registerSchema = z.object({
   name: z.string().min(2, 'ชื่อต้องมีความยาวอย่างน้อย 2 ตัวอักษร'),
   email: z.string().email('รูปแบบอีเมลไม่ถูกต้อง'),
-  password: z.string().min(6, 'รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร'),
-  phone: z.string().min(9, 'กรุณาระบุเบอร์โทรศัพท์ที่ถูกต้อง'),
+  password: z.string().min(8, 'รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร'),
+  confirmPassword: z.string().min(1, 'กรุณายืนยันรหัสผ่าน'),
+  phone: z.string().regex(/^\d{10}$/, 'กรุณาระบุเบอร์โทรศัพท์ 10 หลัก (เช่น 0812345678)'),
   address: z.string().min(5, 'กรุณาระบุที่อยู่ให้ครบถ้วน'),
-  shop_name: z.string().min(2, 'กรุณาระบุชื่อร้านค้าของคุณ'),
+  shopName: z.string().min(2, 'กรุณาระบุชื่อร้านค้าของคุณ'),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "รหัสผ่านไม่ตรงกัน",
+  path: ["confirmPassword"],
 });
 
 type RegisterForm = z.infer<typeof registerSchema>;
@@ -33,15 +37,57 @@ export default function ResellerRegister() {
   const onSubmit = async (data: RegisterForm) => {
     try {
       setError('');
+      console.log('Form data being sent:', data);
       const response = await authService.register(data);
+      console.log('Register response:', response.data);
+      
+      // จัดการ response จาก backend
+      let responseMessage = '';
+      if (typeof response.data === 'string') {
+        responseMessage = response.data;
+      } else if (typeof response.data === 'object' && response.data !== null && 'message' in response.data) {
+        responseMessage = (response.data as any).message;
+      } else {
+        responseMessage = 'สมัครสมาชิกสำเร็จ';
+      }
+      
       // Backend ส่งข้อความกลับมาว่า "สมัครสำเร็จ กรุณารอการอนุมัติจาก Admin"
-      if (response.data.includes('สำเร็จ')) {
+      if (responseMessage.includes('สำเร็จ')) {
         setSuccess(true);
       } else {
-        setError(response.data);
+        setError(responseMessage);
       }
     } catch (err: any) {
-      setError(err.response?.data || 'สมัครสมาชิกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+      console.error('Register error:', err);
+      console.error('Error response:', err.response?.data);
+      console.error('Error status:', err.response?.status);
+      
+      // จัดการ error response จาก backend
+      let errorMessage = 'สมัครสมาชิกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
+      
+      if (err.response?.data) {
+        const errorData = err.response.data;
+        
+        // ถ้า errorData เป็น object มี message field
+        if (typeof errorData === 'object' && errorData !== null && 'message' in errorData) {
+          errorMessage = (errorData as any).message;
+        }
+        // ถ้า errorData เป็น string
+        else if (typeof errorData === 'string') {
+          errorMessage = errorData;
+        }
+        // ถ้า errorData เป็น object มี error field (เช่น {timestamp, status, error, path})
+        else if (typeof errorData === 'object' && errorData !== null && 'error' in errorData) {
+          errorMessage = (errorData as any).error;
+        }
+        // ถ้า errorData เป็น object มี status 400 (Bad Request)
+        else if (typeof errorData === 'object' && errorData !== null && 'status' in errorData && (errorData as any).status === 400) {
+          errorMessage = 'ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบข้อมูลที่กรอกใหม่';
+        }
+      }
+      
+      console.log('Final error message:', errorMessage);
+      setError(errorMessage);
     }
   };
 
@@ -105,8 +151,8 @@ export default function ResellerRegister() {
 
               <div>
                 <label className="block text-sm font-semibold text-neutral-800 mb-1.5">ชื่อร้านค้า</label>
-                <input {...register('shop_name')} className="input-field w-full" placeholder="ร้านของสมชาย" />
-                {errors.shop_name && <p className="mt-1.5 text-xs font-medium text-rose-500">{errors.shop_name.message}</p>}
+                <input {...register('shopName')} className="input-field w-full" placeholder="ร้านของสมชาย" />
+                {errors.shopName && <p className="mt-1.5 text-xs font-medium text-rose-500">{errors.shopName.message}</p>}
               </div>
             </div>
 
@@ -116,10 +162,18 @@ export default function ResellerRegister() {
               {errors.email && <p className="mt-1.5 text-xs font-medium text-rose-500">{errors.email.message}</p>}
             </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-neutral-800 mb-1.5">รหัสผ่าน</label>
-              <input type="password" {...register('password')} className="input-field w-full" placeholder="••••••••" />
-              {errors.password && <p className="mt-1.5 text-xs font-medium text-rose-500">{errors.password.message}</p>}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div>
+                <label className="block text-sm font-semibold text-neutral-800 mb-1.5">รหัสผ่าน</label>
+                <input type="password" {...register('password')} className="input-field w-full" placeholder="••••••••" />
+                {errors.password && <p className="mt-1.5 text-xs font-medium text-rose-500">{errors.password.message}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-neutral-800 mb-1.5">ยืนยันรหัสผ่าน</label>
+                <input type="password" {...register('confirmPassword')} className="input-field w-full" placeholder="••••••••" />
+                {errors.confirmPassword && <p className="mt-1.5 text-xs font-medium text-rose-500">{errors.confirmPassword.message}</p>}
+              </div>
             </div>
 
             <div>

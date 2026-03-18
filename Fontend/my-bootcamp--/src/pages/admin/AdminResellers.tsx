@@ -21,7 +21,7 @@ const mockResellers: ResellerUser[] = [
 ];
 
 export default function AdminResellers() {
-  const [resellers, setResellers] = useState<ResellerUser[]>(mockResellers);
+  const [resellers, setResellers] = useState<ResellerUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [action, setAction] = useState<{ id: number; type: 'approve' | 'reject' } | null>(null);
   const [processing, setProcessing] = useState(false);
@@ -34,10 +34,14 @@ export default function AdminResellers() {
     try {
       setLoading(true);
       const response = await resellerService.getAll();
-      if (response.data.data.data) {
-        setResellers(response.data.data.data as ResellerUser[]);
+      const data = response.data?.data?.data;
+      if (data && Array.isArray(data) && data.length > 0) {
+        setResellers(data as ResellerUser[]);
+      } else {
+        setResellers(mockResellers);
       }
     } catch {
+      console.error('Failed to load resellers from backend, using mock data');
       setResellers(mockResellers);
     } finally {
       setLoading(false);

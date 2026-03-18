@@ -36,7 +36,8 @@ export default function ResellerMyProducts() {
     try {
       setLoading(true);
       const response = await shopService.getMyProducts();
-      setProducts(response.data.data);
+      // Spring Page structure: { content: [], ... }
+      setProducts(response.data.content || response.data.data || []);
     } catch {
       setProducts(mockMyProducts);
     } finally {

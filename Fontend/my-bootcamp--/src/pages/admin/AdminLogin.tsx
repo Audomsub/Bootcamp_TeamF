@@ -34,10 +34,18 @@ export default function AdminLogin() {
       setError('');
       const response = await authService.loginAdmin(data);
       const { token, role, email } = response.data;
-      if (role?.toLowerCase() !== 'admin') {
+
+      // Debug: แสดงค่าที่ได้จาก backend
+      console.log('Backend response:', response.data);
+      console.log('Role:', role);
+
+      // ตรวจสอบ role แบบยืดหยุ่นขึ้น
+      const adminRoles = ['admin', 'administrator', 'superadmin', 'root'];
+      if (!role || !adminRoles.includes(role.toLowerCase())) {
         setError('ปฏิเสธการเข้าถึง จำเป็นต้องใช้สิทธิ์ผู้ดูแลระบบเท่านั้น');
         return;
       }
+
       const mockUser = {
         id: Date.now(),
         name: email.split('@')[0],
@@ -51,7 +59,33 @@ export default function AdminLogin() {
       login(token, mockUser);
       navigate('/admin/dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.message || err.response?.data || 'เข้าสู่ระบบไม่สำเร็จ โปรดลองอีกครั้ง');
+      console.error('Login error:', err);
+
+      // จัดการ error response จาก backend
+      let errorMessage = 'เข้าสู่ระบบไม่สำเร็จ โปรดลองอีกครั้ง';
+
+      if (err.response?.data) {
+        const errorData = err.response.data;
+
+        // ถ้า errorData เป็น object มี message field
+        if (typeof errorData === 'object' && errorData.message) {
+          errorMessage = errorData.message;
+        }
+        // ถ้า errorData เป็น string
+        else if (typeof errorData === 'string') {
+          errorMessage = errorData;
+        }
+        // ถ้า errorData เป็น object มี error field
+        else if (typeof errorData === 'object' && errorData.error) {
+          errorMessage = errorData.error;
+        }
+        // ถ้า errorData เป็น object มี status 400 (Bad Request)
+        else if (typeof errorData === 'object' && errorData.status === 400) {
+          errorMessage = 'ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบอีเมลและรหัสผ่าน';
+        }
+      }
+
+      setError(errorMessage);
     }
   };
 
@@ -60,7 +94,7 @@ export default function AdminLogin() {
       {/* Decorative Gimmicks - Cinema-grade background elements */}
       <div className="absolute top-[-10%] left-[-5%] w-[40%] h-[40%] bg-primary-500/10 rounded-full blur-[120px] animate-pulse"></div>
       <div className="absolute bottom-[-10%] right-[-5%] w-[40%] h-[40%] bg-accent-500/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }}></div>
-      
+
       <div className="w-full max-w-[1200px] grid lg:grid-cols-2 gap-12 lg:gap-24 items-center relative z-10">
         {/* Left Side: Brand Power */}
         <div className="hidden lg:flex flex-col animate-in fade-in slide-in-from-left-12 duration-1000 ease-out">
@@ -68,12 +102,12 @@ export default function AdminLogin() {
             <div className="w-2 h-2 rounded-full bg-primary-500 animate-pulse"></div>
             <span className="text-xs font-semibold text-neutral-600">ระบบจัดการขั้นสูง</span>
           </div>
-          
+
           <h1 className="page-title !leading-tight !mb-8">
             <span className="text-neutral-500 block mb-2 text-4xl lg:text-5xl">เข้าสู่ระบบ</span>
             <span className="text-neutral-900">ผู้ดูแลระบบ</span>
           </h1>
-          
+
           <p className="page-subtitle mb-12 text-neutral-600 leading-relaxed text-lg">
             เข้าถึงระบบโครงสร้างพื้นฐานอย่างปลอดภัย แดชบอร์ดผู้บริหารของเรามอบการวิเคราะห์และควบคุมการปฏิบัติงานที่มีประสิทธิภาพสูงเพียงปลายนิ้วสัมผัส
           </p>
@@ -100,7 +134,7 @@ export default function AdminLogin() {
         <div className="relative animate-in fade-in slide-in-from-right-12 duration-1000 delay-200 ease-out">
           <div className="glass-card p-10 lg:p-16 relative overflow-hidden group rounded-[2.5rem] bg-white/90 shadow-2xl">
             <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-1000"></div>
-            
+
             <div className="flex items-center gap-4 mb-12">
               <div className="w-14 h-14 bg-neutral-900 rounded-2xl flex items-center justify-center shadow-lg">
                 <Shield className="h-7 w-7 text-white" />
@@ -142,7 +176,6 @@ export default function AdminLogin() {
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <label className="label text-sm font-semibold text-neutral-700 !mb-0">รหัสผ่าน</label>
-                    <button type="button" className="text-xs font-medium text-neutral-500 hover:text-primary-600 transition-colors">ลืมรหัสผ่าน?</button>
                   </div>
                   <div className="relative group">
                     <input
@@ -197,7 +230,7 @@ export default function AdminLogin() {
               </p>
             </div>
           </div>
-          
+
           {/* Visual Gimmick underneath card */}
           <div className="absolute -z-10 bottom-[-20px] left-[10%] right-[10%] h-[40px] bg-neutral-900/10 blur-[40px] rounded-full"></div>
         </div>

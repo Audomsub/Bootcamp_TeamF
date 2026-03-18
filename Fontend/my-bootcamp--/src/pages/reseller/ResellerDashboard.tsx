@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { DollarSign, ShoppingCart, Clock, ArrowRight, Calendar, ChevronDown } from 'lucide-react';
+import { DollarSign, ShoppingCart, Clock, ArrowRight, Calendar, ChevronDown, Copy, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { StatCard, PageHeader, LoadingSpinner } from '@/components/ui/shared';
 import { dashboardService } from '@/services/dashboard.service';
@@ -47,7 +47,10 @@ export default function ResellerDashboard() {
     }
   };
 
-  const shopUrl = `${window.location.origin}/shop/${shop?.shop_slug}`;
+  // Ensure we use the latest slug from the shop object
+  const shopUrl = shop?.shop_slug 
+    ? `${window.location.origin}/shop/${shop.shop_slug}`
+    : `${window.location.origin}/shop/not-found`;
 
   if (loading) return <LoadingSpinner />;
 
@@ -129,14 +132,45 @@ export default function ResellerDashboard() {
               {shop?.shop_name || 'ไม่ได้ตั้งชื่อร้าน'}
             </p>
           </div>
-          <a
-            href={shopUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="relative z-10 inline-flex items-center gap-2 text-sm font-semibold bg-white/20 hover:bg-white/30 px-4 py-2.5 rounded-xl transition-all w-full justify-center active:scale-95 border border-white/10"
-          >
-            ไปที่หน้าร้าน <ArrowRight className="h-4 w-4" />
-          </a>
+          <div className="relative z-10 flex flex-col gap-2">
+            <a
+              href={shopUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 text-sm font-semibold bg-white/20 hover:bg-white/30 px-4 py-2.5 rounded-xl transition-all w-full justify-center active:scale-95 border border-white/10"
+            >
+              ไปที่หน้าร้าน <ArrowRight className="h-4 w-4" />
+            </a>
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(shopUrl);
+                const btn = document.getElementById('copy-btn');
+                const iconCopy = document.getElementById('icon-copy');
+                const iconCheck = document.getElementById('icon-check');
+                const text = document.getElementById('copy-text');
+                
+                if (btn && iconCopy && iconCheck && text) {
+                  iconCopy.classList.add('hidden');
+                  iconCheck.classList.remove('hidden');
+                  text.innerText = 'คัดลอกแล้ว!';
+                  btn.classList.add('bg-emerald-500/40');
+                  
+                  setTimeout(() => {
+                    iconCopy.classList.remove('hidden');
+                    iconCheck.classList.add('hidden');
+                    text.innerText = 'คัดลอกลิงก์';
+                    btn.classList.remove('bg-emerald-500/40');
+                  }, 2000);
+                }
+              }}
+              id="copy-btn"
+              className="inline-flex items-center gap-2 text-sm font-semibold bg-white/10 hover:bg-white/20 px-4 py-2.5 rounded-xl transition-all w-full justify-center active:scale-95 border border-white/5"
+            >
+              <Copy id="icon-copy" className="h-4 w-4" />
+              <Check id="icon-check" className="h-4 w-4 hidden" />
+              <span id="copy-text">คัดลอกลิงก์</span>
+            </button>
+          </div>
           {/* Decorative Background */}
           <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none" />
         </div>

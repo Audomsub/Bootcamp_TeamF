@@ -8,10 +8,10 @@ import type {
 
 export const authService = {
   loginAdmin: (data: LoginCredentials) =>
-    api.post<{ token: string; email: string; role: string; message: string }>('/admin/login', data),
+    api.post<{ token: string; email: string; role: string; message: string; user?: any; shop?: any }>('/admin/login', data),
 
   loginReseller: (data: LoginCredentials) =>
-    api.post<{ token: string; email: string; role: string; message: string }>('/login', data),
+    api.post<{ token: string; email: string; role: string; message: string; user?: any; shop?: any }>('/login', data),
 
   register: (data: RegisterData) =>
     api.post<string>('/register', data),

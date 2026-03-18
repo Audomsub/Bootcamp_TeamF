@@ -9,17 +9,8 @@ import { productService } from '@/services/product.service';
 import { formatCurrency } from '@/lib/utils';
 import type { Product } from '@/types';
 
-// Mock data
-const mockProducts: Product[] = [
-  { id: 1, name: 'เสื้อยืดพรีเมียม', description: 'เสื้อยืดผ้าฝ้ายคุณภาพสูง', image_url: 'https://placehold.co/100x100/e2e8f0/64748b?text=T-Shirt', cost_price: 150, min_price: 250, stock: 100, created_at: '2025-03-01' },
-  { id: 2, name: 'เสื้อฮู้ดคลาสสิก', description: 'เสื้อฮู้ดสวมใส่สบาย', image_url: 'https://placehold.co/100x100/e2e8f0/64748b?text=Hoodie', cost_price: 350, min_price: 500, stock: 50, created_at: '2025-03-02' },
-  { id: 3, name: 'หมวกแก๊ปสปอร์ต', description: 'หมวกสปอร์ตปรับขนาดได้', image_url: 'https://placehold.co/100x100/e2e8f0/64748b?text=Cap', cost_price: 80, min_price: 150, stock: 200, created_at: '2025-03-03' },
-  { id: 4, name: 'กระเป๋าสตางค์หนังแท้', description: 'กระเป๋าสตางค์หนังแท้ 100%', image_url: 'https://placehold.co/100x100/e2e8f0/64748b?text=Wallet', cost_price: 200, min_price: 350, stock: 75, created_at: '2025-03-04' },
-  { id: 5, name: 'รองเท้าวิ่ง', description: 'รองเท้าวิ่งน้ำหนักเบา', image_url: 'https://placehold.co/100x100/e2e8f0/64748b?text=Shoes', cost_price: 800, min_price: 1200, stock: 0, created_at: '2025-03-05' },
-];
-
 export default function AdminProducts() {
-  const [products, setProducts] = useState<Product[]>(mockProducts);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -32,10 +23,12 @@ export default function AdminProducts() {
   const loadProducts = async () => {
     try {
       setLoading(true);
+      setError('');
       const response = await productService.getAll();
       setProducts(response.data.data.data);
     } catch {
-      setProducts(mockProducts);
+      setProducts([]);
+      setError('ไม่สามารถโหลดข้อมูลสินค้าได้');
     } finally {
       setLoading(false);
     }
