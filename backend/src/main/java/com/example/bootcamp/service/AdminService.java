@@ -67,6 +67,7 @@ public class AdminService {
                     order.getCustomerName(),
                     items,
                     order.getTotalAmount(),
+                    order.getResellerProfit(),
                     order.getStatus().toString(),
                     order.getCreatedAt()
             );
@@ -100,6 +101,7 @@ public class AdminService {
 
             WalletLogsEntity log = new WalletLogsEntity();
             log.setWallet(wallet);
+            log.setOrder(order);
             log.setAmount(order.getResellerProfit());
             walletLogRepository.save(log);
         }

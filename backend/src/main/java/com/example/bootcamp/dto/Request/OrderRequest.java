@@ -1,8 +1,8 @@
 package com.example.bootcamp.dto.Request;
 
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
+import java.util.List;
 
 public class OrderRequest {
 
@@ -15,50 +15,23 @@ public class OrderRequest {
     @NotBlank(message = "ที่อยู่ลูกค้าห้ามว่าง")
     private String customerAddress;
 
-    @NotNull(message = "รหัสสินค้าห้ามว่าง")
-    private Integer productId;
+    @NotEmpty(message = "รายการสินค้าห้ามว่าง")
+    private List<OrderItemRequest> items;
 
-    @NotNull(message = "จำนวนสินค้าห้ามว่าง")
-    @Min(value = 1 , message = "จำนวนสินค้าขั้นต่ำต้องมากกว่า 1")
-    private Integer amountProduct;
+    private java.math.BigDecimal totalAmount;
 
-    public String getCustomerName() {
-        return customerName;
-    }
+    public String getCustomerName() { return customerName; }
+    public void setCustomerName(String customerName) { this.customerName = customerName; }
 
-    public void setCustomerName(String customerName) {
-        this.customerName = customerName;
-    }
+    public String getCustomerPhone() { return customerPhone; }
+    public void setCustomerPhone(String customerPhone) { this.customerPhone = customerPhone; }
 
-    public String getCustomerPhone() {
-        return customerPhone;
-    }
+    public String getCustomerAddress() { return customerAddress; }
+    public void setCustomerAddress(String customerAddress) { this.customerAddress = customerAddress; }
 
-    public void setCustomerPhone(String customerPhone) {
-        this.customerPhone = customerPhone;
-    }
+    public List<OrderItemRequest> getItems() { return items; }
+    public void setItems(List<OrderItemRequest> items) { this.items = items; }
 
-    public String getCustomerAddress() {
-        return customerAddress;
-    }
-
-    public void setCustomerAddress(String customerAddress) {
-        this.customerAddress = customerAddress;
-    }
-
-    public Integer getProductId() {
-        return productId;
-    }
-
-    public void setProductId(Integer productId) {
-        this.productId = productId;
-    }
-
-    public Integer getAmountProduct() {
-        return amountProduct;
-    }
-
-    public void setAmountProduct(Integer amountProduct) {
-        this.amountProduct = amountProduct;
-    }
+    public java.math.BigDecimal getTotalAmount() { return totalAmount; }
+    public void setTotalAmount(java.math.BigDecimal totalAmount) { this.totalAmount = totalAmount; }
 }

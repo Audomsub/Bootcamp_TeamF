@@ -88,12 +88,20 @@ public class AdminProductController {
 
     @PostMapping("/orders/status")
     public ResponseEntity<String> updateOrderStatus(
-            @Valid @RequestBody UpdateOrderStatusRequest request,
-            @RequestParam OrdersEntity.Status status) {
+            @RequestBody UpdateOrderStatusRequest request,
+            @RequestParam(name = "status") String status) {
         try {
-            String message = adminService.updateOrderStatus(request.getOrderId(), status);
+            System.out.println("=== UPDATE ORDER STATUS ===");
+            System.out.println("orderId: " + request.getOrderId());
+            System.out.println("status: " + status);
+            OrdersEntity.Status orderStatus = OrdersEntity.Status.valueOf(status.toLowerCase());
+            String message = adminService.updateOrderStatus(request.getOrderId(), orderStatus);
             return ResponseEntity.ok(message);
+        } catch (IllegalArgumentException e) {
+            System.out.println("IllegalArgumentException: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("สถานะไม่ถูกต้อง: " + status);
         } catch (RuntimeException e) {
+            System.out.println("RuntimeException: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }

@@ -16,4 +16,5 @@ public class ResellerDashboardResponse {
     private Long totalOrders;
     private Long pendingOrders;
     private List<ResellerOrderResponse> recentOrders;
+    private List<java.util.Map<String, Object>> salesChart;
 }

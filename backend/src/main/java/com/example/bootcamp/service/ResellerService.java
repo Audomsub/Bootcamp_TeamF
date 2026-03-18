@@ -19,12 +19,18 @@ import java.util.Optional;
 
 @Service
 public class ResellerService {
-    @Autowired private UserRepository userRepository;
-    @Autowired private ShopRepository shopRepository;
-    @Autowired private ProductRepository productRepository;
-    @Autowired private ShopProductRepository shopProductRepository;
-    @Autowired private OrderRepository orderRepository;
-    @Autowired private WalletRepository walletRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private ShopRepository shopRepository;
+    @Autowired
+    private ProductRepository productRepository;
+    @Autowired
+    private ShopProductRepository shopProductRepository;
+    @Autowired
+    private OrderRepository orderRepository;
+    @Autowired
+    private WalletRepository walletRepository;
 
     @Transactional
     public Page<ResellerProductResponse> getMyProducts(String email, Pageable pageable) {
@@ -32,7 +38,7 @@ public class ResellerService {
                 .orElseThrow(() -> new RuntimeException("ไม่พบผู้ใช้งาน"));
         ShopsEntity shop = shopRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new RuntimeException("ไม่พบร้านค้าของคุณ"));
-        
+
         Page<ShopProductsEntity> page = shopProductRepository.findByShopId(shop.getId(), pageable);
         return page.map(ResellerProductResponse::fromEntity);
     }
@@ -68,8 +74,7 @@ public class ResellerService {
                     product.getMinSellPrice(),
                     product.getStock(),
                     isAdded,
-                    currentPrice
-            );
+                    currentPrice);
             responseList.add(resellerCatalogResponse);
         }
 
@@ -121,7 +126,7 @@ public class ResellerService {
                 .orElseThrow(() -> new RuntimeException("ไม่พบร้านค้าของคุณ"));
 
         Page<OrdersEntity> ordersPage = orderRepository.findRecentByShopId(shopsEntity.getId(), pageable);
-        
+
         return ordersPage.map(order -> {
             BigDecimal orderTotalSelling = BigDecimal.ZERO;
             BigDecimal orderTotalProfit = BigDecimal.ZERO;
@@ -130,22 +135,23 @@ public class ResellerService {
             for (OrderItemsEntity item : order.getOrderItems()) {
                 BigDecimal qty = new BigDecimal(item.getQuantity());
                 orderTotalSelling = orderTotalSelling.add(item.getSellingPrice().multiply(qty));
-                orderTotalProfit = orderTotalProfit.add(item.getSellingPrice().subtract(item.getCostPrice()).multiply(qty));
-                
-                if (productName.length() > 0) productName.append(" , ");
+                orderTotalProfit = orderTotalProfit
+                        .add(item.getSellingPrice().subtract(item.getCostPrice()).multiply(qty));
+
+                if (productName.length() > 0)
+                    productName.append(" , ");
                 productName.append(item.getProductName()).append(" (").append(item.getQuantity()).append(")");
             }
 
             return new ResellerOrderResponse(
-                order.getId(),
-                order.getOrderNumber(),
-                order.getCustomerName(),
-                productName.toString(),
-                orderTotalSelling,
-                orderTotalProfit,
-                order.getStatus().name(),
-                order.getCreatedAt()
-            );
+                    order.getId(),
+                    order.getOrderNumber(),
+                    order.getCustomerName(),
+                    productName.toString(),
+                    orderTotalSelling,
+                    orderTotalProfit,
+                    order.getStatus().name(),
+                    order.getCreatedAt());
         });
     }
 
@@ -157,39 +163,71 @@ public class ResellerService {
                 .orElseThrow(() -> new RuntimeException("ไม่พบร้านค้าของคุณ"));
 
         BigDecimal totalProfit = orderRepository.sumProfitByShopId(shop.getId());
-        if (totalProfit == null) totalProfit = BigDecimal.ZERO;
-        
+        if (totalProfit == null)
+            totalProfit = BigDecimal.ZERO;
+
         long totalOrders = orderRepository.countByShopId(shop.getId());
         long pendingOrders = orderRepository.countByShopIdAndStatus(shop.getId(), OrdersEntity.Status.pending);
 
         // Optimized way to fetch 5 latest orders
-        org.springframework.data.domain.Page<OrdersEntity> recentOrdersPage = 
-            orderRepository.findRecentByShopId(shop.getId(), org.springframework.data.domain.PageRequest.of(0, 5));
-        
+        org.springframework.data.domain.Page<OrdersEntity> recentOrdersPage = orderRepository
+                .findRecentByShopId(shop.getId(), org.springframework.data.domain.PageRequest.of(0, 5));
+
         List<ResellerOrderResponse> recentOrders = new ArrayList<>();
         for (OrdersEntity order : recentOrdersPage.getContent()) {
             StringBuilder pn = new StringBuilder();
             BigDecimal selling = BigDecimal.ZERO;
             BigDecimal profit = BigDecimal.ZERO;
-            
+
             for (OrderItemsEntity item : order.getOrderItems()) {
                 BigDecimal q = new BigDecimal(item.getQuantity());
                 selling = selling.add(item.getSellingPrice().multiply(q));
                 profit = profit.add(item.getSellingPrice().subtract(item.getCostPrice()).multiply(q));
-                if (pn.length() > 0) pn.append(", ");
+                if (pn.length() > 0)
+                    pn.append(", ");
                 pn.append(item.getProductName()).append(" (").append(item.getQuantity()).append(")");
             }
-            
+
             recentOrders.add(new ResellerOrderResponse(
-                order.getId(),
-                order.getOrderNumber(),
-                order.getCustomerName(),
-                pn.toString(),
-                selling,
-                profit,
-                order.getStatus().name(),
-                order.getCreatedAt()
-            ));
+                    order.getId(),
+                    order.getOrderNumber(),
+                    order.getCustomerName(),
+                    pn.toString(),
+                    selling,
+                    profit,
+                    order.getStatus().name(),
+                    order.getCreatedAt()));
+        }
+
+        // Compute last 7 days chart
+        List<OrdersEntity> allOrders = orderRepository.findByShopIdOrderByCreatedAtDesc(shop.getId());
+        List<java.util.Map<String, Object>> salesChart = new ArrayList<>();
+        java.time.LocalDate today = java.time.LocalDate.now();
+        java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("dd MMM");
+
+        for (int i = 6; i >= 0; i--) {
+            java.time.LocalDate targetDate = today.minusDays(i);
+            BigDecimal dailyAmount = BigDecimal.ZERO;
+            BigDecimal dailyProfit = BigDecimal.ZERO;
+
+            for (OrdersEntity o : allOrders) {
+                if (o.getCreatedAt() != null) {
+                    java.time.LocalDate orderDate = o.getCreatedAt().atZone(java.time.ZoneId.systemDefault())
+                            .toLocalDate();
+                    if (orderDate.equals(targetDate)) {
+                        dailyAmount = dailyAmount
+                                .add(o.getTotalAmount() != null ? o.getTotalAmount() : BigDecimal.ZERO);
+                        dailyProfit = dailyProfit
+                                .add(o.getResellerProfit() != null ? o.getResellerProfit() : BigDecimal.ZERO);
+                    }
+                }
+            }
+
+            java.util.Map<String, Object> dayData = new java.util.HashMap<>();
+            dayData.put("date", targetDate.format(formatter));
+            dayData.put("amount", dailyAmount);
+            dayData.put("profit", dailyProfit);
+            salesChart.add(dayData);
         }
 
         return com.example.bootcamp.dto.Response.ResellerDashboardResponse.builder()
@@ -197,6 +235,7 @@ public class ResellerService {
                 .totalOrders(totalOrders)
                 .pendingOrders(pendingOrders)
                 .recentOrders(recentOrders)
+                .salesChart(salesChart)
                 .build();
     }
 

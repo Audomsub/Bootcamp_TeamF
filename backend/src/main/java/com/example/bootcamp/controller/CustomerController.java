@@ -35,12 +35,29 @@ public class CustomerController {
     }
 
     @PostMapping("/shop/{slug}/checkout")
-    public ResponseEntity<String> checkout(@PathVariable String slug , @Valid @RequestBody OrderRequest orderRequest) {
-        String result = customerService.createOrder(slug , orderRequest);
-        if (result.contains("สำเร็จ")) {
-            return ResponseEntity.ok(result);
-        } else  {
-            return ResponseEntity.badRequest().body(result);
+    public ResponseEntity<?> checkout(@PathVariable String slug, @Valid @RequestBody OrderRequest orderRequest) {
+        try {
+            com.example.bootcamp.entity.OrdersEntity order = customerService.createOrder(slug, orderRequest);
+            java.util.Map<String, Object> data = new java.util.HashMap<>();
+            data.put("id", order.getId());
+            data.put("orderNumber", order.getOrderNumber());
+            
+            java.util.Map<String, Object> response = new java.util.HashMap<>();
+            response.put("data", data);
+            
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("message", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/shop/{slug}/order/{orderId}")
+    public ResponseEntity<?> getOrder(@PathVariable String slug, @PathVariable Integer orderId) {
+        try {
+            com.example.bootcamp.dto.Response.OrderDetailResponse response = customerService.getOrderDetails(orderId);
+            return ResponseEntity.ok(java.util.Map.of("data", response));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(java.util.Map.of("message", e.getMessage()));
         }
     }
 

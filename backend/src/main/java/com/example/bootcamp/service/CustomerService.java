@@ -1,8 +1,10 @@
 package com.example.bootcamp.service;
 
+import com.example.bootcamp.dto.Request.OrderItemRequest;
 import com.example.bootcamp.dto.Request.OrderRequest;
 import com.example.bootcamp.dto.Response.ShopFrontResponse;
 import com.example.bootcamp.dto.Response.ShopProductResponse;
+import com.example.bootcamp.dto.Response.OrderDetailResponse;
 import com.example.bootcamp.dto.Response.TrackOrderResponse;
 import com.example.bootcamp.entity.*;
 import com.example.bootcamp.repository.*;
@@ -68,17 +70,9 @@ public class CustomerService {
     }
 
     @Transactional
-    public String createOrder(String slug, OrderRequest orderRequest) {
-
+    public OrdersEntity createOrder(String slug, OrderRequest orderRequest) {
         ShopsEntity shopsEntity = shopRepository.findByShopSlug(slug)
                 .orElseThrow(() -> new RuntimeException("ไม่พบร้านค้านี้"));
-        ShopProductsEntity shopProductsEntity = shopProductRepository
-                .findByShopIdAndProductId(shopsEntity.getId(), orderRequest.getProductId())
-                .orElseThrow(() -> new RuntimeException("ไม่มีสินค้าชิ้นนี้ในร้าน"));
-        ProductsEntity productsEntity = shopProductsEntity.getProduct();
-        if (productsEntity.getStock() < orderRequest.getAmountProduct()) {
-            return "สินค้าไม่พอ";
-        }
 
         OrdersEntity ordersEntity = new OrdersEntity();
         ordersEntity.setOrderNumber("ORD-" + System.currentTimeMillis());
@@ -86,27 +80,56 @@ public class CustomerService {
         ordersEntity.setCustomerName(orderRequest.getCustomerName());
         ordersEntity.setCustomerPhone(orderRequest.getCustomerPhone());
         ordersEntity.setShippingAddress(orderRequest.getCustomerAddress());
-        ordersEntity.setStatus(OrdersEntity.Status.unpaid);
+        ordersEntity.setStatus(OrdersEntity.Status.pending);
 
-        BigDecimal quantityBD = new BigDecimal(orderRequest.getAmountProduct());
-        BigDecimal totalAmount = shopProductsEntity.getSellingPrice().multiply(quantityBD);
-        BigDecimal profit = (shopProductsEntity.getSellingPrice().subtract(productsEntity.getCostPrice()))
-                .multiply(quantityBD);
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        BigDecimal totalProfit = BigDecimal.ZERO;
+        List<OrderItemsEntity> orderItems = new ArrayList<>();
 
-        ordersEntity.setTotalAmount(totalAmount);
-        ordersEntity.setResellerProfit(profit);
-        OrdersEntity saveOrder = orderRepository.save(ordersEntity);
+        for (OrderItemRequest itemReq : orderRequest.getItems()) {
+            ShopProductsEntity shopProduct = shopProductRepository
+                    .findByShopIdAndProductId(shopsEntity.getId(), itemReq.getProductId())
+                    .orElseThrow(() -> new RuntimeException("ไม่มีสินค้า ID " + itemReq.getProductId() + " ในร้าน"));
+            
+            ProductsEntity product = shopProduct.getProduct();
+            if (product.getStock() < itemReq.getQuantity()) {
+                throw new RuntimeException("สินค้า " + product.getProductName() + " มีไม่เพียงพอ");
+            }
+            
+            product.setStock(product.getStock() - itemReq.getQuantity());
+            productRepository.save(product);
 
-        OrderItemsEntity orderItemsEntity = new OrderItemsEntity();
-        orderItemsEntity.setOrder(saveOrder);
-        orderItemsEntity.setProduct(productsEntity);
-        orderItemsEntity.setProductName(productsEntity.getProductName());
-        orderItemsEntity.setCostPrice(productsEntity.getCostPrice());
-        orderItemsEntity.setSellingPrice(shopProductsEntity.getSellingPrice());
-        orderItemsEntity.setQuantity(orderRequest.getAmountProduct());
-        orderItemRepository.save(orderItemsEntity);
+            BigDecimal quantityBD = new BigDecimal(itemReq.getQuantity());
+            BigDecimal itemTotal = shopProduct.getSellingPrice().multiply(quantityBD);
+            BigDecimal itemProfit = (shopProduct.getSellingPrice().subtract(product.getCostPrice()))
+                    .multiply(quantityBD);
 
-        return "สั่งซื้อสำเร็จ เลขที่ออเดอร์: " + saveOrder.getOrderNumber() + " กรุณาชำระเงิน";
+            totalAmount = totalAmount.add(itemTotal);
+            totalProfit = totalProfit.add(itemProfit);
+
+            OrderItemsEntity orderItem = new OrderItemsEntity();
+            orderItem.setOrder(ordersEntity);
+            orderItem.setProduct(product);
+            orderItem.setProductName(product.getProductName());
+            orderItem.setCostPrice(product.getCostPrice());
+            orderItem.setSellingPrice(shopProduct.getSellingPrice());
+            orderItem.setQuantity(itemReq.getQuantity());
+            orderItems.add(orderItem);
+        }
+
+        if (orderRequest.getTotalAmount() != null) {
+            ordersEntity.setTotalAmount(orderRequest.getTotalAmount());
+        } else {
+            ordersEntity.setTotalAmount(totalAmount);
+        }
+        
+        ordersEntity.setResellerProfit(totalProfit);
+        ordersEntity.setOrderItems(orderItems);
+        
+        OrdersEntity savedOrder = orderRepository.save(ordersEntity);
+        orderItemRepository.saveAll(orderItems);
+
+        return savedOrder;
     }
 
     @Transactional
@@ -118,17 +141,8 @@ public class CustomerService {
             throw new RuntimeException("ออเดอร์นี้ไม่ได้อยู่ในร้านค้านี้");
         }
 
-        if (order.getStatus() != OrdersEntity.Status.unpaid) {
+        if (order.getStatus() == OrdersEntity.Status.completed) {
             throw new RuntimeException("ออเดอร์นี้ชำระเงินแล้วหรือถูกยกเลิก");
-        }
-
-        for (OrderItemsEntity item : order.getOrderItems()) {
-            ProductsEntity product = item.getProduct();
-            if (product.getStock() < item.getQuantity()) {
-                throw new RuntimeException("สินค้า " + product.getProductName() + " มีไม่เพียงพอ");
-            }
-            product.setStock(product.getStock() - item.getQuantity());
-            productRepository.save(product);
         }
 
         order.setStatus(OrdersEntity.Status.pending);
@@ -141,10 +155,14 @@ public class CustomerService {
         OrdersEntity order = orderRepository.findByOrderNumber(orderNumber)
                 .orElseThrow(() -> new RuntimeException("ไม่พบออเดอร์นี้"));
                 
-        List<String> items = new ArrayList<>();
+        List<TrackOrderResponse.TrackOrderItemResponse> items = new ArrayList<>();
         if (order.getOrderItems() != null) {
             for (OrderItemsEntity item : order.getOrderItems()) {
-                items.add(item.getProductName() + " (x" + item.getQuantity() + ")");
+                items.add(new TrackOrderResponse.TrackOrderItemResponse(
+                        item.getProductName(),
+                        item.getQuantity(),
+                        item.getSellingPrice()
+                ));
             }
         }
 
@@ -152,8 +170,33 @@ public class CustomerService {
                 order.getOrderNumber(),
                 order.getStatus().toString(),
                 items,
+                order.getCustomerName(),
+                order.getCustomerPhone(),
                 order.getShippingAddress(),
                 order.getTotalAmount(),
+                order.getCreatedAt()
+        );
+    }
+
+    public OrderDetailResponse getOrderDetails(Integer orderId) {
+        OrdersEntity order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("ไม่พบออเดอร์นี้"));
+        
+        List<String> items = new ArrayList<>();
+        if (order.getOrderItems() != null) {
+            for (OrderItemsEntity item : order.getOrderItems()) {
+                items.add(item.getProductName() + " (x" + item.getQuantity() + ")");
+            }
+        }
+
+        return new OrderDetailResponse(
+                order.getId(),
+                order.getOrderNumber(),
+                order.getShop().getShopName(),
+                order.getCustomerName(),
+                items,
+                order.getTotalAmount(),
+                order.getStatus().toString(),
                 order.getCreatedAt()
         );
     }

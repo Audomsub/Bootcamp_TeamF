@@ -44,6 +44,12 @@ public class AuthService {
                     .email(email)
                     .role("ADMIN")
                     .message("เข้าสู่ระบบสำเร็จ")
+                    .user(UserInfo.builder()
+                            .id(0)
+                            .name("Admin")
+                            .email(email)
+                            .role("ADMIN")
+                            .build())
                     .build();
         }
 

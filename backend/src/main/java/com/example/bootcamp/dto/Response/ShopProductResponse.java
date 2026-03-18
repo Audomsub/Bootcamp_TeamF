@@ -3,7 +3,7 @@ package com.example.bootcamp.dto.Response;
 import java.math.BigDecimal;
 
 public class ShopProductResponse {
-    private Integer pruductId;
+    private Integer productId;
 
     private String productName;
 
@@ -13,20 +13,20 @@ public class ShopProductResponse {
 
     private Integer stock;
 
-    public ShopProductResponse(Integer pruductId , String productName , String imageUrl , BigDecimal sellingPrice , Integer stock) {
-        this.pruductId = pruductId;
+    public ShopProductResponse(Integer productId , String productName , String imageUrl , BigDecimal sellingPrice , Integer stock) {
+        this.productId = productId;
         this.productName = productName;
         this.imageUrl = imageUrl;
         this.sellingPrice = sellingPrice;
         this.stock = stock;
     }
 
-    public Integer getPruductId() {
-        return pruductId;
+    public Integer getProductId() {
+        return productId;
     }
 
-    public void setPruductId(Integer pruductId) {
-        this.pruductId = pruductId;
+    public void setProductId(Integer productId) {
+        this.productId = productId;
     }
 
     public String getProductName() {

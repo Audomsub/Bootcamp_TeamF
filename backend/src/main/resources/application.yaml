@@ -4,8 +4,8 @@ spring:
   application:
     name: bootcamp_db
   datasource:
-    url: jdbc:postgresql://10.202.10.36:5432/bootcamp_db
-    username: dev_dew
+    url: jdbc:postgresql://127.0.0.1:5432/bootcamp_db
+    username: dev_beam
     password: password
     driver-class-name: org.postgresql.Driver
   jpa:

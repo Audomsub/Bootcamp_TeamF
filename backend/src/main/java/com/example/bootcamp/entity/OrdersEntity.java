@@ -53,7 +53,6 @@ public class OrdersEntity {
     private LocalDateTime createdAt;
 
     public enum Status {
-        unpaid,
         pending,
         shipped,
         completed

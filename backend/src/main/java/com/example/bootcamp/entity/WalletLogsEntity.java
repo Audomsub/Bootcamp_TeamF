@@ -22,6 +22,11 @@ public class WalletLogsEntity {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private WalletsEntity wallet;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private OrdersEntity order;
+
     @Column(name = "amount" , nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;
 
@@ -59,6 +64,14 @@ public class WalletLogsEntity {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public OrdersEntity getOrder() {
+        return order;
+    }
+
+    public void setOrder(OrdersEntity order) {
+        this.order = order;
     }
 }
 
