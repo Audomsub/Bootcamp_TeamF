@@ -8,7 +8,8 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface OrderRepository extends JpaRepository<OrdersEntity, Long> {
+public interface OrderRepository extends JpaRepository<OrdersEntity, Integer> {
     Optional<OrdersEntity> findByOrderNumber(String orderNumber);
-    List<OrdersEntity> findByShopIdOrderByCreatedAtDesc(Long shopId);
+
+    List<OrdersEntity> findByShopIdOrderByCreatedAtDesc(Integer shopId);
 }

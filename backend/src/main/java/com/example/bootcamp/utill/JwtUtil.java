@@ -14,7 +14,7 @@ public class JwtUtil {
 
     private  final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
-    private final int expirationMs = 3600000;
+    private final int expirationMs = 28800000;
 
     public String generateToken(String email , String role) {
         return Jwts.builder()
@@ -45,5 +45,9 @@ public class JwtUtil {
 
     public String extractEmail(String token) {
         return getClaims(token).getSubject();
+    }
+
+    public String extractRole(String token) {
+        return getClaims(token).get("role", String.class);
     }
 }

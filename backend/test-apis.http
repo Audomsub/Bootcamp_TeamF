@@ -1,0 +1,123 @@
+### Admin Login
+POST http://localhost:8080/admin/login
+Content-Type: application/json
+
+{
+  "email": "admin@gmail.com",
+  "password": "admin123456"
+}
+
+> {%
+    client.global.set("adminToken", response.body.token);
+%}
+
+### ----------------------------------------
+### Reseller Register
+POST http://localhost:8080/register
+Content-Type: application/json
+
+{
+  "name": "Jane Doe",
+  "email": "jane@example.com",
+  "phone": "0812345678",
+  "password": "password123",
+  "confirmPassword": "password123",
+  "shopName": "Jane Shop",
+  "address": "123 Bangkok"
+}
+
+### ----------------------------------------
+### Admin Get Resellers to Approve (Find ID of Jane Doe)
+GET http://localhost:8080/admin/resellers
+Authorization: Bearer {{adminToken}}
+
+### ----------------------------------------
+### Admin Approves Reseller (Change 1 to the actual Reseller ID)
+POST http://localhost:8080/admin/reseller/1/status?status=approved
+Authorization: Bearer {{adminToken}}
+
+### ----------------------------------------
+### Reseller Login
+POST http://localhost:8080/login
+Content-Type: application/json
+
+{
+  "email": "jane@example.com",
+  "password": "password123"
+}
+
+> {%
+    client.global.set("resellerToken", response.body.token);
+%}
+
+### ----------------------------------------
+### Admin Adds a Product (Use form-data in Postman due to File Upload)
+### GET Products
+GET http://localhost:8080/admin/products
+Authorization: Bearer {{adminToken}}
+
+### ----------------------------------------
+### Reseller Views Catalog
+GET http://localhost:8080/reseller/catalog
+Authorization: Bearer {{resellerToken}}
+
+### ----------------------------------------
+### Reseller Adds Product to Shop (Change Product ID 1)
+POST http://localhost:8080/reseller/catalog
+Authorization: Bearer {{resellerToken}}
+Content-Type: application/json
+
+{
+  "productId": 1,
+  "sellingPrice": 500
+}
+
+### ----------------------------------------
+### Customer Views Shop
+GET http://localhost:8080/shop/jane-shop
+
+### ----------------------------------------
+### Customer Checkout (Change productId to an existing one)
+POST http://localhost:8080/shop/jane-shop/checkout
+Content-Type: application/json
+
+{
+  "customerName": "John Smith",
+  "customerPhone": "0987654321",
+  "customerAddress": "456 Sukhumvit",
+  "productId": 1,
+  "amountProduct": 2
+}
+
+### ----------------------------------------
+### Customer Simulates Payment (replace 1 with the orderId created above)
+POST http://localhost:8080/shop/jane-shop/payment/1
+
+### ----------------------------------------
+### Customer Tracks Order (Replace ORD-xxxxxx)
+GET http://localhost:8080/track-order?orderNumber=ORD-123456789
+
+### ----------------------------------------
+### Admin Views All Orders
+GET http://localhost:8080/admin/orders
+Authorization: Bearer {{adminToken}}
+
+### ----------------------------------------
+### Admin Marks Order as Shipped (Find correct Order ID)
+POST http://localhost:8080/admin/orders/status?status=shipped
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+    "orderId": 1
+}
+
+### ----------------------------------------
+### Reseller Views Wallet
+GET http://localhost:8080/reseller/wallet
+Authorization: Bearer {{resellerToken}}
+
+### ----------------------------------------
+### Admin Views Dashboard
+GET http://localhost:8080/admin/dashboard
+Authorization: Bearer {{adminToken}}

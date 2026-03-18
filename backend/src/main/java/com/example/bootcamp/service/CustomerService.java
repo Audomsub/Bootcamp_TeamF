@@ -3,6 +3,8 @@ package com.example.bootcamp.service;
 import com.example.bootcamp.dto.Request.OrderRequest;
 import com.example.bootcamp.dto.Response.ShopFrontResponse;
 import com.example.bootcamp.dto.Response.ShopProductResponse;
+import com.example.bootcamp.dto.Response.AdminOrderResponse;
+import com.example.bootcamp.dto.Response.TrackOrderResponse;
 import com.example.bootcamp.entity.*;
 import com.example.bootcamp.repository.*;
 import jakarta.transaction.Transactional;
@@ -76,7 +78,7 @@ public class CustomerService {
         ordersEntity.setCustomerName(orderRequest.getCustomerName());
         ordersEntity.setCustomerPhone(orderRequest.getCustomerPhone());
         ordersEntity.setShippingAddress(orderRequest.getCustomerAddress());
-        ordersEntity.setStatus(OrdersEntity.Status.pending);
+        ordersEntity.setStatus(OrdersEntity.Status.unpaid);
 
         BigDecimal quantityBD = new BigDecimal(orderRequest.getAmountProduct());
         BigDecimal totalAmount = shopProductsEntity.getSellingPrice().multiply(quantityBD);
@@ -95,9 +97,56 @@ public class CustomerService {
         orderItemsEntity.setSellingPrice(shopProductsEntity.getSellingPrice());
         orderItemsEntity.setQuantity(orderRequest.getAmountProduct());
         orderItemRepository.save(orderItemsEntity);
-        productsEntity.setStock(productsEntity.getStock() - orderRequest.getAmountProduct());
-        productRepository.save(productsEntity);
 
-        return "สั่งซื้อสำเร็จ เลขที่ออเดอร์: " + saveOrder.getOrderNumber();
+        return "สั่งซื้อสำเร็จ เลขที่ออเดอร์: " + saveOrder.getOrderNumber() + " กรุณาชำระเงิน";
+    }
+
+    @Transactional
+    public String simulatePayment(String slug, Integer orderId) {
+        OrdersEntity order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("ไม่พบออเดอร์นี้"));
+
+        if (!order.getShop().getShopSlug().equals(slug)) {
+            throw new RuntimeException("ออเดอร์นี้ไม่ได้อยู่ในร้านค้านี้");
+        }
+
+        if (order.getStatus() != OrdersEntity.Status.unpaid) {
+            throw new RuntimeException("ออเดอร์นี้ชำระเงินแล้วหรือถูกยกเลิก");
+        }
+
+        for (OrderItemsEntity item : order.getOrderItems()) {
+            ProductsEntity product = item.getProduct();
+            if (product.getStock() < item.getQuantity()) {
+                throw new RuntimeException("สินค้า " + product.getProductName() + " มีไม่เพียงพอ");
+            }
+            product.setStock(product.getStock() - item.getQuantity());
+            productRepository.save(product);
+        }
+
+        order.setStatus(OrdersEntity.Status.pending);
+        orderRepository.save(order);
+
+        return "ขำระเงินจำลองสำเร็จ สถานะออเดอร์เปลี่ยนเป็น รอดำเนินการ";
+    }
+
+    public TrackOrderResponse trackOrder(String orderNumber) {
+        OrdersEntity order = orderRepository.findByOrderNumber(orderNumber)
+                .orElseThrow(() -> new RuntimeException("ไม่พบออเดอร์นี้"));
+                
+        List<String> items = new ArrayList<>();
+        if (order.getOrderItems() != null) {
+            for (OrderItemsEntity item : order.getOrderItems()) {
+                items.add(item.getProductName() + " (x" + item.getQuantity() + ")");
+            }
+        }
+
+        return new TrackOrderResponse(
+                order.getOrderNumber(),
+                order.getStatus().toString(),
+                items,
+                order.getShippingAddress(),
+                order.getTotalAmount(),
+                order.getCreatedAt()
+        );
     }
 }

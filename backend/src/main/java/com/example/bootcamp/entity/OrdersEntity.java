@@ -9,6 +9,7 @@ import org.w3c.dom.Text;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "orders", schema = "public")
@@ -17,6 +18,9 @@ public class OrdersEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @OneToMany(mappedBy = "order" , cascade = CascadeType.ALL , fetch = FetchType.LAZY)
+    private List<OrderItemsEntity> orderItems;
 
     @Column(name = "order_number", nullable = false, unique = true, length = 50)
     private String orderNumber;
@@ -49,9 +53,18 @@ public class OrdersEntity {
     private LocalDateTime createdAt;
 
     public enum Status {
+        unpaid,
         pending,
-        approved,
-        rejected
+        shipped,
+        completed
+    }
+
+    public List<OrderItemsEntity> getOrderItems() {
+        return orderItems;
+    }
+
+    public void setOrderItems(List<OrderItemsEntity> orderItems) {
+        this.orderItems = orderItems;
     }
 
     public Integer getId() {

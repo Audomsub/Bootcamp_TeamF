@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface WalletLogRepository extends JpaRepository<WalletLogsEntity, Long> {
-    List<WalletLogsEntity> findByWalletIdOrderByCreatedAtDesc(Long walletId); // ดึงประวัติเงินเข้า เรียงจากใหม่ไปเก่า
+public interface WalletLogRepository extends JpaRepository<WalletLogsEntity, Integer> {
+    List<WalletLogsEntity> findByWalletIdOrderByCreatedAtDesc(Integer walletId); // ดึงประวัติเงินเข้า เรียงจากใหม่ไปเก่า
 }

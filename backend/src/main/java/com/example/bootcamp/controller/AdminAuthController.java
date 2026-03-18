@@ -39,7 +39,7 @@ public class AdminAuthController {
     }
 
     @PostMapping("/reseller/{id}/status")
-    public ResponseEntity<String> updateStatus(@PathVariable Long id , @RequestParam UsersEntity.Status status) {
+    public ResponseEntity<String> updateStatus(@PathVariable Integer id , @RequestParam UsersEntity.Status status) {
         return ResponseEntity.ok(adminService.updateResellerStatus(id , status));
     }
 }

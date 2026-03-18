@@ -39,8 +39,9 @@ public class JwtFilter extends OncePerRequestFilter {
 
                 // เพิ่มตัวอย่างการตั้งค่า Context ใน JwtFilter (ภายใน try-catch)
                 if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            email, null, Collections.emptyList()); // ใส่ Role/Authority ตรงนี้ได้
+                    String role = jwtUtill.extractRole(token);
+                    java.util.List<org.springframework.security.core.authority.SimpleGrantedAuthority> authorities = java.util.Collections.singletonList(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + role));
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(email, null, authorities);
 
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                     request.setAttribute("email", email);

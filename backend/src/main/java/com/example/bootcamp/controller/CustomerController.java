@@ -32,4 +32,24 @@ public class CustomerController {
             return ResponseEntity.badRequest().body(result);
         }
     }
+
+    @PostMapping("/shop/{slug}/payment/{orderId}")
+    public ResponseEntity<String> simulatePayment(@PathVariable String slug, @PathVariable Integer orderId) {
+        try {
+            String result = customerService.simulatePayment(slug, orderId);
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/track-order")
+    public ResponseEntity<com.example.bootcamp.dto.Response.TrackOrderResponse> trackOrder(@RequestParam String orderNumber) {
+        try {
+            com.example.bootcamp.dto.Response.TrackOrderResponse response = customerService.trackOrder(orderNumber);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(null);
+        }
+    }
 }

@@ -27,7 +27,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/admin/login").permitAll() // อนุญาตให้ Login ได้โดยไม่ต้องมี Token
                         .requestMatchers("/shop/**").permitAll()
-                        .requestMatchers("/admin/**").authenticated() // ทุกอย่างที่ขึ้นต้นด้วย /admin ต้อง Login (มี Token)
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().permitAll() // URL อื่นๆ นอกจากนี้ปล่อยผ่านหมด
                 )
                 // วาง JwtFilter ไว้ก่อน Filter หลักของ Spring เพื่อตรวจ Token ก่อน

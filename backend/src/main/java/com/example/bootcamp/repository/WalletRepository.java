@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface WalletRepository extends JpaRepository<WalletsEntity, Long> {
-    Optional<WalletsEntity> findByUserId(Long userId); // ดึงกระเป๋าเงินของตัวแทนคนนั้นๆ
+public interface WalletRepository extends JpaRepository<WalletsEntity, Integer> {
+    Optional<WalletsEntity> findByUserId(Integer userId); // ดึงกระเป๋าเงินของตัวแทนคนนั้นๆ
 }

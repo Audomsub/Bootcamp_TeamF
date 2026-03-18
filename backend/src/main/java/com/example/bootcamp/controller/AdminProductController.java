@@ -1,7 +1,11 @@
 package com.example.bootcamp.controller;
 
 import com.example.bootcamp.dto.Request.ProductRequest;
+import com.example.bootcamp.dto.Request.UpdateOrderStatusRequest;
+import com.example.bootcamp.dto.Response.AdminOrderResponse;
+import com.example.bootcamp.entity.OrdersEntity;
 import com.example.bootcamp.entity.ProductsEntity;
+import com.example.bootcamp.service.AdminService;
 import com.example.bootcamp.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +23,9 @@ public class AdminProductController {
 
     @Autowired
     private ProductService productService;
+
+    @Autowired
+    private AdminService adminService;
 
     @GetMapping("/products")
     public ResponseEntity<List<ProductsEntity>> getAllProducts() {
@@ -64,5 +71,28 @@ public class AdminProductController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
+    }
+
+    @GetMapping("/orders")
+    public ResponseEntity<List<AdminOrderResponse>> getAllOrder() {
+        List<AdminOrderResponse> adminOrderResponses = adminService.getAllOrder();
+        return ResponseEntity.ok(adminOrderResponses);
+    }
+
+    @PostMapping("/orders/status")
+    public ResponseEntity<String> updateOrderStatus(
+            @Valid @RequestBody UpdateOrderStatusRequest request,
+            @RequestParam OrdersEntity.Status status) {
+        try {
+            String message = adminService.updateOrderStatus(request.getOrderId(), status);
+            return ResponseEntity.ok(message);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/dashboard")
+    public ResponseEntity<com.example.bootcamp.dto.Response.AdminDashboardResponse> getDashboard() {
+        return ResponseEntity.ok(adminService.getDashboardStatistics());
     }
 }

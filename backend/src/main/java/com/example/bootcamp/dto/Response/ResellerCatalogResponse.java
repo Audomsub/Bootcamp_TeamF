@@ -3,86 +3,34 @@ package com.example.bootcamp.dto.Response;
 import java.math.BigDecimal;
 
 public class ResellerCatalogResponse {
-    private Integer id;
-
-    private String name;
-
+    private Integer productId;
+    private String productName;
     private String imageUrl;
-
     private BigDecimal costPrice;
-
-    private BigDecimal minPrice;
-
+    private BigDecimal minSellPrice;
     private Integer stock;
-
     private boolean isAdded;
+    private BigDecimal sellingPrice;
 
-    public ResellerCatalogResponse() {
-    }
-
-    public ResellerCatalogResponse(Integer id, String name, String imageUrl, BigDecimal costPrice, BigDecimal minPrice, Integer stock, boolean isAdded) {
-        this.id = id;
-        this.name = name;
+    public ResellerCatalogResponse(Integer productId, String productName, String imageUrl,
+                                   BigDecimal costPrice, BigDecimal minSellPrice,
+                                   Integer stock, boolean isAdded, BigDecimal sellingPrice) {
+        this.productId = productId;
+        this.productName = productName;
         this.imageUrl = imageUrl;
         this.costPrice = costPrice;
-        this.minPrice = minPrice;
+        this.minSellPrice = minSellPrice;
         this.stock = stock;
         this.isAdded = isAdded;
+        this.sellingPrice = sellingPrice;
     }
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
-
-    public BigDecimal getCostPrice() {
-        return costPrice;
-    }
-
-    public void setCostPrice(BigDecimal costPrice) {
-        this.costPrice = costPrice;
-    }
-
-    public BigDecimal getMinPrice() {
-        return minPrice;
-    }
-
-    public void setMinPrice(BigDecimal minPrice) {
-        this.minPrice = minPrice;
-    }
-
-    public Integer getStock() {
-        return stock;
-    }
-
-    public void setStock(Integer stock) {
-        this.stock = stock;
-    }
-
-    public boolean isAdded() {
-        return isAdded;
-    }
-
-    public void setAdded(boolean added) {
-        isAdded = added;
-    }
+    public Integer getProductId() { return productId; }
+    public String getProductName() { return productName; }
+    public String getImageUrl() { return imageUrl; }
+    public BigDecimal getCostPrice() { return costPrice; }
+    public BigDecimal getMinSellPrice() { return minSellPrice; }
+    public Integer getStock() { return stock; }
+    public boolean getIsAdded() { return isAdded; }
+    public BigDecimal getSellingPrice() { return sellingPrice; }
 }

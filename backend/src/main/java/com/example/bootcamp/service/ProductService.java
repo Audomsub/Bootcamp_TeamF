@@ -73,7 +73,7 @@ public class ProductService {
     public String deleteProduct(Integer id) {
         ProductsEntity productsEntity = productRepository.findById(id).orElseThrow(() -> new RuntimeException("ไม่พบสินค้านนี้ในระบบ"));
         boolean linkToPendingOrder = orderItemRepository.existsByProductIdAndOrderStatusIn(id
-                ,List.of(OrdersEntity.Status.pending , OrdersEntity.Status.approved));
+                ,List.of(OrdersEntity.Status.pending , OrdersEntity.Status.shipped));
         if (linkToPendingOrder) {
             return "ไม่สามารถลบได้เนื่องจาก มีสินค้าคงเหลือในออเดอร์";
         }
