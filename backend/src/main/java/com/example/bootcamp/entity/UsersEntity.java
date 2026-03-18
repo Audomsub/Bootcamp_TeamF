@@ -1,13 +1,8 @@
 package com.example.bootcamp.entity;
 
 import jakarta.persistence.*;
-import jakarta.transaction.Status;
-import jdk.jshell.Snippet;
-import org.hibernate.Internal;
 import org.hibernate.annotations.CreationTimestamp;
-import org.w3c.dom.Text;
 
-import javax.management.relation.Role;
 import java.time.LocalDateTime;
 
 @Entity
@@ -27,7 +22,7 @@ public class UsersEntity {
     @Column(name = "password" , nullable = false)
     private String password;
 
-    @Column(name = "phone" , length = 20)
+    @Column(name = "phone" , nullable = false)
     private String phone;
 
     @Enumerated(EnumType.STRING)

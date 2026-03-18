@@ -37,9 +37,9 @@ public class JwtUtil {
     public boolean isTokenValid(String token) {
         try {
             getClaims(token);
-            return true;
+            return true; // ถ้า Parse ผ่าน แปลว่า Valid
         } catch (Exception error) {
-            return false;
+            return false; // ถ้า Error แปลว่า Invalid
         }
     }
 

@@ -6,19 +6,30 @@ import com.example.bootcamp.service.CustomerService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@CrossOrigin(origins = "*", allowedHeaders = "*", maxAge = 3600)
 public class CustomerController {
 
     @Autowired
     private CustomerService customerService;
 
+
+
     @GetMapping("/shop/{slug}")
-    public ResponseEntity<?> getShopDetail(@PathVariable String slug) {
-        ShopFrontResponse shopFrontResponse = customerService.getShopFront(slug);
+    public ResponseEntity<?> getShopDetail(
+            @PathVariable String slug,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size) {
+        
+        Pageable pageable = PageRequest.of(page, size);
+        ShopFrontResponse shopFrontResponse = customerService.getShopFront(slug, pageable);
+        
         if (shopFrontResponse == null) {
-            return ResponseEntity.status(404).body("ไม่พบร้านค้านนี้");
+            return ResponseEntity.status(404).body("ไม่พบร้านค้านี้");
         }
         return ResponseEntity.ok(shopFrontResponse);
     }
@@ -51,5 +62,13 @@ public class CustomerController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(404).body(null);
         }
+    }
+
+    @GetMapping("/catalog")
+    public ResponseEntity<org.springframework.data.domain.Page<com.example.bootcamp.entity.ProductsEntity>> getCatalog(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by("id").descending());
+        return ResponseEntity.ok(customerService.getAllCatalog(pageable));
     }
 }

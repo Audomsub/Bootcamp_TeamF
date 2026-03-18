@@ -37,6 +37,7 @@ public class JwtFilter extends OncePerRequestFilter {
             try {
                 String email = jwtUtill.extractEmail(token);
 
+                // เพิ่มตัวอย่างการตั้งค่า Context ใน JwtFilter (ภายใน try-catch)
                 if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     String role = jwtUtill.extractRole(token);
                     java.util.List<org.springframework.security.core.authority.SimpleGrantedAuthority> authorities = java.util.Collections.singletonList(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + role));

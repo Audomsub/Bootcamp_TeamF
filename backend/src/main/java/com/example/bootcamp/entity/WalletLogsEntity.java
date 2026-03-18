@@ -18,14 +18,9 @@ public class WalletLogsEntity {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "wallet_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private UsersEntity user;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private OrdersEntity order;
+    private WalletsEntity wallet;
 
     @Column(name = "amount" , nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;
@@ -42,20 +37,12 @@ public class WalletLogsEntity {
         this.id = id;
     }
 
-    public UsersEntity getUser() {
-        return user;
+    public WalletsEntity getWallet() {
+        return wallet;
     }
 
-    public void setUser(UsersEntity user) {
-        this.user = user;
-    }
-
-    public OrdersEntity getOrder() {
-        return order;
-    }
-
-    public void setOrder(OrdersEntity order) {
-        this.order = order;
+    public void setWallet(WalletsEntity wallet) {
+        this.wallet = wallet;
     }
 
     public BigDecimal getAmount() {

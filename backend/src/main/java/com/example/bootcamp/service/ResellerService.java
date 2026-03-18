@@ -1,16 +1,15 @@
 package com.example.bootcamp.service;
 
-import com.example.bootcamp.dto.Request.ResellerCatalogRequest;
-import com.example.bootcamp.dto.Response.ResellerCatalogResponse;
-import com.example.bootcamp.dto.Response.ResellerOrderResponse;
-import com.example.bootcamp.dto.Response.ResellerWalletResponse;
-import com.example.bootcamp.dto.Response.WalletLogResponse;
+import com.example.bootcamp.dto.Request.*;
+import com.example.bootcamp.dto.Response.*;
 import com.example.bootcamp.entity.*;
 import com.example.bootcamp.repository.*;
 
 import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -26,6 +25,17 @@ public class ResellerService {
     @Autowired private ShopProductRepository shopProductRepository;
     @Autowired private OrderRepository orderRepository;
     @Autowired private WalletRepository walletRepository;
+
+    @Transactional
+    public Page<ResellerProductResponse> getMyProducts(String email, Pageable pageable) {
+        UsersEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("ไม่พบผู้ใช้งาน"));
+        ShopsEntity shop = shopRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new RuntimeException("ไม่พบร้านค้าของคุณ"));
+        
+        Page<ShopProductsEntity> page = shopProductRepository.findByShopId(shop.getId(), pageable);
+        return page.map(ResellerProductResponse::fromEntity);
+    }
 
     @Transactional
     public List<ResellerCatalogResponse> getCentralCatalogByUsername(String email) {
@@ -104,65 +114,94 @@ public class ResellerService {
     }
 
     @Transactional
-    public String removeProductFromShop(String email, Integer productId) {
+    public Page<ResellerOrderResponse> getMyOrder(String email, Pageable pageable) {
         UsersEntity user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("ไม่พบผู้ใช้งาน: " + email));
-        ShopsEntity shop = shopRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new RuntimeException("ไม่พบร้านค้าของคุณ"));
-
-        ShopProductsEntity shopProduct = shopProductRepository.findByShopIdAndProductId(shop.getId(), productId)
-                .orElseThrow(() -> new RuntimeException("ไม่พบสินค้านี้ในร้านของคุณ"));
-
-        shopProductRepository.delete(shopProduct);
-        return "นำสินค้าออกจากร้านสำเร็จ";
-    }
-
-    @Transactional()
-    public List<ResellerOrderResponse> getMyOrder(String email) {
-        // 1. หา User และ Shop
-        UsersEntity usersEntity = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("ไม่พบผู้ใช้งาน"));
-        ShopsEntity shopsEntity = shopRepository.findByUserId(usersEntity.getId())
+        ShopsEntity shopsEntity = shopRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new RuntimeException("ไม่พบร้านค้าของคุณ"));
 
-        List<OrdersEntity> ordersEntityList = orderRepository.findByShopIdOrderByCreatedAtDesc(shopsEntity.getId());
-        List<ResellerOrderResponse> resellerOrderResponses = new ArrayList<>();
-
-        for (OrdersEntity ordersEntity : ordersEntityList) {
+        Page<OrdersEntity> ordersPage = orderRepository.findRecentByShopId(shopsEntity.getId(), pageable);
+        
+        return ordersPage.map(order -> {
             BigDecimal orderTotalSelling = BigDecimal.ZERO;
             BigDecimal orderTotalProfit = BigDecimal.ZERO;
             StringBuilder productName = new StringBuilder();
 
-            for (OrderItemsEntity orderItemsEntity : ordersEntity.getOrderItems()) {
-                BigDecimal qty = new BigDecimal(orderItemsEntity.getQuantity());
-                BigDecimal itemSelling = orderItemsEntity.getSellingPrice().multiply(qty);
-                orderTotalSelling = orderTotalSelling.add(itemSelling);
-
-                BigDecimal itemProfit = orderItemsEntity.getSellingPrice()
-                        .subtract(orderItemsEntity.getCostPrice())
-                        .multiply(qty);
-                orderTotalProfit = orderTotalProfit.add(itemProfit);
-                if (productName.length() > 0) {
-                    productName.append(" , ");
-                }
-                productName.append(orderItemsEntity.getProductName())
-                        .append(" (").append(orderItemsEntity.getQuantity()).append(")");
+            for (OrderItemsEntity item : order.getOrderItems()) {
+                BigDecimal qty = new BigDecimal(item.getQuantity());
+                orderTotalSelling = orderTotalSelling.add(item.getSellingPrice().multiply(qty));
+                orderTotalProfit = orderTotalProfit.add(item.getSellingPrice().subtract(item.getCostPrice()).multiply(qty));
+                
+                if (productName.length() > 0) productName.append(" , ");
+                productName.append(item.getProductName()).append(" (").append(item.getQuantity()).append(")");
             }
 
-            resellerOrderResponses.add(new ResellerOrderResponse(
-                    ordersEntity.getId(),
-                    ordersEntity.getCustomerName(),
-                    productName.toString(),
-                    orderTotalSelling,
-                    orderTotalProfit,
-                    ordersEntity.getStatus() != null ? ordersEntity.getStatus().name() : "pending"
-            ));
-        }
-        return resellerOrderResponses;
+            return new ResellerOrderResponse(
+                order.getId(),
+                order.getOrderNumber(),
+                order.getCustomerName(),
+                productName.toString(),
+                orderTotalSelling,
+                orderTotalProfit,
+                order.getStatus().name(),
+                order.getCreatedAt()
+            );
+        });
     }
 
     @Transactional
-    public ResellerWalletResponse getWalletDetails(String email) {
+    public com.example.bootcamp.dto.Response.ResellerDashboardResponse getResellerDashboardStats(String email) {
+        UsersEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("ไม่พบผู้ใช้งาน"));
+        ShopsEntity shop = shopRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new RuntimeException("ไม่พบร้านค้าของคุณ"));
+
+        BigDecimal totalProfit = orderRepository.sumProfitByShopId(shop.getId());
+        if (totalProfit == null) totalProfit = BigDecimal.ZERO;
+        
+        long totalOrders = orderRepository.countByShopId(shop.getId());
+        long pendingOrders = orderRepository.countByShopIdAndStatus(shop.getId(), OrdersEntity.Status.pending);
+
+        // Optimized way to fetch 5 latest orders
+        org.springframework.data.domain.Page<OrdersEntity> recentOrdersPage = 
+            orderRepository.findRecentByShopId(shop.getId(), org.springframework.data.domain.PageRequest.of(0, 5));
+        
+        List<ResellerOrderResponse> recentOrders = new ArrayList<>();
+        for (OrdersEntity order : recentOrdersPage.getContent()) {
+            StringBuilder pn = new StringBuilder();
+            BigDecimal selling = BigDecimal.ZERO;
+            BigDecimal profit = BigDecimal.ZERO;
+            
+            for (OrderItemsEntity item : order.getOrderItems()) {
+                BigDecimal q = new BigDecimal(item.getQuantity());
+                selling = selling.add(item.getSellingPrice().multiply(q));
+                profit = profit.add(item.getSellingPrice().subtract(item.getCostPrice()).multiply(q));
+                if (pn.length() > 0) pn.append(", ");
+                pn.append(item.getProductName()).append(" (").append(item.getQuantity()).append(")");
+            }
+            
+            recentOrders.add(new ResellerOrderResponse(
+                order.getId(),
+                order.getOrderNumber(),
+                order.getCustomerName(),
+                pn.toString(),
+                selling,
+                profit,
+                order.getStatus().name(),
+                order.getCreatedAt()
+            ));
+        }
+
+        return com.example.bootcamp.dto.Response.ResellerDashboardResponse.builder()
+                .totalProfit(totalProfit)
+                .totalOrders(totalOrders)
+                .pendingOrders(pendingOrders)
+                .recentOrders(recentOrders)
+                .build();
+    }
+
+    @Transactional
+    public ResellerWalletResponse getWalletDetails(String email, Pageable pageable) {
         UsersEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("ไม่พบผู้ใช้งาน"));
         WalletsEntity wallet = walletRepository.findByUserId(user.getId()).orElse(null);
@@ -171,34 +210,64 @@ public class ResellerService {
         ShopsEntity shop = shopRepository.findByUserId(user.getId()).orElse(null);
         List<WalletLogResponse> history = new ArrayList<>();
         if (shop != null) {
-            List<OrdersEntity> orders = orderRepository.findByShopIdOrderByCreatedAtDesc(shop.getId());
-            for (OrdersEntity o : orders) {
+            Page<OrdersEntity> ordersPage = orderRepository.findRecentByShopId(shop.getId(), pageable);
+            for (OrdersEntity o : ordersPage.getContent()) {
                 if (o.getStatus() == OrdersEntity.Status.shipped || o.getStatus() == OrdersEntity.Status.completed) {
-                    history.add(new WalletLogResponse(o.getOrderNumber(), o.getResellerProfit(), o.getCreatedAt()));
+                    history.add(WalletLogResponse.builder()
+                            .id(o.getId())
+                            .amount(o.getResellerProfit())
+                            .createdAt(o.getCreatedAt())
+                            .order(WalletLogResponse.OrderSummary.builder()
+                                    .orderNumber(o.getOrderNumber())
+                                    .build())
+                            .build());
                 }
             }
         }
-        return new ResellerWalletResponse(balance, history);
+
+        return ResellerWalletResponse.builder()
+                .wallet(ResellerWalletResponse.WalletInfo.builder().balance(balance).build())
+                .logs(history)
+                .build();
     }
 
     @Transactional
-    public com.example.bootcamp.dto.Response.ResellerDashboardResponse getDashboardData(String email) {
+    public void updateProductPrice(String email, Integer shopProductId, BigDecimal newPrice) {
         UsersEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("ไม่พบผู้ใช้งาน"));
         ShopsEntity shop = shopRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new RuntimeException("ไม่พบร้านค้าของคุณ"));
 
-        WalletsEntity wallet = walletRepository.findByUserId(user.getId()).orElse(null);
-        BigDecimal balance = wallet != null ? wallet.getBalance() : BigDecimal.ZERO;
-        
-        List<OrdersEntity> orders = orderRepository.findByShopIdOrderByCreatedAtDesc(shop.getId());
-        long orderCount = orders.size();
+        ShopProductsEntity shopProduct = shopProductRepository.findById(shopProductId)
+                .orElseThrow(() -> new RuntimeException("ไม่พบสินค้านี้ในร้านของคุณ"));
 
-        return com.example.bootcamp.dto.Response.ResellerDashboardResponse.builder()
-                .shopName(shop.getShopName())
-                .shopSlug(shop.getShopSlug())
-                .totalProfit(balance)
-                .orderCount(orderCount)
-                .build();
+        if (!shopProduct.getShop().getId().equals(shop.getId())) {
+            throw new RuntimeException("คุณไม่มีสิทธิ์แก้ไขสินค้านี้");
+        }
+
+        ProductsEntity product = shopProduct.getProduct();
+        if (newPrice.compareTo(product.getMinSellPrice()) < 0) {
+            throw new RuntimeException("ราคาขายต้องไม่ต่ำกว่า " + product.getMinSellPrice() + " บาท");
+        }
+
+        shopProduct.setSellingPrice(newPrice);
+        shopProductRepository.save(shopProduct);
+    }
+
+    @Transactional
+    public void removeProductFromShop(String email, Integer shopProductId) {
+        UsersEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("ไม่พบผู้ใช้งาน"));
+        ShopsEntity shop = shopRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new RuntimeException("ไม่พบร้านค้าของคุณ"));
+
+        ShopProductsEntity shopProduct = shopProductRepository.findById(shopProductId)
+                .orElseThrow(() -> new RuntimeException("ไม่พบสินค้านี้ในร้านของคุณ"));
+
+        if (!shopProduct.getShop().getId().equals(shop.getId())) {
+            throw new RuntimeException("คุณไม่มีสิทธิ์ลบสินค้านี้");
+        }
+
+        shopProductRepository.delete(shopProduct);
     }
 }

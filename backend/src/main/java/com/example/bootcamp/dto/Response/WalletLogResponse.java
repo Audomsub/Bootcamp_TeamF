@@ -1,23 +1,27 @@
 package com.example.bootcamp.dto.Response;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class WalletLogResponse {
-    private String orderNumber;
+    private Integer id;
     private BigDecimal amount;
-    private LocalDateTime date;
+    private LocalDateTime createdAt;
+    private OrderSummary order;
 
-    public WalletLogResponse(String orderNumber, BigDecimal amount, LocalDateTime date) {
-        this.orderNumber = orderNumber;
-        this.amount = amount;
-        this.date = date;
+    @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class OrderSummary {
+        private String orderNumber;
     }
-
-    public String getOrderNumber() { return orderNumber; }
-    public void setOrderNumber(String orderNumber) { this.orderNumber = orderNumber; }
-    public BigDecimal getAmount() { return amount; }
-    public void setAmount(BigDecimal amount) { this.amount = amount; }
-    public LocalDateTime getDate() { return date; }
-    public void setDate(LocalDateTime date) { this.date = date; }
 }

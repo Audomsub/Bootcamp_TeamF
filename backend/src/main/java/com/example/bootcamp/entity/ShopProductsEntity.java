@@ -18,7 +18,7 @@ public class ShopProductsEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "shop_id", nullable = false)
+    @JoinColumn(name = "shop_id")
     private ShopsEntity shop;
 
     @Column(name = "product_id", insertable = false, updatable = false)
@@ -26,11 +26,11 @@ public class ShopProductsEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "product_id", nullable = false)
+    @JoinColumn(name = "product_id")
     private ProductsEntity product;
 
     // ----- สิ่งที่ต้องเพิ่ม -----
-    @Column(name = "selling_price", nullable = false, precision = 10, scale = 2)
+    @Column(name = "selling_price", precision = 10, scale = 2)
     private BigDecimal sellingPrice;
     // -------------------------
 

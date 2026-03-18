@@ -1,16 +1,15 @@
 server:
   port: 8080
-
 spring:
+  application:
+    name: bootcamp_db
   datasource:
     url: jdbc:postgresql://10.202.10.36:5432/bootcamp_db
     username: dev_dew
     password: password
     driver-class-name: org.postgresql.Driver
-
   jpa:
     hibernate:
-      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:

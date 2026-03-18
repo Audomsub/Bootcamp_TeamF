@@ -9,11 +9,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AdminLoginResponse {
-    private String token;
+public class UserInfo {
+    private Integer id;
+    private String name;
     private String email;
     private String role;
-    private String message;
-    private UserInfo user;
-    private ShopInfo shop;
 }

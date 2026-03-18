@@ -4,16 +4,16 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class ResellerDashboardResponse {
-    private String shopName;
-    private String shopSlug;
     private BigDecimal totalProfit;
-    private Long orderCount;
+    private Long totalOrders;
+    private Long pendingOrders;
+    private List<ResellerOrderResponse> recentOrders;
 }

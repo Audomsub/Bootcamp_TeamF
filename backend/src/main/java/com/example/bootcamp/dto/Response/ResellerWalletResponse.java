@@ -1,19 +1,25 @@
 package com.example.bootcamp.dto.Response;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.util.List;
 
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class ResellerWalletResponse {
-    private BigDecimal accumulatedProfit;
-    private List<WalletLogResponse> history;
+    private WalletInfo wallet;
+    private List<WalletLogResponse> logs;
 
-    public ResellerWalletResponse(BigDecimal accumulatedProfit, List<WalletLogResponse> history) {
-        this.accumulatedProfit = accumulatedProfit;
-        this.history = history;
+    @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class WalletInfo {
+        private BigDecimal balance;
     }
-
-    public BigDecimal getAccumulatedProfit() { return accumulatedProfit; }
-    public void setAccumulatedProfit(BigDecimal accumulatedProfit) { this.accumulatedProfit = accumulatedProfit; }
-    public List<WalletLogResponse> getHistory() { return history; }
-    public void setHistory(List<WalletLogResponse> history) { this.history = history; }
 }

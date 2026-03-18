@@ -14,6 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/reseller/catalog")
+@CrossOrigin(origins = "*", allowedHeaders = "*", maxAge = 3600)
 public class ResellerCatalogController {
 
     @Autowired
@@ -45,18 +46,5 @@ public class ResellerCatalogController {
             return ResponseEntity.ok(message);
         }
         return ResponseEntity.badRequest().body(message);
-    }
-
-    @DeleteMapping("/remove/{productId}")
-    public ResponseEntity<String> removeProduct(
-            @PathVariable Integer productId,
-            Authentication authentication) {
-
-        if (authentication == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("กรุณาเข้าสู่ระบบ");
-        }
-        String name = authentication.getName();
-        String message = resellerService.removeProductFromShop(name, productId);
-        return ResponseEntity.ok(message);
     }
 }

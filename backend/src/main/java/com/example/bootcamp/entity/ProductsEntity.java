@@ -2,7 +2,6 @@ package com.example.bootcamp.entity;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.w3c.dom.Text;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -22,17 +21,17 @@ public class ProductsEntity {
     @Column(name = "description" , columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "image_url" , length = 500)
+    @Column(name = "image_url" , length = 500 , nullable = false)
     private String imageUrl;
 
     @Column(name = "cost_price", nullable = false, precision = 10, scale = 2)
     private BigDecimal costPrice;
 
     @Column(name = "min_price" , nullable = false , precision = 10 , scale = 2)
-    private  BigDecimal minSellPrice;
+    private BigDecimal minSellPrice;
 
     @Column(name = "stock")
-    private Integer stock = 0;
+    private Integer stock;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

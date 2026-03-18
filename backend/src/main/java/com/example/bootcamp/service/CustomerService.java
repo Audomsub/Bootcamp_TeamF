@@ -3,13 +3,14 @@ package com.example.bootcamp.service;
 import com.example.bootcamp.dto.Request.OrderRequest;
 import com.example.bootcamp.dto.Response.ShopFrontResponse;
 import com.example.bootcamp.dto.Response.ShopProductResponse;
-
 import com.example.bootcamp.dto.Response.TrackOrderResponse;
 import com.example.bootcamp.entity.*;
 import com.example.bootcamp.repository.*;
 import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -35,7 +36,9 @@ public class CustomerService {
     @Autowired
     private ProductRepository productRepository;
 
-    public ShopFrontResponse getShopFront(String slug) {
+
+
+    public ShopFrontResponse getShopFront(String slug, Pageable pageable) {
         Optional<ShopsEntity> shopsEntity = shopRepository.findByShopSlug(slug);
 
         if (shopsEntity.isEmpty()) {
@@ -43,11 +46,10 @@ public class CustomerService {
         }
 
         ShopsEntity currentShop = shopsEntity.get();
-
-        List<ShopProductsEntity> shopProductsEntities = shopProductRepository.findByShopId(currentShop.getId());
+        Page<ShopProductsEntity> shopProductsPage = shopProductRepository.findByShopId(currentShop.getId(), pageable);
 
         List<ShopProductResponse> shopProductResponses = new ArrayList<>();
-        for (ShopProductsEntity shopProductsEntity : shopProductsEntities) {
+        for (ShopProductsEntity shopProductsEntity : shopProductsPage.getContent()) {
             ShopProductResponse shopProductResponse = new ShopProductResponse(
                     shopProductsEntity.getProduct().getId(),
                     shopProductsEntity.getProduct().getProductName(),
@@ -56,7 +58,13 @@ public class CustomerService {
                     shopProductsEntity.getProduct().getStock());
             shopProductResponses.add(shopProductResponse);
         }
-        return new ShopFrontResponse(currentShop.getShopName() , shopProductResponses);
+        return new ShopFrontResponse(
+                currentShop.getShopName(),
+                shopProductResponses,
+                shopProductsPage.getTotalPages(),
+                shopProductsPage.getTotalElements(),
+                shopProductsPage.getNumber()
+        );
     }
 
     @Transactional
@@ -78,7 +86,7 @@ public class CustomerService {
         ordersEntity.setCustomerName(orderRequest.getCustomerName());
         ordersEntity.setCustomerPhone(orderRequest.getCustomerPhone());
         ordersEntity.setShippingAddress(orderRequest.getCustomerAddress());
-        ordersEntity.setStatus(OrdersEntity.Status.pending);
+        ordersEntity.setStatus(OrdersEntity.Status.unpaid);
 
         BigDecimal quantityBD = new BigDecimal(orderRequest.getAmountProduct());
         BigDecimal totalAmount = shopProductsEntity.getSellingPrice().multiply(quantityBD);
@@ -110,7 +118,7 @@ public class CustomerService {
             throw new RuntimeException("ออเดอร์นี้ไม่ได้อยู่ในร้านค้านี้");
         }
 
-        if (order.getStatus() != OrdersEntity.Status.pending) {
+        if (order.getStatus() != OrdersEntity.Status.unpaid) {
             throw new RuntimeException("ออเดอร์นี้ชำระเงินแล้วหรือถูกยกเลิก");
         }
 
@@ -148,5 +156,9 @@ public class CustomerService {
                 order.getTotalAmount(),
                 order.getCreatedAt()
         );
+    }
+
+    public Page<ProductsEntity> getAllCatalog(Pageable pageable) {
+        return productRepository.findAll(pageable);
     }
 }

@@ -12,7 +12,8 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/")
-public class AuthController {
+@CrossOrigin(origins = "*", allowedHeaders = "*", maxAge = 3600)
+public class ResellerAuthController {
 
     @Autowired
     private AuthService authService;

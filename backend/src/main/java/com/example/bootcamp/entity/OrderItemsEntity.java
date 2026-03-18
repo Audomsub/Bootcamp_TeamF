@@ -25,7 +25,7 @@ public class OrderItemsEntity {
     @JoinColumn(name = "product_id", nullable = false)
     private  ProductsEntity product;
 
-    @Column(name = "product_name")
+    @Column(name = "product_name" , nullable = false)
     private String productName;
 
     @Column(name = "cost_price" , nullable = false , precision = 10 , scale = 2)

@@ -10,7 +10,7 @@ import com.example.bootcamp.repository.OrderRepository;
 import com.example.bootcamp.repository.UserRepository;
 import com.example.bootcamp.repository.WalletRepository;
 import com.example.bootcamp.repository.WalletLogRepository;
-import com.example.bootcamp.repository.UserRepository;
+
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -50,29 +50,27 @@ public class AdminService {
     }
 
     @Transactional
-    public List<AdminOrderResponse> getAllOrder() {
-        List<OrdersEntity> ordersEntityList = orderRepository.findAll();
-        List<AdminOrderResponse> adminOrderResponses = new ArrayList<>();
-        for (OrdersEntity ordersEntity : ordersEntityList) {
+    public org.springframework.data.domain.Page<AdminOrderResponse> getAllOrder(org.springframework.data.domain.Pageable pageable) {
+        org.springframework.data.domain.Page<OrdersEntity> ordersPage = orderRepository.findAllByOrderByCreatedAtDesc(pageable);
+        
+        return ordersPage.map(order -> {
             List<String> items = new ArrayList<>();
-            if (ordersEntity.getOrderItems() != null) {
-                for (com.example.bootcamp.entity.OrderItemsEntity item : ordersEntity.getOrderItems()) {
+            if (order.getOrderItems() != null) {
+                for (com.example.bootcamp.entity.OrderItemsEntity item : order.getOrderItems()) {
                     items.add(item.getProductName() + " (x" + item.getQuantity() + ")");
                 }
             }
-            AdminOrderResponse adminOrderResponse = new AdminOrderResponse(
-                    ordersEntity.getId(),
-                    ordersEntity.getOrderNumber(),
-                    ordersEntity.getShop().getShopName(),
-                    ordersEntity.getCustomerName(),
+            return new AdminOrderResponse(
+                    order.getId(),
+                    order.getOrderNumber(),
+                    order.getShop().getShopName(),
+                    order.getCustomerName(),
                     items,
-                    ordersEntity.getTotalAmount(),
-                    ordersEntity.getStatus().toString(),
-                    ordersEntity.getCreatedAt()
+                    order.getTotalAmount(),
+                    order.getStatus().toString(),
+                    order.getCreatedAt()
             );
-            adminOrderResponses.add(adminOrderResponse);
-        }
-        return adminOrderResponses;
+        });
     }
 
     @Transactional
@@ -101,8 +99,7 @@ public class AdminService {
             walletRepository.save(wallet);
 
             WalletLogsEntity log = new WalletLogsEntity();
-            log.setUser(reseller);
-            log.setOrder(order);
+            log.setWallet(wallet);
             log.setAmount(order.getResellerProfit());
             walletLogRepository.save(log);
         }
