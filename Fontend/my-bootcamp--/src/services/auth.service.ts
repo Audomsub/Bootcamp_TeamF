@@ -7,10 +7,7 @@ import type {
 } from '@/types';
 
 export const authService = {
-  loginAdmin: (data: LoginCredentials) =>
-    api.post<{ token: string; email: string; role: string; message: string; user?: any; shop?: any }>('/admin/login', data),
-
-  loginReseller: (data: LoginCredentials) =>
+  login: (data: LoginCredentials) =>
     api.post<{ token: string; email: string; role: string; message: string; user?: any; shop?: any }>('/login', data),
 
   register: (data: RegisterData) =>

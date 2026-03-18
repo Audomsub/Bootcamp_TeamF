@@ -21,9 +21,10 @@ export default function PaymentPage() {
   }, [order_id]);
 
   const loadOrder = async (orderId: number) => {
+    if (!slug) return;
     try {
       setLoading(true);
-      const response = await orderService.getOrderById(orderId);
+      const response = await orderService.getOrderById(slug, orderId);
       setOrder(response.data.data);
     } catch (err) {
       setError('ไม่สามารถโหลดข้อมูลคำสั่งซื้อเพื่อชำระเงินได้');
@@ -33,22 +34,21 @@ export default function PaymentPage() {
   };
 
   const handlePayment = async () => {
-    if (!order_id) return;
+    if (!order_id || !slug || !order) return;
     try {
       setProcessing(true);
       setError('');
       // Simulate payment delay for premium feel
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Update order status via API with fallback
-      await orderService.simulatePayment(Number(order_id)).catch(() => {
-        console.warn("Payment simulation API failed, using manual override.");
-        return null;
-      });
+      // Update order status via API
+      await orderService.simulatePayment(slug, Number(order_id));
+      
+      const num = (order as any).orderNumber || order.order_number;
       
       // Navigate to success/tracking
       navigate('/track-order', { 
-        state: { orderId: order_id, success: true },
+        state: { orderId: num, success: true },
         replace: true 
       });
     } catch (err: any) {
@@ -70,6 +70,9 @@ export default function PaymentPage() {
     </div>
   );
 
+  const orderNumber = (order as any).orderNumber || order.order_number || '';
+  const totalAmount = (order as any).totalAmount || order.total_amount || 0;
+
   return (
     <div className="max-w-[1000px] mx-auto pb-32 px-4 sm:px-10 animate-in fade-in duration-1000 font-sans">
       {/* Visual background gradient */}
@@ -82,7 +85,7 @@ export default function PaymentPage() {
             <span className="text-[11px] font-bold text-primary-700 tracking-wider">ระบบชำระเงินปลอดภัย 100%</span>
           </div>
           <h1 className="text-4xl lg:text-5xl font-black text-neutral-900 tracking-tight mb-4">ดำเนินการชำระเงิน</h1>
-          <p className="text-neutral-500 font-bold tracking-widest text-xs">หมายเลขคำสั่งซื้อ: <span className="text-neutral-900">{order.order_number}</span></p>
+          <p className="text-neutral-500 font-bold tracking-widest text-xs">หมายเลขคำสั่งซื้อ: <span className="text-neutral-900">{orderNumber}</span></p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-start">
@@ -97,19 +100,39 @@ export default function PaymentPage() {
             
             <div className="p-8 lg:p-10">
               <div className="space-y-6">
-                {order.items?.map((item, idx) => (
-                  <div key={idx} className="flex justify-between items-center group">
-                    <div className="flex-1 min-w-0 pr-4">
-                      <p className="font-bold text-neutral-900 text-sm truncate">{item.product_name}</p>
-                      <p className="text-xs font-bold text-neutral-400 mt-1">
-                        {item.quantity} ชิ้น @ {formatCurrency(item.selling_price)}
+                {order.items?.map((item: any, idx) => {
+                  if (typeof item === 'string') {
+                    // String items format: "ProductName (xQty)"
+                    const match = item.match(/(.+)\s*\(x(\d+)\)/);
+                    const name = match ? match[1] : item;
+                    const qty = match ? parseInt(match[2]) : 1;
+                    return (
+                      <div key={idx} className="flex justify-between items-center group">
+                        <div className="flex-1 min-w-0 pr-4">
+                          <p className="font-bold text-neutral-900 text-sm truncate">{name}</p>
+                          <p className="text-xs font-bold text-neutral-400 mt-1">
+                            {qty} ชิ้น
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  }
+                  
+                  // Fallback for object items
+                  return (
+                    <div key={idx} className="flex justify-between items-center group">
+                      <div className="flex-1 min-w-0 pr-4">
+                        <p className="font-bold text-neutral-900 text-sm truncate">{item.product_name || item.name}</p>
+                        <p className="text-xs font-bold text-neutral-400 mt-1">
+                          {item.quantity} ชิ้น @ {formatCurrency(item.selling_price || 0)}
+                        </p>
+                      </div>
+                      <p className="font-black text-neutral-900 text-sm ml-4 shrink-0">
+                        {formatCurrency((item.selling_price || 0) * (item.quantity || 1))}
                       </p>
                     </div>
-                    <p className="font-black text-neutral-900 text-sm ml-4 shrink-0">
-                      {formatCurrency(item.selling_price * item.quantity)}
-                    </p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               <div className="mt-8 pt-8 border-t border-neutral-100 space-y-4">
@@ -119,7 +142,7 @@ export default function PaymentPage() {
                 </div>
                 <div className="flex justify-between items-end pt-4">
                   <span className="text-lg font-black text-neutral-900 tracking-tight">ยอดรวมทั้งสิ้น</span>
-                  <p className="text-4xl font-black text-primary-600 tracking-tighter leading-none">{formatCurrency(order.total_amount)}</p>
+                  <p className="text-4xl font-black text-primary-600 tracking-tighter leading-none">{formatCurrency(totalAmount)}</p>
                 </div>
               </div>
             </div>
@@ -167,7 +190,7 @@ export default function PaymentPage() {
                     ) : (
                       <>
                         <ShieldCheck className="h-5 w-5" />
-                        ชำระเงิน {formatCurrency(order.total_amount)}
+                        ชำระเงิน {formatCurrency(totalAmount)}
                       </>
                     )}
                   </div>

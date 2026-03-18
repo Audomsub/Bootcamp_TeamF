@@ -8,12 +8,6 @@ import { orderService } from '@/services/order.service';
 import { formatCurrency, formatDate, cn } from '@/lib/utils';
 import type { Order } from '@/types';
 
-// Mock data (fallback)
-const mockOrders: Order[] = [
-  { id: 1, order_number: 'ORD-ABC123', shop_id: 1, customer_name: 'สมชาย', customer_phone: '0812345678', shipping_address: 'กรุงเทพ', total_amount: 1500, reseller_profit: 300, status: 'pending', created_at: '2025-03-12', shop: { id: 1, user_id: 1, shop_name: 'JD Store', shop_slug: 'jd-store' }, items: [{ id: 1, order_id: 1, product_id: 1, product_name: 'Premium T-Shirt', cost_price: 150, selling_price: 250, quantity: 2 }, { id: 2, order_id: 1, product_id: 2, product_name: 'Classic Hoodie', cost_price: 350, selling_price: 500, quantity: 1 }] },
-  { id: 2, order_number: 'ORD-DEF456', shop_id: 1, customer_name: 'สมหญิง', customer_phone: '0898765432', shipping_address: 'เชียงใหม่', total_amount: 2400, reseller_profit: 600, status: 'shipped', created_at: '2025-03-11', shop: { id: 1, user_id: 1, shop_name: 'JD Store', shop_slug: 'jd-store' }, items: [{ id: 3, order_id: 2, product_id: 5, product_name: 'Running Shoes', cost_price: 800, selling_price: 1200, quantity: 2 }] },
-  { id: 3, order_number: 'ORD-GHI789', shop_id: 2, customer_name: 'สมศรี', customer_phone: '0867891234', shipping_address: 'ภูเก็ต', total_amount: 750, reseller_profit: 150, status: 'completed', created_at: '2025-03-10', shop: { id: 2, user_id: 2, shop_name: 'JS Shop', shop_slug: 'js-shop' }, items: [{ id: 4, order_id: 3, product_id: 1, product_name: 'Premium T-Shirt', cost_price: 150, selling_price: 250, quantity: 3 }] },
-];
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -30,14 +24,10 @@ export default function AdminOrders() {
       setLoading(true);
       const response = await orderService.getAllOrders();
       const data = response.data?.data?.data;
-      if (data && Array.isArray(data) && data.length > 0) {
-        setOrders(data);
-      } else {
-        setOrders(mockOrders);
-      }
-    } catch {
-      console.error('Failed to load orders from backend, using mock data');
-      setOrders(mockOrders);
+      setOrders(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Failed to load orders', err);
+      setOrders([]);
     } finally {
       setLoading(false);
     }
@@ -51,8 +41,9 @@ export default function AdminOrders() {
       setOrders((prev) =>
         prev.map((o) => (o.id === shipId ? { ...o, status: 'shipped' as const } : o))
       );
-    } catch {
-      // handle error
+    } catch (err: any) {
+      const msg = err?.response?.data || 'เกิดข้อผิดพลาดในการอัปเดตสถานะ';
+      alert(typeof msg === 'string' ? msg : 'เกิดข้อผิดพลาดในการอัปเดตสถานะ');
     } finally {
       setProcessing(false);
       setShipId(null);

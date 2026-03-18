@@ -33,23 +33,8 @@ export default function TrackOrder() {
       if (response && response.data.data) {
         setOrder(response.data.data);
       } else {
-        // ข้อมูลจำลอง (Mock data) สำหรับการสาธิต
-        setOrder({
-          id: Number(queryNumber) || 999,
-          order_number: queryNumber.startsWith('ORD') ? queryNumber : `ORD-${queryNumber}`,
-          shop_id: 1,
-          customer_name: 'อเล็กซานเดอร์ เพียร์ซ',
-          customer_phone: '0812345678',
-          shipping_address: '123 ถนนพรีเมียม แขวงลุมพินี เขตปทุมวัน กรุงเทพมหานคร 10330',
-          total_amount: 24500,
-          reseller_profit: 4500,
-          status: 'pending',
-          created_at: new Date().toISOString(),
-          items: [
-            { id: 1, order_id: 1, product_id: 1, product_name: 'กระเป๋าสตางค์ Carbon Heritage', cost_price: 1500, selling_price: 1850, quantity: 1 },
-            { id: 2, order_id: 1, product_id: 2, product_name: 'สมาร์ทวอทช์ Apex Chrono', cost_price: 9000, selling_price: 12900, quantity: 1 }
-          ]
-        });
+        setError('ค้นหาไม่สำเร็จ ไม่พบคำสั่งซื้อนี้ในระบบของเรา');
+        setOrder(null);
       }
     } catch {
       setError('ค้นหาไม่สำเร็จ ไม่พบคำสั่งซื้อนี้ในระบบของเรา');

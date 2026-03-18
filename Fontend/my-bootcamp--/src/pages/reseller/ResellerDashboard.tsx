@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { DollarSign, ShoppingCart, Clock, ArrowRight, Calendar, ChevronDown, Copy, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { StatCard, PageHeader, LoadingSpinner } from '@/components/ui/shared';
@@ -7,21 +8,16 @@ import { formatCurrency, formatDate, cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import type { ResellerDashboardStats } from '@/types';
 
-const mockStats: ResellerDashboardStats = {
-  total_profit: 24500,
-  total_orders: 45,
-  pending_orders: 5,
-  shop_link: '',
-  recent_orders: [
-    { id: 1, order_number: 'ORD-123456', shop_id: 1, customer_name: 'สมชาย', customer_phone: '', shipping_address: '', total_amount: 1500, reseller_profit: 300, status: 'pending', created_at: '2025-03-12' },
-    { id: 2, order_number: 'ORD-789012', shop_id: 1, customer_name: 'สมหญิง', customer_phone: '', shipping_address: '', total_amount: 800, reseller_profit: 150, status: 'shipped', created_at: '2025-03-11' },
-    { id: 3, order_number: 'ORD-345678', shop_id: 1, customer_name: 'วินัย', customer_phone: '', shipping_address: '', total_amount: 2200, reseller_profit: 400, status: 'completed', created_at: '2025-03-10' },
-  ],
-};
 
 export default function ResellerDashboard() {
   const { shop } = useAuth();
-  const [stats, setStats] = useState<ResellerDashboardStats>(mockStats);
+  const [stats, setStats] = useState<ResellerDashboardStats>({
+    total_profit: 0,
+    total_orders: 0,
+    pending_orders: 0,
+    shop_link: '',
+    recent_orders: []
+  });
   const [loading, setLoading] = useState(false);
   const [period, setPeriod] = useState('30days');
   const [customDates, setCustomDates] = useState({ start: '', end: '' });
@@ -40,8 +36,8 @@ export default function ResellerDashboard() {
       }
       const response = await dashboardService.getResellerStats(params);
       setStats(response.data.data);
-    } catch {
-      setStats(mockStats);
+    } catch (err) {
+      console.error("Failed to load dashboard stats", err);
     } finally {
       setLoading(false);
     }
@@ -102,7 +98,7 @@ export default function ResellerDashboard() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
         <StatCard
-          title="กำไรทั้งหมด"
+          title="กำไรคาดการณ์"
           value={formatCurrency(stats.total_profit)}
           icon={DollarSign}
           iconColor="text-emerald-600"
@@ -173,6 +169,80 @@ export default function ResellerDashboard() {
           </div>
           {/* Decorative Background */}
           <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none" />
+        </div>
+      </div>
+
+      {/* Sales Chart */}
+      <div className="glass-card bg-white/80 border-white/60 shadow-xl rounded-[2rem] p-6 sm:p-8 mb-8">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h2 className="text-lg font-bold text-neutral-900">ภาพรวมยอดขายและกำไรคาดการณ์ 7 วันล่าสุด</h2>
+            <p className="text-sm font-medium text-neutral-500 mt-1">ติดตามการเติบโตของร้านค้าคุณได้อย่างใกล้ชิด (รวมออเดอร์รอดำเนินการ)</p>
+          </div>
+        </div>
+        
+        <div className="h-[300px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={stats.sales_chart || []} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
+              <defs>
+                <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#818cf8" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#818cf8" stopOpacity={0}/>
+                </linearGradient>
+                <linearGradient id="colorProfit" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#34d399" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#34d399" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+              <XAxis 
+                dataKey="date" 
+                axisLine={false} 
+                tickLine={false} 
+                tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 600 }} 
+                dy={10}
+              />
+              <YAxis 
+                yAxisId="left"
+                axisLine={false} 
+                tickLine={false} 
+                tick={{ fill: '#94a3b8', fontSize: 12 }} 
+                tickFormatter={(value) => `฿${value}`}
+              />
+              <YAxis 
+                yAxisId="right"
+                orientation="right"
+                axisLine={false} 
+                tickLine={false} 
+                tick={{ fill: '#94a3b8', fontSize: 12 }} 
+                tickFormatter={(value) => `฿${value}`}
+              />
+              <Tooltip 
+                contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)', fontWeight: 'bold' }}
+                formatter={(value: any, name: any) => [`฿${Number(value).toLocaleString()}`, name]}
+              />
+              <Area 
+                yAxisId="left"
+                type="monotone" 
+                dataKey="amount" 
+                stroke="#818cf8" 
+                strokeWidth={3}
+                fillOpacity={1} 
+                fill="url(#colorAmount)" 
+                name="ยอดขายสุทธิ"
+              />
+              <Area 
+                yAxisId="right"
+                type="monotone" 
+                dataKey="profit" 
+                stroke="#34d399" 
+                strokeWidth={3}
+                fillOpacity={1} 
+                fill="url(#colorProfit)" 
+                name="กำไรของคุณ"
+              />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
       </div>
 

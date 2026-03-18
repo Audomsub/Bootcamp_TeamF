@@ -9,15 +9,16 @@ import ResellerLayout from './components/layouts/ResellerLayout';
 import ShopLayout from './components/layouts/ShopLayout';
 
 // Admin Pages
-import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProducts from './pages/admin/AdminProducts';
 import ProductForm from './pages/admin/ProductForm';
 import AdminResellers from './pages/admin/AdminResellers';
 import AdminOrders from './pages/admin/AdminOrders';
 
+// Auth Pages
+import Login from './pages/auth/Login';
+
 // Reseller Pages
-import ResellerLogin from './pages/reseller/ResellerLogin';
 import ResellerRegister from './pages/reseller/ResellerRegister';
 import ResellerDashboard from './pages/reseller/ResellerDashboard';
 import ResellerCatalog from './pages/reseller/ResellerCatalog';
@@ -39,9 +40,11 @@ export default function App() {
           <Routes>
             {/* Public Root Redirect */}
             <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/admin/login" element={<Login />} />
 
-            {/* Admin Auth */}
-            <Route path="/admin/login" element={<AdminLogin />} />
+            {/* Auth */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<ResellerRegister />} />
 
             {/* Protected Admin Routes */}
             <Route element={<ProtectedRoute role="admin" />}>
@@ -54,10 +57,6 @@ export default function App() {
                 <Route path="/admin/orders" element={<AdminOrders />} />
               </Route>
             </Route>
-
-            {/* Reseller Auth */}
-            <Route path="/login" element={<ResellerLogin />} />
-            <Route path="/register" element={<ResellerRegister />} />
 
             {/* Protected Reseller Routes */}
             <Route element={<ProtectedRoute role="reseller" requireApproval={true} />}>
@@ -74,7 +73,7 @@ export default function App() {
             <Route element={<ShopLayout />}>
               <Route path="/shop/:slug" element={<ShopPage />} />
               <Route path="/shop/:slug/checkout" element={<CheckoutPage />} />
-              <Route path="/shop/:slug/payment/:order_id" element={<PaymentPage />} />
+              <Route path="/shop/:slug/payment" element={<PaymentPage />} />
               <Route path="/track-order" element={<TrackOrder />} />
             </Route>
 

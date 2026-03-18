@@ -12,13 +12,6 @@ interface ResellerUser extends User {
   shop?: { shop_name: string };
 }
 
-// Mock data (ปรับที่อยู่เป็นภาษาไทยเล็กน้อย)
-const mockResellers: ResellerUser[] = [
-  { id: 1, name: 'John Doe', email: 'john@example.com', phone: '0812345678', role: 'reseller', status: 'approved', address: 'กรุงเทพมหานคร', created_at: '2025-03-01', shop: { shop_name: 'JD Store' } },
-  { id: 2, name: 'Jane Smith', email: 'jane@example.com', phone: '0898765432', role: 'reseller', status: 'pending', address: 'เชียงใหม่', created_at: '2025-03-05', shop: { shop_name: 'JS Shop' } },
-  { id: 3, name: 'Bob Wilson', email: 'bob@example.com', phone: '0867891234', role: 'reseller', status: 'rejected', address: 'ภูเก็ต', created_at: '2025-03-08', shop: { shop_name: 'BW Mart' } },
-  { id: 4, name: 'Alice Brown', email: 'alice@example.com', phone: '0845678901', role: 'reseller', status: 'pending', address: 'ชลบุรี', created_at: '2025-03-10', shop: { shop_name: 'AB Collection' } },
-];
 
 export default function AdminResellers() {
   const [resellers, setResellers] = useState<ResellerUser[]>([]);
@@ -35,14 +28,10 @@ export default function AdminResellers() {
       setLoading(true);
       const response = await resellerService.getAll();
       const data = response.data?.data?.data;
-      if (data && Array.isArray(data) && data.length > 0) {
-        setResellers(data as ResellerUser[]);
-      } else {
-        setResellers(mockResellers);
-      }
-    } catch {
-      console.error('Failed to load resellers from backend, using mock data');
-      setResellers(mockResellers);
+      setResellers(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Failed to load resellers', err);
+      setResellers([]);
     } finally {
       setLoading(false);
     }

@@ -46,3 +46,10 @@ export function getStatusColor(status: string): string {
 export function generateOrderNumber(): string {
   return 'ORD-' + Date.now().toString(36).toUpperCase();
 }
+
+export function getImageUrl(path: string | null | undefined): string {
+  if (!path) return '';
+  if (path.startsWith('http') || path.startsWith('data:')) return path;
+  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+  return `${baseUrl}${path.startsWith('/') ? '' : '/'}${path}`;
+}

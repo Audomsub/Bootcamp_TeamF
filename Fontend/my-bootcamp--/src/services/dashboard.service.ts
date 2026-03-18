@@ -47,7 +47,7 @@ export const dashboardService = {
   getResellerStats: async (params?: { period?: string; startDate?: string; endDate?: string }) => {
     const res = await api.get<any>('/reseller/dashboard', { params });
     const d = res.data;
-    
+
     const mapped: ResellerDashboardStats = {
       total_profit: d.totalProfit || 0,
       total_orders: d.totalOrders || 0,
@@ -61,6 +61,7 @@ export const dashboardService = {
         status: o.status?.toLowerCase() || 'pending',
         created_at: o.createdAt || new Date().toISOString()
       })) || [],
+      sales_chart: d.salesChart || [],
       shop_link: ''
     };
     return { data: { data: mapped } };

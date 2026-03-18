@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Store, ShoppingCart, CheckCircle2 } from 'lucide-react';
+import { Store, ShoppingCart, CheckCircle2, Package, ArrowRight, Sparkles, Star, MapPin } from 'lucide-react';
 import { LoadingSpinner, EmptyState } from '@/components/ui/shared';
 import { shopService } from '@/services/shop.service';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, getImageUrl } from '@/lib/utils';
 import { useCart } from '@/contexts/CartContext';
 
 export default function ShopPage() {
@@ -36,18 +36,15 @@ export default function ShopPage() {
       else setLoadingMore(true);
 
       const response = await shopService.getBySlug(shopSlug, page, 12);
-      // Backend returns ShopFrontResponse directly
       const data = (response.data as any).data || response.data;
 
       if (data && data.shopName) {
         setShopName(data.shopName);
-        
         if (page === 0) {
           setProducts(data.productResponses || []);
         } else {
           setProducts(prev => [...prev, ...(data.productResponses || [])]);
         }
-
         setPagination({
           totalPages: data.totalPages || 0,
           totalElements: data.totalElements || 0,
@@ -71,124 +68,230 @@ export default function ShopPage() {
   };
 
   const handleAddToCart = (item: any) => {
-    // Map to the format CartContext expects
     const cartItem = {
       ...item,
-      id: item.id,
+      id: item.productId,
+      product_id: item.productId,
       selling_price: item.sellingPrice,
       product: {
-        id: item.id,
+        id: item.productId,
         name: item.productName,
-        image_url: item.imageUrl,
+        image_url: getImageUrl(item.imageUrl),
         stock: item.stock
       }
     };
     addToCart(cartItem, 1);
-    setAddedItem(item.id);
+    setAddedItem(item.productId);
     setTimeout(() => setAddedItem(null), 2000);
   };
 
-  if (loading) return <div className="py-20"><LoadingSpinner /></div>;
-
-  if (!shopName && !loading) {
+  // ── Loading ──────────────────────────────────────────────────
+  if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-32 px-4 text-center">
-        <div className="w-24 h-24 bg-rose-50 rounded-3xl flex items-center justify-center mb-8 border border-rose-100 shadow-sm">
-          <Store className="h-12 w-12 text-rose-500" />
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-neutral-100 flex items-center justify-center animate-pulse">
+            <Store className="h-6 w-6 text-neutral-400" />
+          </div>
+          <p className="text-sm text-neutral-400 font-medium tracking-wide">กำลังโหลดร้านค้า...</p>
         </div>
-        <h1 className="text-4xl font-black text-neutral-900 uppercase tracking-tighter mb-4">404 ไม่พบร้านค้า</h1>
-        <p className="text-neutral-500 max-w-sm font-medium tracking-tight leading-relaxed">
-          ไม่มีร้านค้า <span className="text-neutral-900 font-bold">"{slug}"</span> ที่คุณกำลังค้นหาอยู่ในระบบของเรา
-        </p>
-
       </div>
     );
   }
 
-  return (
-    <div className="pb-32 px-4 sm:px-0">
-      <div className="px-4">
-        <div className="flex items-end justify-between mb-12 border-b border-neutral-100 pb-8">
-          <div>
-            <h2 className="text-3xl font-black text-neutral-900 tracking-tighter uppercase">สินค้าของเรา ({pagination.totalElements})</h2>
-            <p className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.3em] mt-2">ประวัติร้านค้า: {shopName}</p>
+  // ── 404 ──────────────────────────────────────────────────────
+  if (!shopName && !loading) {
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center px-4 text-center">
+        <div className="relative mb-8">
+          <div className="w-28 h-28 rounded-3xl bg-gradient-to-br from-rose-50 to-rose-100 flex items-center justify-center border border-rose-200/60 shadow-xl shadow-rose-100">
+            <Store className="h-13 w-13 text-rose-400" />
           </div>
-          <div className="hidden md:flex gap-4">
-            <div className="px-6 py-3 rounded-xl bg-neutral-50 text-[10px] font-black uppercase tracking-widest text-neutral-400 border border-neutral-200/50">
-              หน้า {pagination.currentPage + 1} / {pagination.totalPages || 1}
+          <div className="absolute -top-2 -right-2 w-8 h-8 bg-rose-500 rounded-xl flex items-center justify-center shadow-lg">
+            <span className="text-white text-xs font-black">!</span>
+          </div>
+        </div>
+        <p className="text-xs font-bold text-rose-400 uppercase tracking-[0.3em] mb-3">Error 404</p>
+        <h1 className="text-3xl font-black text-neutral-900 tracking-tight mb-3">ไม่พบร้านค้า</h1>
+        <p className="text-neutral-500 max-w-xs leading-relaxed text-sm">
+          ร้านค้า <span className="text-neutral-800 font-semibold">"{slug}"</span> ไม่มีอยู่ในระบบ
+          กรุณาตรวจสอบลิงก์อีกครั้ง
+        </p>
+      </div>
+    );
+  }
+
+  const hasMore = pagination.currentPage < pagination.totalPages - 1;
+
+  // ── Main ──────────────────────────────────────────────────────
+  return (
+    <div className="min-h-screen bg-neutral-50/50 pb-20">
+
+      {/* ── Shop Header Banner ── */}
+      <div className="bg-white shadow-sm relative overflow-hidden">
+        {/* Cover Background (Gradient) */}
+        <div className="absolute inset-0 h-32 bg-gradient-to-r from-[#ff2b5e] via-pink-500 to-[#ff681a] opacity-90 blur-sm"></div>
+        <div className="absolute inset-0 h-32 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20 border-b border-black/10"></div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 pt-16 pb-6">
+          <div className="flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-8">
+
+            {/* Avatar */}
+            <div className="w-24 h-24 rounded-full bg-white p-1 shadow-xl shrink-0 -mt-6 relative">
+              <div className="w-full h-full rounded-full bg-neutral-800 flex items-center justify-center overflow-hidden">
+                <Store className="h-10 w-10 text-white" />
+              </div>
             </div>
+
+            {/* Info */}
+            <div className="flex-1 text-center md:text-left mt-2 md:mt-0">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-[#ff2b5e] text-white text-[10px] font-bold rounded-sm mb-2 shadow-sm uppercase tracking-wider">
+                <Sparkles className="h-3 w-3" />
+                ร้านค้าแนะนำ
+              </div>
+              <h1 className="text-2xl md:text-3xl font-black text-neutral-900 tracking-tight truncate mb-1.5">{shopName}</h1>
+
+              <div className="flex items-center justify-center md:justify-start gap-4 text-xs text-neutral-500 font-medium">
+                <span className="flex items-center gap-1">
+                  <Package className="h-3.5 w-3.5" />
+                  สินค้าทั้งหมด {pagination.totalElements} ชิ้น
+                </span>
+              </div>
+            </div>
+
+
+          </div>
+        </div>
+      </div>
+
+      {/* ── Content ── */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 gap-6 flex flex-col">
+
+        {/* ── Section Title ── */}
+        <div className="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm border border-neutral-100 mb-2">
+          <div className="flex items-center gap-2">
+            <h2 className="text-base font-bold text-neutral-900 uppercase tracking-tight">สินค้าทั้งหมด</h2>
           </div>
         </div>
 
         {products.length === 0 ? (
-          <EmptyState
-            icon={ShoppingCart}
-            title="ยังไม่มีสินค้า"
-            description="ร้านค้านี้ยังไม่มีสินค้าจำหน่ายในขณะนี้"
-          />
+          <div className="py-24 bg-white rounded-2xl flex flex-col items-center gap-4 text-center border border-neutral-100 shadow-sm">
+            <div className="w-16 h-16 rounded-2xl bg-neutral-50 flex items-center justify-center">
+              <ShoppingCart className="h-8 w-8 text-neutral-300" />
+            </div>
+            <p className="text-lg font-bold text-neutral-700">ยังไม่มีสินค้า</p>
+            <p className="text-sm text-neutral-400">ร้านค้านี้ยังไม่ได้เพิ่มสินค้าจำหน่าย</p>
+          </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
-              {products.map((item: any, index: number) => (
-                <div key={`${item.id}-${index}`} className="group relative">
-                  <div className="absolute -inset-4 bg-gradient-to-b from-primary-500/5 to-transparent rounded-[2.5rem] opacity-0 group-hover:opacity-100 transition-all duration-700 blur-xl"></div>
-                  <div className="glass-card !p-0 !bg-white/80 border-white shadow-xl group-hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.12)] transition-all duration-700 relative overflow-hidden flex flex-col h-full !rounded-[2rem]">
-                    <div className="aspect-[5/4] overflow-hidden relative">
-                      <img
-                        src={item.imageUrl || 'https://placehold.co/400x300?text=No+Image'}
-                        alt={item.productName}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
-                      />
-                      <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/50">
-                        <span className="text-[9px] font-black text-neutral-900">สต็อก: {item.stock}</span>
-                      </div>
-                    </div>
-                    <div className="p-8 flex flex-col flex-1">
-                      <div className="mb-4">
-                        <p className="text-[9px] font-black text-primary-500 uppercase tracking-[0.2em] mb-1">In Stock</p>
-                        <h3 className="text-xl font-black text-neutral-900 tracking-tight leading-tight line-clamp-2 min-h-[3rem]">{item.productName}</h3>
-                      </div>
+            {/* ── Grid ── */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-5">
+              {products.map((item: any, index: number) => {
+                const isAdded = addedItem === item.productId;
+                const outOfStock = item.stock <= 0;
+                return (
+                  <div
+                    key={`${item.productId}-${index}`}
+                    className="group bg-white rounded-[14px] overflow-hidden border border-neutral-100/80 hover:border-[#ff2b5e]/40 hover:shadow-[0_8px_20px_-8px_rgba(255,43,94,0.15)] transition-all duration-300 flex flex-col relative"
+                  >
 
-                      <div className="flex items-center justify-between pt-6 border-t border-neutral-100 mt-auto">
-                        <div className="flex flex-col">
-                          <p className="text-[9px] font-black text-neutral-400 uppercase tracking-widest mb-0.5">ราคาขาย</p>
-                          <p className="text-2xl font-black text-neutral-900 tracking-tighter">
-                            {formatCurrency(item.sellingPrice)}
-                          </p>
+                    {/* Image */}
+                    <div className="relative aspect-square overflow-hidden bg-neutral-50 flex-shrink-0">
+                      <img
+                        src={getImageUrl(item.imageUrl) || 'https://placehold.co/400x400?text=No+Image'}
+                        alt={item.productName}
+                        className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${outOfStock ? 'opacity-50 grayscale' : ''}`}
+                      />
+
+                      {/* Out of stock overlay */}
+                      {outOfStock && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-[2px]">
+                          <span className="px-3 py-1.5 bg-neutral-900/90 text-white text-[11px] font-bold rounded-lg shadow-sm">
+                            สินค้าหมดชั่วคราว
+                          </span>
                         </div>
+                      )}
+
+                      {/* Stock badge */}
+                      {!outOfStock && item.stock <= 10 && (
+                        <div className="absolute bottom-2 left-2">
+                          <span className="px-2 py-0.5 bg-[#ff2b5e] text-white text-[9px] font-bold rounded shadow-sm">
+                            🔥 เหลือ {item.stock} ชิ้น
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Body */}
+                    <div className="p-3 sm:p-4 flex flex-col flex-1 gap-2">
+                      <h3 className="text-[13px] font-medium text-neutral-800 leading-snug line-clamp-2 min-h-[2.5rem] group-hover:text-[#ff2b5e] transition-colors">
+                        {item.productName}
+                      </h3>
+
+                      <div className="mt-auto flex flex-col">
+
+                        {/* Selling Price */}
+                        <div className="flex items-baseline text-[#ff2b5e] mb-3">
+                          <span className="text-[13px] font-bold mr-0.5">฿</span>
+                          <span className="text-[18px] sm:text-[20px] font-bold tracking-tight">{Number(item.sellingPrice).toLocaleString()}</span>
+                        </div>
+
+                        {/* Enhanced Add to Cart Button */}
                         <button
-                          onClick={() => handleAddToCart(item)}
-                          disabled={item.stock <= 0}
-                          className={`group/btn relative px-6 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 shadow-lg active:scale-95 ${item.stock <= 0
-                              ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed shadow-none border border-neutral-200'
-                              : addedItem === item.id
-                                ? 'bg-emerald-500 text-white shadow-emerald-500/20'
-                                : 'bg-neutral-900 text-white hover:bg-primary-600 shadow-neutral-900/10'
-                            }`}
+                          onClick={() => !outOfStock && handleAddToCart(item)}
+                          disabled={outOfStock || isAdded}
+                          className={`
+                            w-full h-9 rounded-lg flex items-center justify-center gap-1.5 text-[12px] font-bold
+                            transition-all duration-300 active:scale-[0.98]
+                            ${outOfStock
+                              ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed border border-neutral-200'
+                              : isAdded
+                                ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
+                                : 'bg-neutral-900 text-white hover:bg-[#ff2b5e] hover:shadow-md'
+                            }
+                          `}
+                          aria-label={outOfStock ? 'สินค้าหมด' : 'เพิ่มลงตะกร้า'}
                         >
-                          {item.stock <= 0 ? (
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em]">หมด</span>
-                          ) : addedItem === item.id ? (
-                            <CheckCircle2 className="h-5 w-5 animate-in zoom-in duration-300" />
+                          {isAdded ? (
+                            <>
+                              <CheckCircle2 className="h-3.5 w-3.5" />
+                              ลงตะกร้าแล้ว
+                            </>
+                          ) : outOfStock ? (
+                            'สินค้าหมด'
                           ) : (
-                            <ShoppingCart className="h-5 w-5 stroke-[2.5px]" />
+                            <>
+                              <ShoppingCart className="h-3.5 w-3.5" />
+                              เพิ่มลงตะกร้า
+                            </>
                           )}
                         </button>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
-            {pagination.currentPage < pagination.totalPages - 1 && (
-              <div className="mt-20 text-center">
+            {/* ── Load More ── */}
+            {hasMore && (
+              <div className="mt-12 flex justify-center pb-8">
                 <button
                   onClick={handleLoadMore}
                   disabled={loadingMore}
-                  className="px-12 py-4 bg-neutral-900 text-white text-[12px] font-black uppercase tracking-widest rounded-2xl hover:bg-primary-600 transition-all disabled:opacity-50 hover:shadow-2xl active:scale-95"
+                  className="group inline-flex items-center justify-center gap-2 px-10 py-3.5 bg-white border border-neutral-200 text-neutral-700 text-[13px] font-bold rounded-xl hover:text-[#ff2b5e] hover:border-[#ff2b5e] transition-all duration-300 shadow-sm disabled:opacity-50 disabled:pointer-events-none min-w-[200px]"
                 >
-                  {loadingMore ? 'กำลังโหลดข้อมูล...' : 'โหลดสินค้าเพิ่มเติม'}
+                  {loadingMore ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-neutral-300 border-t-neutral-600 rounded-full animate-spin" />
+                      <span>กำลังโหลด...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>ดูสินค้าเพิ่มเติม</span>
+                      <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    </>
+                  )}
                 </button>
               </div>
             )}

@@ -150,3 +150,9 @@
 ::-webkit-scrollbar-thumb {
   @apply bg-neutral-200 rounded-full border-[3px] border-neutral-50 hover:bg-neutral-300 transition-colors;
 }
+
+/* Hide browser-native password reveal and clear buttons */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}

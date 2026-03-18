@@ -13,7 +13,7 @@ import {
   Lock
 } from 'lucide-react';
 import { useCart } from '../../contexts/CartContext';
-import { formatCurrency } from '../../lib/utils';
+import { formatCurrency, getImageUrl } from '../../lib/utils';
 import { shopService } from '../../services/shop.service';
 import { orderService } from '../../services/order.service';
 import type { Shop } from '../../types';
@@ -34,6 +34,7 @@ export default function CheckoutPage() {
   const [shop, setShop] = useState<Shop | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isOrderCreated, setIsOrderCreated] = useState(false);
 
   const {
     register,
@@ -48,7 +49,6 @@ export default function CheckoutPage() {
   }, [slug]);
 
   useEffect(() => {
-    // หากตะกร้าสินค้าว่างเปล่า ให้กลับไปหน้าหลักของร้าน
     if (!loading && cartItems.length === 0) {
       navigate(`/shop/${slug}`);
     }
@@ -58,15 +58,17 @@ export default function CheckoutPage() {
     try {
       setLoading(true);
       const response = await shopService.getBySlug(shopSlug);
-      setShop(response.data.data);
-    } catch (err) {
-      console.warn("โหลดข้อมูลร้านค้าไม่สำเร็จ, ใช้งานข้อมูลจำลอง (Mock fallback)");
+      // Backend returns ShopFrontResponse, we just need basic shop info or handle it
+      const data = response.data;
       setShop({
-        id: 1,
-        user_id: 1,
-        shop_name: "Premium Boutique",
-        shop_slug: slug || "default"
+        id: (data as any).id || 1, // Fallback if ID is missing in ShopFrontResponse
+        user_id: 0,
+        shop_name: (data as any).shopName || "ร้านค้า",
+        shop_slug: shopSlug
       });
+    } catch (err) {
+      setError("ไม่พบข้อมูลร้านค้าในระบบ กรุณาลองใหม่อีกครั้ง");
+      setShop(null);
     } finally {
       setLoading(false);
     }
@@ -77,7 +79,7 @@ export default function CheckoutPage() {
     if (!item || !item.shopProduct.product) return;
 
     if (newQuantity > item.shopProduct.product.stock) {
-      setError(`สินค้า ${item.shopProduct.product.name} มีจำนวนไม่พอ (เหลือสูงสุด: ${item.shopProduct.product.stock} ชิ้น)`);
+      setError(`ขออภัย สินค้า "${item.shopProduct.product.name}" มีสต็อกไม่พอ (สั่งได้สูงสุด: ${item.shopProduct.product.stock} ชิ้น)`);
       return;
     }
 
@@ -93,7 +95,7 @@ export default function CheckoutPage() {
     // ตรวจสอบสต๊อกสินค้าครั้งสุดท้ายก่อนยืนยันออเดอร์
     for (const item of cartItems) {
       if (item.shopProduct.product && item.quantity > item.shopProduct.product.stock) {
-        setError(`สินค้า ${item.shopProduct.product.name} มีไม่เพียงพอ กรุณาปรับจำนวนใหม่อีกครั้ง`);
+        setError(`ขออภัย สินค้า "${item.shopProduct.product.name}" มีสต็อกเหลือเพียง ${item.shopProduct.product.stock} ชิ้น กรุณาปรับยอดสั่งซื้อใหม่`);
         return;
       }
     }
@@ -102,22 +104,19 @@ export default function CheckoutPage() {
       setError(null);
 
       const orderData = {
-        shop_id: shop.id,
-        customer_name: data.customer_name,
-        customer_phone: data.customer_phone,
-        shipping_address: data.shipping_address,
+        customerName: data.customer_name,
+        customerPhone: data.customer_phone,
+        customerAddress: data.shipping_address,
+        totalAmount: totalAmount + 50,
         items: cartItems.map(item => ({
-          product_id: item.shopProduct.product_id,
+          productId: item.shopProduct.product?.id || item.shopProduct.product_id,
+          product_name: item.shopProduct.product?.name,
+          selling_price: item.shopProduct.selling_price,
           quantity: item.quantity,
         }))
       };
 
-      const response = await orderService.createOrder(orderData).catch(() => ({
-        data: { data: { id: Date.now() } } // Mock fallback สำหรับจำลอง
-      }));
-
-      clearCart();
-      navigate(`/shop/${slug}/payment/${response.data.data.id}`);
+      navigate(`/shop/${slug}/payment`, { state: { orderData, cartItems } });
     } catch (err) {
       setError('ไม่สามารถทำรายการได้ในขณะนี้ กรุณาตรวจสอบข้อมูลและลองใหม่อีกครั้ง');
     }
@@ -269,7 +268,7 @@ export default function CheckoutPage() {
                         <div className="flex gap-4">
                           <div className="w-20 h-20 rounded-xl overflow-hidden bg-neutral-50 flex-shrink-0 border border-neutral-100">
                             <img 
-                              src={item.shopProduct.product?.image_url} 
+                              src={getImageUrl(item.shopProduct.product?.image_url)} 
                               alt={item.shopProduct.product?.name}
                               className="w-full h-full object-cover group-hover/item:scale-110 transition-transform duration-700"
                             />
@@ -295,7 +294,18 @@ export default function CheckoutPage() {
                                 >
                                   <Minus className="h-3 w-3" />
                                 </button>
-                                <span className="w-8 text-center text-xs font-bold text-neutral-900">{item.quantity}</span>
+                                <input 
+                                  type="number"
+                                  min="1"
+                                  value={item.quantity}
+                                  onChange={(e) => {
+                                    const val = parseInt(e.target.value);
+                                    if (!isNaN(val)) {
+                                      handleUpdateQuantity(item.shopProduct.id, val);
+                                    }
+                                  }}
+                                  className="w-10 text-center text-xs font-bold text-neutral-900 bg-transparent border-none p-0 focus:ring-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                                />
                                 <button 
                                   onClick={(e) => { e.preventDefault(); handleUpdateQuantity(item.shopProduct.id, item.quantity + 1); }}
                                   className="w-7 h-7 rounded-md hover:bg-white flex items-center justify-center text-neutral-500 hover:text-neutral-900 transition-colors shadow-sm"

@@ -7,17 +7,10 @@ import { walletService } from '@/services/wallet.service';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
 import type { WalletLog } from '@/types';
 
-// Mock data
-const mockWallet = { id: 1, user_id: 1, balance: 12500 };
-const mockLogs: WalletLog[] = [
-  { id: 1, wallet_id: 1, order_id: 101, amount: 300, created_at: '2025-03-12T14:30:00Z', order: { order_number: 'ORD-ABC123' } as any },
-  { id: 2, wallet_id: 1, order_id: 102, amount: 600, created_at: '2025-03-11T09:15:00Z', order: { order_number: 'ORD-DEF456' } as any },
-  { id: 3, wallet_id: 1, order_id: 103, amount: 150, created_at: '2025-03-10T16:45:00Z', order: { order_number: 'ORD-GHI789' } as any },
-];
 
 export default function ResellerWallet() {
-  const [balance, setBalance] = useState(mockWallet.balance);
-  const [logs, setLogs] = useState<WalletLog[]>(mockLogs);
+  const [balance, setBalance] = useState(0);
+  const [logs, setLogs] = useState<WalletLog[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -30,9 +23,8 @@ export default function ResellerWallet() {
       const response = await walletService.getWalletLogs();
       setBalance(response.data.data.wallet.balance);
       setLogs(response.data.data.logs);
-    } catch {
-      setBalance(mockWallet.balance);
-      setLogs(mockLogs);
+    } catch (err) {
+      console.error("Failed to load wallet data", err);
     } finally {
       setLoading(false);
     }

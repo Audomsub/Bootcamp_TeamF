@@ -6,7 +6,7 @@ import { DataTable } from '@/components/ui/data-table';
 import { PageHeader, LoadingSpinner } from '@/components/ui/shared';
 import { ConfirmDialog } from '@/components/ui/modal';
 import { productService } from '@/services/product.service';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, getImageUrl } from '@/lib/utils';
 import type { Product } from '@/types';
 
 export default function AdminProducts() {
@@ -43,8 +43,14 @@ export default function AdminProducts() {
       setProducts((prev) => prev.filter((p) => p.id !== deleteId));
       setDeleteId(null);
     } catch (err: any) {
-      const message = err.response?.data?.message || 'ไม่สามารถลบสินค้าได้';
-      if (message.toLowerCase().includes('order') || message.toLowerCase().includes('pending')) {
+      let message = 'ไม่สามารถลบสินค้าได้';
+      if (typeof err.response?.data === 'string') {
+        message = err.response.data;
+      } else if (err.response?.data?.message) {
+        message = err.response.data.message;
+      }
+      
+      if (message.includes('ออเดอร์') || message.toLowerCase().includes('order') || message.toLowerCase().includes('pending')) {
         setError('ไม่สามารถลบสินค้าได้: สินค้านี้มีคำสั่งซื้อที่ค้างอยู่ กรุณาจัดการคำสั่งซื้อให้เสร็จสิ้นหรือยกเลิกก่อนดำเนินการลบ');
       } else {
         setError(message);
@@ -61,7 +67,7 @@ export default function AdminProducts() {
       enableSorting: false,
       cell: ({ row }) => (
         <img
-          src={row.original.image_url}
+          src={getImageUrl(row.original.image_url)}
           alt={row.original.name}
           className="w-12 h-12 rounded-xl object-cover bg-neutral-100 border border-neutral-200"
         />

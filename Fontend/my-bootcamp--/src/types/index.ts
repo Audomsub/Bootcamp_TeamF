@@ -31,6 +31,7 @@ export interface Product {
   cost_price: number;
   min_price: number;
   stock: number;
+  is_added?: boolean;
   created_at: string;
 }
 
@@ -130,6 +131,7 @@ export interface ResellerDashboardStats {
   pending_orders: number;
   shop_link: string;
   recent_orders: Order[];
+  sales_chart?: { date: string; amount: number; profit?: number }[];
 }
 
 // ─── API Response ────────────────────────────────

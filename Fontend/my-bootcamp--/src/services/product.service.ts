@@ -1,4 +1,5 @@
 import api from '@/lib/axios';
+import { getImageUrl } from '@/lib/utils';
 import type { Product, ApiResponse, PaginatedResponse } from '@/types';
 
 export interface BackendProduct {
@@ -16,7 +17,7 @@ const mapProduct = (p: BackendProduct): Product => ({
   id: p.id,
   name: p.productName,
   description: p.description,
-  image_url: p.imageUrl || 'https://placehold.co/100x100',
+  image_url: getImageUrl(p.imageUrl) || 'https://placehold.co/100x100',
   cost_price: p.costPrice,
   min_price: p.minSellPrice,
   stock: p.stock,
@@ -48,34 +49,27 @@ export const productService = {
 
   getById: async (id: number) => {
     // Since admin API doesn't have get by id, fetch all and filter
-    const res = await api.get<BackendProduct[]>('/admin/products');
-    const product = res.data.find(p => p.id === id);
+    const res = await api.get<{ content?: BackendProduct[] }>('/admin/products');
+    const productsArray = Array.isArray(res.data) ? res.data : (res.data.content || []);
+    const product = productsArray.find(p => p.id === id);
     if (!product) throw new Error('Product not found');
     return { data: { data: mapProduct(product) } };
   },
 
   create: (data: FormData) => {
-    const req = {
-      productName: data.get('name'),
-      description: data.get('description'),
-      costPrice: data.get('cost_price'),
-      minSellPrice: data.get('min_price'),
-      stock: data.get('stock'),
-      imageUrl: 'https://placehold.co/100x100?text=New', // Fake image url since backend doesn't support file upload
-    };
-    return api.post('/admin/products/add', req);
+    return api.post('/admin/products/add', data, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
   },
 
   update: (id: number, data: FormData) => {
-    const req = {
-      productName: data.get('name'),
-      description: data.get('description'),
-      costPrice: data.get('cost_price'),
-      minSellPrice: data.get('min_price'),
-      stock: data.get('stock'),
-      imageUrl: 'https://placehold.co/100x100?text=Updated',
-    };
-    return api.put(`/admin/products/edit/${id}`, req);
+    return api.put(`/admin/products/edit/${id}`, data, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
   },
 
   delete: (id: number) =>

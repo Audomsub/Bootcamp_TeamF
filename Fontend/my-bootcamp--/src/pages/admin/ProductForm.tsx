@@ -6,10 +6,11 @@ import { z } from 'zod';
 import { ArrowLeft, Upload, Loader2, AlertCircle } from 'lucide-react';
 import { PageHeader } from '@/components/ui/shared';
 import { productService } from '@/services/product.service';
+import { getImageUrl } from '@/lib/utils';
 
 const productSchema = z.object({
   name: z.string().min(1, 'กรุณาระบุชื่อสินค้า'),
-  description: z.string().min(1, 'กรุณาระบุรายละเอียดสินค้า'),
+  description: z.string().optional().or(z.literal('')),
   cost_price: z.coerce.number().min(0.01, 'ต้นทุนต้องมากกว่า 0'),
   min_price: z.coerce.number().min(0, 'ราคาขายขั้นต่ำต้องไม่ติดลบ'),
   stock: z.coerce.number().int().min(0, 'จำนวนสินค้าต้องไม่ติดลบ'),
@@ -59,7 +60,7 @@ export default function ProductForm() {
         min_price: product.min_price,
         stock: product.stock,
       });
-      setImagePreview(product.image_url);
+      setImagePreview(getImageUrl(product.image_url));
     } catch {
       navigate('/admin/products');
     }
@@ -90,6 +91,10 @@ export default function ProductForm() {
   const onSubmit = async (data: ProductForm) => {
     try {
       setError('');
+      if (!isEdit && !imageFile && !imagePreview) {
+        setError('กรุณาอัปโหลดรูปภาพสินค้า');
+        return;
+      }
       const formData = new FormData();
       Object.entries(data).forEach(([key, value]) =>
         formData.append(key, String(value))

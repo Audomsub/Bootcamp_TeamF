@@ -23,10 +23,15 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      localStorage.removeItem('shop');
-      window.location.href = '/login';
+      // Don't reload if the request was to the login endpoint, 
+      // otherwise we lose the ability to show the login error message on the screen.
+      const isLoginRequest = error.config?.url?.includes('/login');
+      if (!isLoginRequest && window.location.pathname !== '/login') {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        localStorage.removeItem('shop');
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

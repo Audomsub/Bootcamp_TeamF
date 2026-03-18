@@ -1,7 +1,7 @@
 import React from 'react';
 import { X, ShoppingBag, Plus, Minus, Trash2, ArrowRight } from 'lucide-react';
 import { useCart } from '../../contexts/CartContext';
-import { formatCurrency } from '../../lib/utils';
+import { formatCurrency, getImageUrl } from '../../lib/utils';
 import { Link, useParams } from 'react-router-dom';
 
 interface CartDrawerProps {
@@ -72,7 +72,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                     <div className="flex gap-5">
                       <div className="w-24 h-24 rounded-2xl overflow-hidden bg-neutral-50 flex-shrink-0">
                         <img
-                          src={item.shopProduct.product?.image_url}
+                          src={getImageUrl(item.shopProduct.product?.image_url)}
                           alt={item.shopProduct.product?.name}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
                         />
@@ -103,9 +103,26 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                             >
                               <Minus className="h-3 w-3" />
                             </button>
-                            <span className="w-8 text-center text-xs font-black text-neutral-900">{item.quantity}</span>
+                            <input
+                              type="number"
+                              min="1"
+                              value={item.quantity}
+                              onChange={(e) => {
+                                const val = parseInt(e.target.value);
+                                if (!isNaN(val) && val >= 1) {
+                                  const maxStock = item.shopProduct.product?.stock || val;
+                                  updateQuantity(item.shopProduct.id, Math.min(val, maxStock));
+                                }
+                              }}
+                              className="w-10 text-center text-xs font-black text-neutral-900 bg-transparent border-none p-0 focus:ring-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                            />
                             <button
-                              onClick={() => updateQuantity(item.shopProduct.id, item.quantity + 1)}
+                              onClick={() => {
+                                const maxStock = item.shopProduct.product?.stock || (item.quantity + 1);
+                                if (item.quantity + 1 <= maxStock) {
+                                  updateQuantity(item.shopProduct.id, item.quantity + 1);
+                                }
+                              }}
                               className="w-7 h-7 rounded-lg hover:bg-white flex items-center justify-center text-neutral-400 hover:text-neutral-900 transition-all"
                             >
                               <Plus className="h-3 w-3" />

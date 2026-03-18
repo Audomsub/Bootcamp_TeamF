@@ -6,14 +6,9 @@ import { orderService } from '@/services/order.service';
 import { formatCurrency, formatDate, cn } from '@/lib/utils';
 import type { Order } from '@/types';
 
-// Mock data (ปรับชื่อสินค้าเล็กน้อยเพื่อความสมจริง)
-const mockOrders: Order[] = [
-  { id: 1, order_number: 'ORD-ABC123', shop_id: 1, customer_name: 'สมชาย รักดี', customer_phone: '0812345678', shipping_address: 'กรุงเทพมหานคร', total_amount: 1500, reseller_profit: 300, status: 'pending', created_at: '2025-03-12', items: [{ id: 1, order_id: 1, product_id: 1, product_name: 'เสื้อยืดพรีเมียม', cost_price: 150, selling_price: 250, quantity: 2 }, { id: 2, order_id: 1, product_id: 2, product_name: 'เสื้อฮู้ดดี้คลาสสิก', cost_price: 350, selling_price: 500, quantity: 1 }] },
-  { id: 2, order_number: 'ORD-DEF456', shop_id: 1, customer_name: 'สมหญิง ใจงาม', customer_phone: '0898765432', shipping_address: 'เชียงใหม่', total_amount: 2400, reseller_profit: 600, status: 'shipped', created_at: '2025-03-11', items: [{ id: 3, order_id: 2, product_id: 5, product_name: 'รองเท้าวิ่ง นุ่มสบาย', cost_price: 800, selling_price: 1200, quantity: 2 }] },
-];
 
 export default function ResellerOrders() {
-  const [orders, setOrders] = useState<Order[]>(mockOrders);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -25,8 +20,8 @@ export default function ResellerOrders() {
       setLoading(true);
       const response = await orderService.getMyOrders();
       setOrders(response.data.data.data);
-    } catch {
-      setOrders(mockOrders);
+    } catch (err) {
+      console.error("Failed to load orders", err);
     } finally {
       setLoading(false);
     }

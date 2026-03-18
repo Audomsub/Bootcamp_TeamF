@@ -9,6 +9,7 @@ interface BackendOrder {
   shopName: string;
   items: string[];
   totalAmount: number;
+  resellerProfit: number;
   status: string;
   createdAt: string;
 }
@@ -21,7 +22,7 @@ const mapOrder = (o: BackendOrder): Order => ({
   customer_phone: '',
   shipping_address: '',
   total_amount: o.totalAmount,
-  reseller_profit: 0,
+  reseller_profit: o.resellerProfit || 0,
   status: (o.status?.toLowerCase() || 'pending') as 'pending' | 'shipped' | 'completed',
   created_at: o.createdAt,
   shop: { id: 0, user_id: 0, shop_name: o.shopName || '-', shop_slug: '' },
@@ -45,9 +46,9 @@ export const orderService = {
     return { data: { data: { data: mapped } } };
   },
 
-  // Admin - POST /admin/orders/status?status=SHIPPED
+  // Admin - POST /admin/orders/status?status=shipped
   updateStatus: (id: number, status: string) =>
-    api.post('/admin/orders/status', { orderId: id }, { params: { status: status.toUpperCase() } }),
+    api.post('/admin/orders/status', { orderId: id }, { params: { status: status.toLowerCase() } }),
 
   // Reseller
   getMyOrders: async (params?: { page?: number; size?: number }) => {
@@ -78,20 +79,50 @@ export const orderService = {
   },
 
   // Customer
-  createOrder: (data: {
-    shop_id: number;
-    customer_name: string;
-    customer_phone: string;
-    shipping_address: string;
-    items: { product_id: number; quantity: number }[];
-  }) => api.post('/shop/orders', data),
+  createOrder: (slug: string, data: {
+    customerName: string;
+    customerPhone: string;
+    customerAddress: string;
+    items: { productId: number; quantity: number }[];
+  }) => api.post(`/shop/${slug}/checkout`, data),
 
-  trackOrder: (orderNumber: string) =>
-    api.get(`/shop/orders/track/${orderNumber}`),
+  trackOrder: async (orderNumber: string) => {
+    const res = await api.get('/track-order', { params: { orderNumber } });
+    const o = res.data;
+    if (!o) return res;
 
-  getOrderById: (id: number) =>
-    api.get(`/orders/${id}`),
+    // Map TrackOrderResponse to Frontend Order type
+    const mapped: Order = {
+      id: 0,
+      order_number: o.orderNumber,
+      shop_id: 0,
+      customer_name: o.customerName || '-', 
+      customer_phone: o.customerPhone || '-',
+      shipping_address: o.shippingAddress,
+      total_amount: o.totalAmount,
+      reseller_profit: 0,
+      status: (o.status?.toLowerCase() || 'pending') as any,
+      created_at: o.createdAt,
+      items: (o.items || []).map((item: any, i: number) => {
+        // Now it's an object from TrackOrderItemResponse
+        return {
+          id: i,
+          order_id: 0,
+          product_id: 0,
+          product_name: item.productName || '-',
+          cost_price: 0,
+          selling_price: item.sellingPrice || 0,
+          quantity: item.quantity || 1,
+        };
+      }),
+    };
 
-  simulatePayment: (orderId: number) =>
-    api.post(`/orders/${orderId}/pay`),
+    return { data: { data: mapped } };
+  },
+
+  getOrderById: (slug: string, id: number) =>
+    api.get(`/shop/${slug}/order/${id}`),
+
+  simulatePayment: (slug: string, orderId: number) =>
+    api.post(`/shop/${slug}/payment/${orderId}`),
 };

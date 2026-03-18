@@ -5,19 +5,14 @@ import { DataTable } from '@/components/ui/data-table';
 import { PageHeader, LoadingSpinner } from '@/components/ui/shared';
 import { Modal, ConfirmDialog } from '@/components/ui/modal';
 import { shopService } from '@/services/shop.service';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, getImageUrl } from '@/lib/utils';
 import type { ShopProduct, Product } from '@/types';
 
 type MyProductItem = ShopProduct & { product: Product };
 
-// Mock data (ปรับชื่อสินค้าให้เป็นภาษาไทยเล็กน้อยเพื่อความสมจริง)
-const mockMyProducts: MyProductItem[] = [
-  { id: 1, shop_id: 1, product_id: 1, selling_price: 299, product: { id: 1, name: 'เสื้อยืดพรีเมียม (Premium T-Shirt)', description: '', image_url: 'https://placehold.co/100', cost_price: 150, min_price: 250, stock: 100, created_at: '' } },
-  { id: 2, shop_id: 1, product_id: 2, selling_price: 590, product: { id: 2, name: 'เสื้อฮู้ดดี้คลาสสิก (Classic Hoodie)', description: '', image_url: 'https://placehold.co/100', cost_price: 350, min_price: 500, stock: 50, created_at: '' } },
-];
 
 export default function ResellerMyProducts() {
-  const [products, setProducts] = useState<MyProductItem[]>(mockMyProducts);
+  const [products, setProducts] = useState<MyProductItem[]>([]);
   const [loading, setLoading] = useState(false);
 
   const [editItem, setEditItem] = useState<MyProductItem | null>(null);
@@ -38,8 +33,8 @@ export default function ResellerMyProducts() {
       const response = await shopService.getMyProducts();
       // Spring Page structure: { content: [], ... }
       setProducts(response.data.content || response.data.data || []);
-    } catch {
-      setProducts(mockMyProducts);
+    } catch (err) {
+      console.error("Failed to load my products", err);
     } finally {
       setLoading(false);
     }
@@ -90,7 +85,7 @@ export default function ResellerMyProducts() {
       cell: ({ row }) => (
         <div className="flex items-center gap-4">
           <img
-            src={row.original.product.image_url}
+            src={getImageUrl(row.original.product.image_url)}
             alt={row.original.product.name}
             className="w-12 h-12 rounded-xl object-cover bg-neutral-50 border border-neutral-100 shadow-sm"
           />
@@ -179,7 +174,7 @@ export default function ResellerMyProducts() {
           <div className="space-y-5">
             <div className="bg-neutral-50 p-4 rounded-xl border border-neutral-100 flex items-center gap-4">
               <img
-                src={editItem.product.image_url}
+                src={getImageUrl(editItem.product.image_url)}
                 alt={editItem.product.name}
                 className="w-12 h-12 rounded-lg object-cover bg-white shadow-sm border border-neutral-200"
               />

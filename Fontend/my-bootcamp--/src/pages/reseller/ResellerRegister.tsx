@@ -40,7 +40,7 @@ export default function ResellerRegister() {
       console.log('Form data being sent:', data);
       const response = await authService.register(data);
       console.log('Register response:', response.data);
-      
+
       // จัดการ response จาก backend
       let responseMessage = '';
       if (typeof response.data === 'string') {
@@ -50,7 +50,7 @@ export default function ResellerRegister() {
       } else {
         responseMessage = 'สมัครสมาชิกสำเร็จ';
       }
-      
+
       // Backend ส่งข้อความกลับมาว่า "สมัครสำเร็จ กรุณารอการอนุมัติจาก Admin"
       if (responseMessage.includes('สำเร็จ')) {
         setSuccess(true);
@@ -61,13 +61,13 @@ export default function ResellerRegister() {
       console.error('Register error:', err);
       console.error('Error response:', err.response?.data);
       console.error('Error status:', err.response?.status);
-      
+
       // จัดการ error response จาก backend
       let errorMessage = 'สมัครสมาชิกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
-      
+
       if (err.response?.data) {
         const errorData = err.response.data;
-        
+
         // ถ้า errorData เป็น object มี message field
         if (typeof errorData === 'object' && errorData !== null && 'message' in errorData) {
           errorMessage = (errorData as any).message;
@@ -85,7 +85,7 @@ export default function ResellerRegister() {
           errorMessage = 'ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบข้อมูลที่กรอกใหม่';
         }
       }
-      
+
       console.log('Final error message:', errorMessage);
       setError(errorMessage);
     }
@@ -184,11 +184,11 @@ export default function ResellerRegister() {
 
             <div>
               <label className="block text-sm font-semibold text-neutral-800 mb-1.5">ที่อยู่จัดส่ง / ติดต่อ</label>
-              <textarea 
-                {...register('address')} 
-                rows={3} 
-                className="input-field w-full resize-none" 
-                placeholder="บ้านเลขที่, ซอย, ถนน, ตำบล/แขวง, อำเภอ/เขต, จังหวัด, รหัสไปรษณีย์" 
+              <textarea
+                {...register('address')}
+                rows={3}
+                className="input-field w-full resize-none"
+                placeholder="บ้านเลขที่, ซอย, ถนน, ตำบล/แขวง, อำเภอ/เขต, จังหวัด, รหัสไปรษณีย์"
               />
               {errors.address && <p className="mt-1.5 text-xs font-medium text-rose-500">{errors.address.message}</p>}
             </div>

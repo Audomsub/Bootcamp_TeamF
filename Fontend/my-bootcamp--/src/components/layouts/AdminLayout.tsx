@@ -28,7 +28,7 @@ export default function AdminLayout() {
 
   const handleLogout = () => {
     logout();
-    navigate('/admin/login');
+    navigate('/login');
   };
 
   /*system time*/
@@ -153,7 +153,7 @@ export default function AdminLayout() {
                 <div className="relative">
                   <div className="w-12 h-12 bg-neutral-50 rounded-2xl flex items-center justify-center border border-neutral-200/50 overflow-hidden group-hover:border-primary-500/50 transition-colors duration-500">
                     <span className="text-sm font-black text-neutral-900 relative z-10 transition-transform duration-500 group-hover:scale-125">
-                      {user?.name?.charAt(0).toUpperCase() || 'A'}
+                      {(user?.name?.charAt(0) || 'A').toUpperCase()}
                     </span>
                     <div className="absolute inset-0 bg-gradient-to-tr from-primary-600/5 to-accent-600/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   </div>
