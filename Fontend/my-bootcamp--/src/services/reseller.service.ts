@@ -11,21 +11,27 @@ interface BackendUser {
   status: string;
   address: string;
   createdAt: string;
+  shop?: {
+    shop_name: string;
+  };
 }
 
 interface ResellerUser extends User {
   shop?: { shop_name: string };
 }
 
-const mapUser = (u: BackendUser): ResellerUser => ({
+const mapUser = (u: any): ResellerUser => ({
   id: u.id,
   name: u.name,
   email: u.email,
-  phone: u.phone,
+  phone: u.phone || '-',
   role: (u.role?.toLowerCase() || 'reseller') as 'admin' | 'reseller',
   status: (u.status?.toLowerCase() || 'pending') as 'pending' | 'approved' | 'rejected',
   address: u.address || '',
-  created_at: u.createdAt || '',
+  created_at: u.createdAt || u.created_at || '',
+  shop: u.shop ? {
+    shop_name: u.shop.shop_name
+  } : undefined
 });
 
 export const resellerService = {

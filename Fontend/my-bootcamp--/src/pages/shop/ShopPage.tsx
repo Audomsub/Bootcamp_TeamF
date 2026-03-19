@@ -9,7 +9,7 @@ import { useCart } from '@/contexts/CartContext';
 export default function ShopPage() {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const { addToCart } = useCart();
+  const { addToCart, setResellerEmail } = useCart();
 
   const [shopName, setShopName] = useState('');
   const [products, setProducts] = useState<any[]>([]);
@@ -52,6 +52,9 @@ export default function ShopPage() {
           totalElements: data.totalElements || 0,
           currentPage: data.currentPage || 0
         });
+        if (data.resellerEmail) {
+          setResellerEmail(data.resellerEmail);
+        }
       } else {
         setShopName('');
       }
@@ -252,7 +255,7 @@ export default function ShopPage() {
                       )}
 
                       {/* Stock badge */}
-                      {!outOfStock && item.stock <= 10 && (
+                      {!outOfStock && (
                         <div className="absolute bottom-2 left-2">
                           <span className="px-2 py-0.5 bg-[#ff2b5e] text-white text-[9px] font-bold rounded shadow-sm">
                             🔥 เหลือ {item.stock} ชิ้น

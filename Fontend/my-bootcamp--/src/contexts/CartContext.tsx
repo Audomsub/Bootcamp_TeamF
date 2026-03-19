@@ -8,6 +8,8 @@ interface CartItem {
 
 interface CartContextType {
   cartItems: CartItem[];
+  resellerEmail: string;
+  setResellerEmail: (email: string) => void;
   addToCart: (shopProduct: ShopProduct, quantity: number) => void;
   removeFromCart: (shopProductId: number) => void;
   updateQuantity: (shopProductId: number, quantity: number) => void;
@@ -24,9 +26,17 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return savedCart ? JSON.parse(savedCart) : [];
   });
 
+  const [resellerEmail, setResellerEmail] = useState<string>(() => {
+    return localStorage.getItem('reseller_email') || '';
+  });
+
   useEffect(() => {
     localStorage.setItem('shop_cart', JSON.stringify(cartItems));
   }, [cartItems]);
+
+  useEffect(() => {
+    localStorage.setItem('reseller_email', resellerEmail);
+  }, [resellerEmail]);
 
   const addToCart = (shopProduct: ShopProduct, quantity: number) => {
     setCartItems(prev => {
@@ -66,6 +76,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <CartContext.Provider value={{ 
       cartItems, 
+      resellerEmail,
+      setResellerEmail,
       addToCart, 
       removeFromCart, 
       updateQuantity, 

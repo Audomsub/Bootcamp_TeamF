@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { type ColumnDef } from '@tanstack/react-table';
-import { Truck, Download } from 'lucide-react';
+import { Truck, Download, CheckCircle2 } from 'lucide-react';
 import { DataTable } from '@/components/ui/data-table';
 import { PageHeader, LoadingSpinner } from '@/components/ui/shared';
 import { ConfirmDialog } from '@/components/ui/modal';
@@ -13,6 +13,7 @@ export default function AdminOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [shipId, setShipId] = useState<number | null>(null);
+  const [completeId, setCompleteId] = useState<number | null>(null);
   const [processing, setProcessing] = useState(false);
 
   useEffect(() => {
@@ -71,6 +72,23 @@ export default function AdminOrders() {
     } finally {
       setProcessing(false);
       setShipId(null);
+    }
+  };
+
+  const handleComplete = async () => {
+    if (!completeId) return;
+    try {
+      setProcessing(true);
+      await orderService.updateStatus(completeId, 'completed');
+      setOrders((prev) =>
+        prev.map((o) => (o.id === completeId ? { ...o, status: 'completed' as const } : o))
+      );
+    } catch (err: any) {
+      const msg = err?.response?.data || 'เกิดข้อผิดพลาดในการอัปเดตสถานะ';
+      alert(typeof msg === 'string' ? msg : 'เกิดข้อผิดพลาดในการอัปเดตสถานะ');
+    } finally {
+      setProcessing(false);
+      setCompleteId(null);
     }
   };
 
@@ -175,16 +193,29 @@ export default function AdminOrders() {
       meta: { align: 'right' },
       enableSorting: false,
       cell: ({ row }) => {
-        if (row.original.status !== 'pending') return <div className="h-9" />; // Maintain row height
+        const { status, id } = row.original;
+        if (status === 'completed') return <div className="h-9" />;
+        
         return (
           <div className="flex items-center justify-end">
-            <button
-              onClick={() => setShipId(row.original.id)}
-              className="flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 shadow-sm hover:shadow-md hover:bg-emerald-100/50 hover:border-emerald-200 transition-all active:scale-95 group font-semibold text-sm"
-            >
-              <Truck className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
-              จัดส่งสินค้า
-            </button>
+            {status === 'pending' && (
+              <button
+                onClick={() => setShipId(id)}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 shadow-sm hover:shadow-md hover:bg-emerald-100/50 hover:border-emerald-200 transition-all active:scale-95 group font-semibold text-sm"
+              >
+                <Truck className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+                จัดส่งสินค้า
+              </button>
+            )}
+            {status === 'shipped' && (
+              <button
+                onClick={() => setCompleteId(id)}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 text-blue-700 border border-blue-100 shadow-sm hover:shadow-md hover:bg-blue-100/50 hover:border-blue-200 transition-all active:scale-95 group font-semibold text-sm"
+              >
+                <CheckCircle2 className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                ส่งมอบเสร็จสิ้น
+              </button>
+            )}
           </div>
         );
       },
@@ -225,6 +256,16 @@ export default function AdminOrders() {
         title="ยืนยันการจัดส่ง"
         message="คุณแน่ใจหรือไม่ว่าต้องการเปลี่ยนสถานะคำสั่งซื้อนี้เป็น 'จัดส่งแล้ว'? ระบบจะส่งการแจ้งเตือนไปยังลูกค้า"
         confirmText="ยืนยันการจัดส่ง"
+        isLoading={processing}
+      />
+
+      <ConfirmDialog
+        isOpen={completeId !== null}
+        onClose={() => setCompleteId(null)}
+        onConfirm={handleComplete}
+        title="ยืนยันการเสร็จสิ้นออเดอร์"
+        message="คุณแน่ใจหรือไม่ว่าต้องการเปลี่ยนสถานะคำสั่งซื้อนี้เป็น 'เสร็จสิ้น'? การดำเนินการนี้ไม่สามารถย้อนกลับได้"
+        confirmText="ส่งมอบเสร็จสิ้น"
         isLoading={processing}
       />
     </div>

@@ -76,10 +76,10 @@ export default function AdminResellers() {
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 bg-primary-500/10 border border-primary-500/20 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
             <span className="text-sm font-bold text-primary-600">
-              {row.original.name.charAt(0)}
+              {row.original.name ? row.original.name.charAt(0) : '?'}
             </span>
           </div>
-          <span className="font-semibold text-neutral-900">{row.original.name}</span>
+          <span className="font-semibold text-neutral-900">{row.original.name || '-'}</span>
         </div>
       ),
     },

@@ -7,9 +7,10 @@ interface EmailNotificationProps {
   orderNumber: string;
   customerName: string;
   totalAmount: number;
+  resellerEmail: string;
 }
 
-export default function EmailNotification({ show, onClose, orderNumber, customerName, totalAmount }: EmailNotificationProps) {
+export default function EmailNotification({ show, onClose, orderNumber, customerName, totalAmount, resellerEmail }: EmailNotificationProps) {
   const [step, setStep] = useState(0); // 0=sending, 1=sent
 
   useEffect(() => {
@@ -60,7 +61,7 @@ export default function EmailNotification({ show, onClose, orderNumber, customer
               <div className="bg-neutral-50 dark:bg-neutral-700/50 rounded-xl p-4 space-y-3 border border-neutral-100 dark:border-neutral-600">
                 <div className="flex items-center gap-2 text-xs">
                   <span className="font-bold text-neutral-400 w-10">ถึง:</span>
-                  <span className="font-medium text-neutral-700 dark:text-neutral-300">reseller@shop.com</span>
+                  <span className="font-medium text-neutral-700 dark:text-neutral-300">{resellerEmail || 'reseller@shop.com'}</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs">
                   <span className="font-bold text-neutral-400 w-10">เรื่อง:</span>

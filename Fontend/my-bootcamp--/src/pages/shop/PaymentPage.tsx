@@ -10,7 +10,7 @@ export default function PaymentPage() {
   const { slug } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const { clearCart } = useCart();
+  const { clearCart, resellerEmail } = useCart();
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState('');
 
@@ -231,6 +231,7 @@ export default function PaymentPage() {
         orderNumber={emailData.orderNumber}
         customerName={emailData.customerName}
         totalAmount={emailData.totalAmount}
+        resellerEmail={resellerEmail}
       />
     </div>
   );

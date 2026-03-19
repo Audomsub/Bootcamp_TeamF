@@ -21,9 +21,6 @@ export default function ProtectedRoute({ role, requireApproval = false }: Protec
   }
 
   if (!user) {
-    if (role === 'admin') {
-      return <Navigate to="/admin/login" replace />;
-    }
     return <Navigate to="/login" replace />;
   }
 

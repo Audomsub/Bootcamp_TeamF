@@ -9,22 +9,36 @@ export function formatCurrency(amount: number): string {
   return `${new Intl.NumberFormat('th-TH').format(amount)}  บาท`;
 }
 
-export function formatDate(date: string): string {
-  return new Intl.DateTimeFormat('th-TH', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  }).format(new Date(date));
+export function formatDate(date: string | null | undefined): string {
+  if (!date) return '-';
+  try {
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return '-';
+    return new Intl.DateTimeFormat('th-TH', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    }).format(d);
+  } catch {
+    return '-';
+  }
 }
 
-export function formatDateTime(date: string): string {
-  return new Intl.DateTimeFormat('th-TH', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(date));
+export function formatDateTime(date: string | null | undefined): string {
+  if (!date) return '-';
+  try {
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return '-';
+    return new Intl.DateTimeFormat('th-TH', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(d);
+  } catch {
+    return '-';
+  }
 }
 
 export function getStatusColor(status: string): string {
