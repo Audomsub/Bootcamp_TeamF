@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Search, Plus, Package, CheckCircle2, TrendingUp, ShoppingCart, ArrowRight } from 'lucide-react';
-import { PageHeader, LoadingSpinner } from '@/components/ui/shared';
+import { PageHeader, LoadingSpinner, Pagination } from '@/components/ui/shared';
 import { Modal } from '@/components/ui/modal';
 import { shopService } from '@/services/shop.service';
 import { formatCurrency, getImageUrl } from '@/lib/utils';
@@ -12,6 +12,8 @@ export default function ResellerCatalog() {
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
   const [hasMore, setHasMore] = useState(true);
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -43,19 +45,29 @@ export default function ResellerCatalog() {
         created_at: p.createdAt || ''
       }));
 
-      if (isInitial || !Array.isArray(data)) {
+      if (Array.isArray(data)) {
         setProducts(mappedProducts);
+        setTotalPages(1);
+        setTotalElements(mappedProducts.length);
+        setHasMore(false);
+        setPage(0);
       } else {
-        setProducts(prev => [...prev, ...mappedProducts]);
+        setProducts(mappedProducts); // Replace, don't append
+        setTotalPages(data.totalPages || 0);
+        setTotalElements(data.totalElements || 0);
+        setHasMore(!data.last);
+        setPage(data.number || 0);
       }
-
-      setHasMore(Array.isArray(data) ? false : !data.last);
-      setPage(Array.isArray(data) ? 0 : data.number);
     } catch (err) {
       console.error('Failed to load catalog:', err);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePageChange = (newPage: number) => {
+    loadCatalog(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleLoadMore = () => {
@@ -235,27 +247,14 @@ export default function ResellerCatalog() {
           })}
         </div>
 
-        {hasMore && (
-          <div className="mt-12 flex justify-center">
-            <button
-              onClick={handleLoadMore}
-              disabled={loading}
-              className="group inline-flex items-center gap-3 px-8 py-3.5 bg-white border border-neutral-200 text-neutral-700 text-sm font-bold rounded-2xl hover:bg-neutral-900 hover:text-white hover:border-neutral-900 transition-all duration-300 shadow-sm hover:shadow-lg disabled:opacity-50 disabled:pointer-events-none"
-            >
-              {loading ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-neutral-300 border-t-neutral-600 rounded-full animate-spin" />
-                  <span>กำลังโหลด...</span>
-                </>
-              ) : (
-                <>
-                  <span>โหลดสินค้าเพิ่มเติม</span>
-                  <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
-                </>
-              )}
-            </button>
-          </div>
-        )}
+        <Pagination
+          pageIndex={page}
+          pageSize={20}
+          totalElements={totalElements}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          className="mt-12"
+        />
       </div>
 
       <Modal

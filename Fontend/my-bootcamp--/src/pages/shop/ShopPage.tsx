@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Store, ShoppingCart, CheckCircle2, Package, ArrowRight, Sparkles, Star, MapPin, Search, X } from 'lucide-react';
-import { LoadingSpinner, EmptyState } from '@/components/ui/shared';
+import { LoadingSpinner, EmptyState, Pagination } from '@/components/ui/shared';
 import { shopService } from '@/services/shop.service';
 import { formatCurrency, getImageUrl } from '@/lib/utils';
 import { useCart } from '@/contexts/CartContext';
@@ -46,11 +46,7 @@ export default function ShopPage() {
 
       if (data && data.shopName) {
         setShopName(data.shopName);
-        if (page === 0) {
-          setProducts(data.productResponses || []);
-        } else {
-          setProducts(prev => [...prev, ...(data.productResponses || [])]);
-        }
+        setProducts(data.productResponses || []); // Always replace
         setPagination({
           totalPages: data.totalPages || 0,
           totalElements: data.totalElements || 0,
@@ -67,9 +63,10 @@ export default function ShopPage() {
     }
   };
 
-  const handleLoadMore = () => {
-    if (slug && pagination.currentPage < pagination.totalPages - 1) {
-      loadShop(slug, pagination.currentPage + 1);
+  const handlePageChange = (newPage: number) => {
+    if (slug) {
+      loadShop(slug, newPage);
+      window.scrollTo({ top: 300, behavior: 'smooth' });
     }
   };
 
@@ -179,7 +176,7 @@ export default function ShopPage() {
             <h2 className="text-base font-bold text-neutral-900 uppercase tracking-tight">สินค้าทั้งหมด</h2>
             {searchQuery && (
               <span className="text-xs font-bold text-neutral-400">
-                พบ {filteredProducts.length} จาก {products.length} รายการ
+                พบ {filteredProducts.length} ในหน้านี้ จาก {pagination.totalElements} รายการ
               </span>
             )}
           </div>
@@ -315,28 +312,14 @@ export default function ShopPage() {
               })}
             </div>
 
-            {/* ── Load More ── */}
-            {hasMore && (
-              <div className="mt-12 flex justify-center pb-8">
-                <button
-                  onClick={handleLoadMore}
-                  disabled={loadingMore}
-                  className="group inline-flex items-center justify-center gap-2 px-10 py-3.5 bg-white border border-neutral-200 text-neutral-700 text-[13px] font-bold rounded-xl hover:text-[#ff2b5e] hover:border-[#ff2b5e] transition-all duration-300 shadow-sm disabled:opacity-50 disabled:pointer-events-none min-w-[200px]"
-                >
-                  {loadingMore ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-neutral-300 border-t-neutral-600 rounded-full animate-spin" />
-                      <span>กำลังโหลด...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>ดูสินค้าเพิ่มเติม</span>
-                      <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                    </>
-                  )}
-                </button>
-              </div>
-            )}
+            <Pagination
+              pageIndex={pagination.currentPage}
+              pageSize={12}
+              totalElements={pagination.totalElements}
+              totalPages={pagination.totalPages}
+              onPageChange={handlePageChange}
+              className="mt-8 pb-12"
+            />
           </>
         )}
       </div>

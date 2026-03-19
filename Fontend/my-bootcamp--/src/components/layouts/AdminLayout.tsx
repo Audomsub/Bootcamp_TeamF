@@ -67,7 +67,7 @@ export default function AdminLayout() {
       {/* Sidebar - Precision Light Glass Look */}
       <aside
         className={cn(
-          'fixed lg:sticky top-0 left-0 z-50 h-screen w-80 bg-white/80 backdrop-blur-2xl border-r border-neutral-200/50 transform transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] lg:translate-x-0 flex flex-col',
+          'fixed lg:sticky top-0 left-0 z-50 h-screen w-80 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-2xl border-r border-neutral-200/50 dark:border-neutral-800/50 transform transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] lg:translate-x-0 flex flex-col',
           sidebarOpen ? 'translate-x-0 shadow-[0_0_100px_rgba(0,0,0,0.1)]' : '-translate-x-full'
         )}
       >
@@ -81,7 +81,7 @@ export default function AdminLayout() {
               </div>
             </div>
             <div className="flex flex-col">
-              <span className="font-display font-black text-xl tracking-tighter text-neutral-900 leading-none">ADMIN PORTAL</span>
+              <span className="font-display font-black text-xl tracking-tighter text-neutral-900 dark:text-white leading-none">ADMIN PORTAL</span>
               <span className="text-[9px] font-black tracking-[0.3em] text-primary-600 uppercase mt-1.5">ระบบจัดการส่วนกลาง</span>
             </div>
             <button
@@ -114,10 +114,10 @@ export default function AdminLayout() {
                 onClick={() => setSidebarOpen(false)}
                 className={cn(
                   'group relative flex items-center gap-4 px-6 py-4 rounded-2xl transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]',
-                  'hover:bg-neutral-50 active:scale-[0.98]',
+                  'hover:bg-neutral-50 dark:hover:bg-neutral-800/50 active:scale-[0.98]',
                   isActive
-                    ? 'bg-primary-50 text-primary-600 shadow-sm'
-                    : 'text-neutral-500 hover:text-neutral-900'
+                    ? 'bg-primary-50 dark:bg-primary-950/30 text-primary-600 dark:text-primary-400 shadow-sm'
+                    : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
                 )}
               >
                 {/* Laser Active Indicator */}
@@ -131,12 +131,12 @@ export default function AdminLayout() {
                 <item.icon className={cn(
                   "h-5 w-5 transition-all duration-500",
                   isActive
-                    ? "text-primary-600 scale-110"
-                    : "text-neutral-400 group-hover:text-neutral-600 group-hover:scale-110"
+                    ? "text-primary-600 dark:text-primary-400 scale-110"
+                    : "text-neutral-400 group-hover:text-neutral-600 dark:group-hover:text-neutral-300 group-hover:scale-110"
                 )} />
                 <span className={cn(
                   "text-[13px] font-black uppercase tracking-widest transition-colors",
-                  isActive ? "text-primary-700" : "text-neutral-500 group-hover:text-neutral-900"
+                  isActive ? "text-primary-700 dark:text-primary-300" : "text-neutral-500 group-hover:text-neutral-900 dark:group-hover:text-white"
                 )}>
                   {item.label}
                 </span>
@@ -149,29 +149,29 @@ export default function AdminLayout() {
         <div className="p-6 mt-auto">
           <div className="relative group">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-primary-500 to-accent-500 rounded-[2rem] blur opacity-0 group-hover:opacity-10 transition-opacity duration-700"></div>
-            <div className="relative bg-white border border-neutral-100 shadow-sm rounded-[2rem] p-5">
+            <div className="relative bg-white dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800 shadow-sm rounded-[2rem] p-5">
               <div className="flex items-center gap-4">
                 <div className="relative">
-                  <div className="w-12 h-12 bg-neutral-50 rounded-2xl flex items-center justify-center border border-neutral-200/50 overflow-hidden group-hover:border-primary-500/50 transition-colors duration-500">
-                    <span className="text-sm font-black text-neutral-900 relative z-10 transition-transform duration-500 group-hover:scale-125">
+                  <div className="w-12 h-12 bg-neutral-50 dark:bg-neutral-800 rounded-2xl flex items-center justify-center border border-neutral-200/50 dark:border-neutral-700/50 overflow-hidden group-hover:border-primary-500/50 transition-colors duration-500">
+                    <span className="text-sm font-black text-neutral-900 dark:text-white relative z-10 transition-transform duration-500 group-hover:scale-125">
                       {(user?.name?.charAt(0) || 'A').toUpperCase()}
                     </span>
                     <div className="absolute inset-0 bg-gradient-to-tr from-primary-600/5 to-accent-600/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   </div>
-                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white dark:border-neutral-900 rounded-full"></div>
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-xs font-black text-neutral-900 truncate tracking-tight">{user?.name || 'Administrator'}</p>
+                    <p className="text-xs font-black text-neutral-900 dark:text-white truncate tracking-tight">{user?.name || 'Administrator'}</p>
                     <Shield className="h-3 w-3 text-primary-500 shrink-0" />
                   </div>
-                  <p className="text-[10px] text-neutral-500 truncate leading-none mt-1.5 font-black uppercase tracking-tighter">ผู้ดูแลระบบสูงสุด</p>
+                  <p className="text-[10px] text-neutral-500 dark:text-neutral-400 truncate leading-none mt-1.5 font-black uppercase tracking-tighter">ผู้ดูแลระบบสูงสุด</p>
                 </div>
               </div>
 
               <button
                 onClick={handleLogout}
-                className="w-full mt-5 flex items-center justify-between px-4 py-3 rounded-xl bg-neutral-50 text-[12px] font-black text-neutral-500 hover:text-white hover:bg-rose-600 transition-all duration-500 group/logout"
+                className="w-full mt-5 flex items-center justify-between px-4 py-3 rounded-xl bg-neutral-50 dark:bg-neutral-800 text-[12px] font-black text-neutral-500 dark:text-neutral-400 hover:text-white hover:bg-rose-600 transition-all duration-500 group/logout"
               >
                 <span>ออกจากระบบ</span>
                 <LogOut className="h-3.5 w-3.5 group-hover/logout:translate-x-1 transition-transform" />
@@ -184,16 +184,16 @@ export default function AdminLayout() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden overflow-y-auto custom-scrollbar">
         {/* Top Header - Glass Effect */}
-        <header className="h-20 bg-white/30 backdrop-blur-2xl border-b border-neutral-200/30 flex items-center px-10 sticky top-0 z-30 justify-between shrink-0">
+        <header className="h-20 bg-white/30 dark:bg-neutral-900/30 backdrop-blur-2xl border-b border-neutral-200/30 dark:border-neutral-800/30 flex items-center px-10 sticky top-0 z-30 justify-between shrink-0">
           <div className="flex items-center gap-6">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-3 bg-white rounded-2xl shadow-sm border border-neutral-200/50 hover:bg-neutral-50 transition-colors"
+              className="lg:hidden p-3 bg-white dark:bg-neutral-900 rounded-2xl shadow-sm border border-neutral-200/50 dark:border-neutral-800/50 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
             >
-              <Menu className="h-6 w-6 text-neutral-900" />
+              <Menu className="h-6 w-6 text-neutral-900 dark:text-white" />
             </button>
             <div className="hidden sm:flex flex-col">
-              <h1 className="text-lg font-black text-neutral-900 tracking-tight mt-1 capitalize leading-none">
+              <h1 className="text-lg font-black text-neutral-900 dark:text-white tracking-tight mt-1 capitalize leading-none">
                 {getPageTitle(location.pathname)}
               </h1>
             </div>
@@ -202,9 +202,9 @@ export default function AdminLayout() {
           <div className="flex items-center gap-6">
             <div className="hidden md:flex flex-col items-end mr-2">
               <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest leading-none">เวลาของระบบ</span>
-              <span className="text-xs font-bold text-neutral-900 mt-1">{time.toLocaleTimeString('th-TH')}</span>
+              <span className="text-xs font-bold text-neutral-900 dark:text-white mt-1">{time.toLocaleTimeString('th-TH')}</span>
             </div>
-            <div className="h-10 w-px bg-neutral-200/50 hidden sm:block"></div>
+            <div className="h-10 w-px bg-neutral-200/50 dark:bg-neutral-800/50 hidden sm:block"></div>
             <ThemeToggle />
             <div className="h-10 w-px bg-neutral-200/50 hidden sm:block"></div>
             <div className="flex flex-col items-end">

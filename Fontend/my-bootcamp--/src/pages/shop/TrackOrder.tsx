@@ -24,15 +24,23 @@ export default function TrackOrder() {
   }, [location]);
 
   const handleSearch = async (queryNumber: string = orderNumber) => {
-    if (!queryNumber.trim()) return;
+    // Sanitize input: Remove "#", "Order", spaces and convert to uppercase
+    const sanitizedQuery = queryNumber
+      .trim()
+      .replace(/^#\s*/, '')           // Remove leading # and any space after it
+      .replace(/^order\s+/i, '')      // Remove "Order " prefix (case insensitive)
+      .replace(/\s+/g, '')            // Remove all other spaces
+      .toUpperCase();
+
+    if (!sanitizedQuery) return;
 
     try {
       setLoading(true);
       setError('');
       setOrder(null);
 
-      console.log('🔍 Searching order:', queryNumber);
-      const response = await orderService.trackOrder(queryNumber);
+      console.log('🔍 Searching order:', sanitizedQuery);
+      const response = await orderService.trackOrder(sanitizedQuery);
       console.log('🔍 Track order response:', response);
 
       if (response && response.data?.data) {

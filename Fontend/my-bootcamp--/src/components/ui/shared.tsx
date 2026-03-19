@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import type { LucideIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 
 interface StatCardProps {
   title: string;
@@ -140,6 +141,81 @@ export function LoadingSpinner({ className, size = 'md' }: LoadingSpinnerProps) 
       <div className="relative">
         <div className={cn('opacity-10 border-neutral-900 rounded-full', sizeClasses[size])} />
         <div className={cn('absolute inset-0 border-transparent border-t-primary-600 rounded-full animate-spin', sizeClasses[size])} />
+      </div>
+    </div>
+  );
+}
+
+interface PaginationProps {
+  pageIndex: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+  onPageChange: (index: number) => void;
+  className?: string;
+}
+
+export function Pagination({
+  pageIndex,
+  pageSize,
+  totalElements,
+  totalPages,
+  onPageChange,
+  className,
+}: PaginationProps) {
+  if (totalPages <= 1) return null;
+
+  const start = pageIndex * pageSize + 1;
+  const end = Math.min((pageIndex + 1) * pageSize, totalElements);
+
+  return (
+    <div className={cn("flex flex-col sm:flex-row items-center justify-between gap-4 px-2 py-4", className)}>
+      <p className="text-sm font-medium text-neutral-500 order-2 sm:order-1">
+        Showing <span className="text-neutral-900 font-bold">{start}</span> to{' '}
+        <span className="text-neutral-900 font-bold">{end}</span> of{' '}
+        <span className="text-neutral-900 font-bold">{totalElements}</span> results
+      </p>
+      
+      <div className="flex items-center gap-1.5 order-1 sm:order-2">
+        <button
+          onClick={() => onPageChange(0)}
+          disabled={pageIndex === 0}
+          className="p-2 rounded-xl bg-white border border-neutral-200 text-neutral-500 hover:text-primary-600 hover:border-primary-200 hover:bg-primary-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95 shadow-sm"
+          title="First Page"
+        >
+          <ChevronsLeft className="h-4 w-4" />
+        </button>
+        <button
+          onClick={() => onPageChange(pageIndex - 1)}
+          disabled={pageIndex === 0}
+          className="p-2 rounded-xl bg-white border border-neutral-200 text-neutral-500 hover:text-primary-600 hover:border-primary-200 hover:bg-primary-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95 shadow-sm"
+          title="Previous Page"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+        
+        <div className="min-w-[80px] h-10 flex items-center justify-center bg-neutral-900 rounded-xl px-4 shadow-lg shadow-neutral-900/10">
+          <span className="text-xs font-black text-white tracking-widest leading-none">
+            {pageIndex + 1} <span className="text-neutral-500 mx-1">/</span> {totalPages}
+          </span>
+        </div>
+        
+        <button
+          onClick={() => onPageChange(pageIndex + 1)}
+          disabled={pageIndex >= totalPages - 1}
+          className="p-2 rounded-xl bg-white border border-neutral-200 text-neutral-500 hover:text-primary-600 hover:border-primary-200 hover:bg-primary-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95 shadow-sm"
+          title="Next Page"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </button>
+        <button
+          onClick={() => onPageChange(totalPages - 1)}
+          disabled={pageIndex >= totalPages - 1}
+          className="p-2 rounded-xl bg-white border border-neutral-200 text-neutral-500 hover:text-primary-600 hover:border-primary-200 hover:bg-primary-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95 shadow-sm"
+          title="Last Page"
+        >
+          <ChevronsRight className="h-4 w-4" />
+        </button>
       </div>
     </div>
   );
