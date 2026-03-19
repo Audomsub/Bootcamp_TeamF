@@ -48,9 +48,9 @@ public class JwtFilter extends OncePerRequestFilter {
                 }
 
             } catch (Exception error) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getWriter().write("Invalid Token");
-                return;
+                // If token is invalid, just log it and continue. 
+                // Don't return 401 here, let the SecurityConfig decide if the endpoint is public or private.
+                System.out.println("Invalid Token received: " + error.getMessage());
             }
         }
 
