@@ -1,77 +1,82 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { CreditCard, CheckCircle2, Store, Truck, Loader2, Package, ShieldCheck } from 'lucide-react';
+import { useState } from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { CreditCard, Store, Truck, Loader2, Package, ShieldCheck } from 'lucide-react';
 import { orderService } from '@/services/order.service';
-import { formatCurrency } from '@/lib/utils';
-import type { Order } from '@/types';
-import { LoadingSpinner } from '@/components/ui/shared';
+import { formatCurrency, getImageUrl } from '@/lib/utils';
+import { useCart } from '@/contexts/CartContext';
 
 export default function PaymentPage() {
-  const { slug, order_id } = useParams();
+  const { slug } = useParams();
   const navigate = useNavigate();
-  const [order, setOrder] = useState<Order | null>(null);
-  const [loading, setLoading] = useState(true);
+  const location = useLocation();
+  const { clearCart } = useCart();
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (order_id) {
-      loadOrder(Number(order_id));
-    }
-  }, [order_id]);
+  // รับข้อมูลจาก CheckoutPage ผ่าน location.state
+  const orderData = location.state?.orderData as {
+    customerName: string;
+    customerPhone: string;
+    customerAddress: string;
+    totalAmount: number;
+    items: { productId: number; product_name?: string; selling_price: number; quantity: number }[];
+  } | undefined;
 
-  const loadOrder = async (orderId: number) => {
-    if (!slug) return;
-    try {
-      setLoading(true);
-      const response = await orderService.getOrderById(slug, orderId);
-      setOrder(response.data.data);
-    } catch (err) {
-      setError('ไม่สามารถโหลดข้อมูลคำสั่งซื้อเพื่อชำระเงินได้');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const cartItems = location.state?.cartItems as any[] | undefined;
+
+  // ถ้าไม่มีข้อมูล orderData (เช่น user เข้า URL ตรง) ให้แสดงหน้า error
+  if (!orderData || !cartItems) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4 font-sans">
+        <div className="w-20 h-20 bg-rose-50 rounded-3xl flex items-center justify-center mb-6 shadow-sm border border-rose-100">
+          <Package className="h-10 w-10 text-rose-500" />
+        </div>
+        <h2 className="text-2xl font-black text-neutral-900 tracking-tight mb-2">ไม่พบข้อมูลคำสั่งซื้อ</h2>
+        <p className="text-neutral-500 max-w-xs mb-8">กรุณาเพิ่มสินค้าลงตะกร้าและกรอกข้อมูลจัดส่งก่อนชำระเงิน</p>
+        <button onClick={() => navigate(`/shop/${slug}`)} className="btn-primary px-8 font-bold py-3">กลับไปที่ร้านค้า</button>
+      </div>
+    );
+  }
 
   const handlePayment = async () => {
-    if (!order_id || !slug || !order) return;
+    if (!slug) return;
     try {
       setProcessing(true);
       setError('');
-      // Simulate payment delay for premium feel
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Update order status via API
-      await orderService.simulatePayment(slug, Number(order_id));
-      
-      const num = (order as any).orderNumber || order.order_number;
-      
+
+      // สร้างออเดอร์จริงผ่าน API
+      const createData = {
+        customerName: orderData.customerName,
+        customerPhone: orderData.customerPhone,
+        customerAddress: orderData.customerAddress,
+        items: orderData.items.map(item => ({
+          productId: item.productId,
+          quantity: item.quantity,
+        })),
+      };
+
+      const response = await orderService.createOrder(slug, createData);
+      const createdOrder = response.data;
+
+      // ดึง orderNumber จาก response
+      const orderNumber = createdOrder?.orderNumber || createdOrder?.data?.orderNumber || createdOrder?.order_number || '';
+
+      // ล้างตะกร้าหลังสร้างออเดอร์สำเร็จ
+      clearCart();
+
       // Navigate to success/tracking
-      navigate('/track-order', { 
-        state: { orderId: num, success: true },
-        replace: true 
+      navigate('/track-order', {
+        state: { orderId: orderNumber, success: true },
+        replace: true,
       });
     } catch (err: any) {
-      console.error("Payment Error:", err);
-      setError('การชำระเงินล้มเหลว กรุณาลองใหม่อีกครั้ง');
+      console.error('Payment Error:', err);
+      setError(err?.response?.data?.message || 'การชำระเงินล้มเหลว กรุณาลองใหม่อีกครั้ง');
       setProcessing(false);
     }
   };
 
-  if (loading) return <LoadingSpinner />;
-  if (!order) return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4 font-sans">
-      <div className="w-20 h-20 bg-rose-50 rounded-3xl flex items-center justify-center mb-6 shadow-sm border border-rose-100">
-        <Package className="h-10 w-10 text-rose-500" />
-      </div>
-      <h2 className="text-2xl font-black text-neutral-900 tracking-tight mb-2">ไม่พบคำสั่งซื้อ</h2>
-      <p className="text-neutral-500 max-w-xs mb-8">เราไม่พบรายละเอียดสำหรับคำสั่งซื้อที่คุณกำลังค้นหา</p>
-      <button onClick={() => navigate(`/shop/${slug}`)} className="btn-primary px-8 font-bold py-3">กลับไปที่ร้านค้า</button>
-    </div>
-  );
-
-  const orderNumber = (order as any).orderNumber || order.order_number || '';
-  const totalAmount = (order as any).totalAmount || order.total_amount || 0;
+  const totalAmount = orderData.totalAmount;
 
   return (
     <div className="max-w-[1000px] mx-auto pb-32 px-4 sm:px-10 animate-in fade-in duration-1000 font-sans">
@@ -85,7 +90,7 @@ export default function PaymentPage() {
             <span className="text-[11px] font-bold text-primary-700 tracking-wider">ระบบชำระเงินปลอดภัย 100%</span>
           </div>
           <h1 className="text-4xl lg:text-5xl font-black text-neutral-900 tracking-tight mb-4">ดำเนินการชำระเงิน</h1>
-          <p className="text-neutral-500 font-bold tracking-widest text-xs">หมายเลขคำสั่งซื้อ: <span className="text-neutral-900">{orderNumber}</span></p>
+          <p className="text-neutral-500 font-bold tracking-widest text-xs">ตรวจสอบรายการสินค้าก่อนยืนยันชำระเงิน</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-start">
@@ -97,42 +102,29 @@ export default function PaymentPage() {
                 สรุปคำสั่งซื้อ
               </h3>
             </div>
-            
+
             <div className="p-8 lg:p-10">
-              <div className="space-y-6">
-                {order.items?.map((item: any, idx) => {
-                  if (typeof item === 'string') {
-                    // String items format: "ProductName (xQty)"
-                    const match = item.match(/(.+)\s*\(x(\d+)\)/);
-                    const name = match ? match[1] : item;
-                    const qty = match ? parseInt(match[2]) : 1;
-                    return (
-                      <div key={idx} className="flex justify-between items-center group">
-                        <div className="flex-1 min-w-0 pr-4">
-                          <p className="font-bold text-neutral-900 text-sm truncate">{name}</p>
-                          <p className="text-xs font-bold text-neutral-400 mt-1">
-                            {qty} ชิ้น
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  }
-                  
-                  // Fallback for object items
-                  return (
-                    <div key={idx} className="flex justify-between items-center group">
-                      <div className="flex-1 min-w-0 pr-4">
-                        <p className="font-bold text-neutral-900 text-sm truncate">{item.product_name || item.name}</p>
-                        <p className="text-xs font-bold text-neutral-400 mt-1">
-                          {item.quantity} ชิ้น @ {formatCurrency(item.selling_price || 0)}
-                        </p>
-                      </div>
-                      <p className="font-black text-neutral-900 text-sm ml-4 shrink-0">
-                        {formatCurrency((item.selling_price || 0) * (item.quantity || 1))}
+              <div className="space-y-4">
+                {cartItems.map((item: any, idx: number) => (
+                  <div key={idx} className="flex items-center gap-4 group">
+                    <div className="w-14 h-14 rounded-xl overflow-hidden bg-neutral-50 flex-shrink-0 border border-neutral-100">
+                      <img
+                        src={getImageUrl(item.shopProduct?.product?.image_url)}
+                        alt={item.shopProduct?.product?.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0 pr-4">
+                      <p className="font-bold text-neutral-900 text-sm truncate">{item.shopProduct?.product?.name}</p>
+                      <p className="text-xs font-bold text-neutral-400 mt-1">
+                        {item.quantity} ชิ้น @ {formatCurrency(item.shopProduct?.selling_price || 0)}
                       </p>
                     </div>
-                  );
-                })}
+                    <p className="font-black text-neutral-900 text-sm ml-4 shrink-0">
+                      {formatCurrency((item.shopProduct?.selling_price || 0) * (item.quantity || 1))}
+                    </p>
+                  </div>
+                ))}
               </div>
 
               <div className="mt-8 pt-8 border-t border-neutral-100 space-y-4">
@@ -153,7 +145,7 @@ export default function PaymentPage() {
             <div className="glass-card !bg-neutral-900 backdrop-blur-3xl !rounded-[2.5rem] p-8 lg:p-10 text-white shadow-2xl relative overflow-hidden group border-neutral-800">
               {/* Decorative elements */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/20 blur-[60px] rounded-full -mr-16 -mt-16 group-hover:bg-primary-500/30 transition-all duration-1000 pointer-events-none"></div>
-              
+
               <div className="relative z-10">
                 <div className="w-16 h-10 rounded-xl bg-gradient-to-br from-neutral-700 to-neutral-800 border border-neutral-600 mb-8 flex items-center justify-center shadow-inner">
                   <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">

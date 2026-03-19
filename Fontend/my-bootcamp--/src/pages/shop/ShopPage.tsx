@@ -186,7 +186,12 @@ export default function ShopPage() {
           <>
             {/* ── Grid ── */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-5">
-              {products.map((item: any, index: number) => {
+              {[...products].sort((a, b) => {
+                // สินค้าที่มีสต็อก (stock > 0) แสดงก่อน, สินค้าหมด (stock <= 0) แสดงหลัง
+                if (a.stock > 0 && b.stock <= 0) return -1;
+                if (a.stock <= 0 && b.stock > 0) return 1;
+                return 0;
+              }).map((item: any, index: number) => {
                 const isAdded = addedItem === item.productId;
                 const outOfStock = item.stock <= 0;
                 return (

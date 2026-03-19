@@ -84,7 +84,7 @@ export default function CheckoutPage() {
     }
 
     if (newQuantity < 1) return; // ป้องกันการปรับจำนวนติดลบหรือเท่ากับ 0
-    
+
     setError(null);
     updateQuantity(shopProductId, newQuantity);
   };
@@ -263,12 +263,19 @@ export default function CheckoutPage() {
                   </div>
 
                   <div className="space-y-3 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
-                    {cartItems.map((item) => (
+                    {[...cartItems].sort((a, b) => {
+                      const stockA = a.shopProduct.product?.stock ?? 0;
+                      const stockB = b.shopProduct.product?.stock ?? 0;
+                      // สินค้าที่มีสต็อก (stock > 0) แสดงก่อน, สินค้าหมด (stock === 0) แสดงหลัง
+                      if (stockA > 0 && stockB === 0) return -1;
+                      if (stockA === 0 && stockB > 0) return 1;
+                      return 0;
+                    }).map((item) => (
                       <div key={item.shopProduct.id} className="group/item relative bg-white rounded-2xl border border-neutral-100 p-3 hover:border-primary-200 hover:shadow-md transition-all duration-300">
                         <div className="flex gap-4">
                           <div className="w-20 h-20 rounded-xl overflow-hidden bg-neutral-50 flex-shrink-0 border border-neutral-100">
-                            <img 
-                              src={getImageUrl(item.shopProduct.product?.image_url)} 
+                            <img
+                              src={getImageUrl(item.shopProduct.product?.image_url)}
                               alt={item.shopProduct.product?.name}
                               className="w-full h-full object-cover group-hover/item:scale-110 transition-transform duration-700"
                             />
@@ -288,13 +295,13 @@ export default function CheckoutPage() {
                             <div className="flex items-center justify-between mt-2">
                               {/* ปุ่มปรับจำนวน */}
                               <div className="flex items-center bg-neutral-50 rounded-lg border border-neutral-200/60 p-0.5">
-                                <button 
+                                <button
                                   onClick={(e) => { e.preventDefault(); handleUpdateQuantity(item.shopProduct.id, item.quantity - 1); }}
                                   className="w-7 h-7 rounded-md hover:bg-white flex items-center justify-center text-neutral-500 hover:text-neutral-900 transition-colors shadow-sm"
                                 >
                                   <Minus className="h-3 w-3" />
                                 </button>
-                                <input 
+                                <input
                                   type="number"
                                   min="1"
                                   value={item.quantity}
@@ -306,7 +313,7 @@ export default function CheckoutPage() {
                                   }}
                                   className="w-10 text-center text-xs font-bold text-neutral-900 bg-transparent border-none p-0 focus:ring-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                                 />
-                                <button 
+                                <button
                                   onClick={(e) => { e.preventDefault(); handleUpdateQuantity(item.shopProduct.id, item.quantity + 1); }}
                                   className="w-7 h-7 rounded-md hover:bg-white flex items-center justify-center text-neutral-500 hover:text-neutral-900 transition-colors shadow-sm"
                                 >
