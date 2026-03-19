@@ -2,9 +2,9 @@ package com.example.bootcamp.controller;
 
 import com.example.bootcamp.dto.Request.ProductRequest;
 import com.example.bootcamp.dto.Request.UpdateOrderStatusRequest;
+import com.example.bootcamp.dto.Response.AdminDashboardResponse;
 import com.example.bootcamp.dto.Response.AdminOrderResponse;
 import com.example.bootcamp.entity.OrdersEntity;
-import com.example.bootcamp.entity.ProductsEntity;
 import com.example.bootcamp.service.AdminService;
 import com.example.bootcamp.service.ProductService;
 import jakarta.validation.Valid;
@@ -18,6 +18,22 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Admin Product & Order Management Controller
+ *
+ * Products:
+ *   GET    /admin/products            - List all products (paginated)
+ *   POST   /admin/products/add        - Add a new product (multipart/form-data)
+ *   PUT    /admin/products/edit/{id}  - Edit a product (multipart/form-data)
+ *   DELETE /admin/products/delete/{id} - Delete a product
+ *
+ * Orders:
+ *   GET  /admin/orders         - List all orders (paginated)
+ *   POST /admin/orders/status  - Update order status (e.g. → shipped)
+ *
+ * Dashboard:
+ *   GET  /admin/dashboard      - Summary statistics
+ */
 @RestController
 @RequestMapping("/admin")
 @CrossOrigin(origins = "*", allowedHeaders = "*", maxAge = 3600)
@@ -29,8 +45,10 @@ public class AdminProductController {
     @Autowired
     private AdminService adminService;
 
+    // ─── Products ────────────────────────────────────────────────────────────
+
     @GetMapping("/products")
-    public ResponseEntity<Page<ProductsEntity>> getAllProducts(
+    public ResponseEntity<Page<com.example.bootcamp.entity.ProductsEntity>> getAllProducts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
@@ -38,52 +56,48 @@ public class AdminProductController {
     }
 
     @PostMapping(value = "/products/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> addProducts(@Valid @ModelAttribute ProductRequest request) {
+    public ResponseEntity<String> addProduct(@Valid @ModelAttribute ProductRequest request) {
         String result = productService.addProduct(request);
-
         if (result.contains("สำเร็จ")) {
             return ResponseEntity.ok(result);
-        } else {
-            return ResponseEntity.badRequest().body(result);
         }
+        return ResponseEntity.badRequest().body(result);
     }
 
     @PutMapping(value = "/products/edit/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> editProducts(
+    public ResponseEntity<String> editProduct(
             @PathVariable Integer id,
             @Valid @ModelAttribute ProductRequest request) {
         String result = productService.editProduct(id, request);
-
         if ("แก้ไขสำเร็จ".equals(result)) {
             return ResponseEntity.ok(result);
         } else if ("ไม่พบสินค้านี้ในระบบ".equals(result)) {
             return ResponseEntity.status(404).body(result);
-        } else {
-            return ResponseEntity.badRequest().body(result);
         }
+        return ResponseEntity.badRequest().body(result);
     }
 
     @DeleteMapping("/products/delete/{id}")
     public ResponseEntity<String> deleteProduct(@PathVariable Integer id) {
         try {
             String message = productService.deleteProduct(id);
-            if (message.equals("ลบสินค้าสำเร็จ")) {
+            if ("ลบสินค้าสำเร็จ".equals(message)) {
                 return ResponseEntity.ok(message);
-            } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
             }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 
+    // ─── Orders ──────────────────────────────────────────────────────────────
+
     @GetMapping("/orders")
-    public ResponseEntity<Page<AdminOrderResponse>> getAllOrder(
+    public ResponseEntity<Page<AdminOrderResponse>> getAllOrders(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<AdminOrderResponse> adminOrderResponses = adminService.getAllOrder(pageable);
-        return ResponseEntity.ok(adminOrderResponses);
+        return ResponseEntity.ok(adminService.getAllOrder(pageable));
     }
 
     @PostMapping("/orders/status")
@@ -91,23 +105,20 @@ public class AdminProductController {
             @RequestBody UpdateOrderStatusRequest request,
             @RequestParam(name = "status") String status) {
         try {
-            System.out.println("=== UPDATE ORDER STATUS ===");
-            System.out.println("orderId: " + request.getOrderId());
-            System.out.println("status: " + status);
             OrdersEntity.Status orderStatus = OrdersEntity.Status.valueOf(status.toLowerCase());
             String message = adminService.updateOrderStatus(request.getOrderId(), orderStatus);
             return ResponseEntity.ok(message);
         } catch (IllegalArgumentException e) {
-            System.out.println("IllegalArgumentException: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("สถานะไม่ถูกต้อง: " + status);
         } catch (RuntimeException e) {
-            System.out.println("RuntimeException: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
+    // ─── Dashboard ────────────────────────────────────────────────────────────
+
     @GetMapping("/dashboard")
-    public ResponseEntity<com.example.bootcamp.dto.Response.AdminDashboardResponse> getDashboard() {
+    public ResponseEntity<AdminDashboardResponse> getDashboard() {
         return ResponseEntity.ok(adminService.getDashboardStatistics());
     }
 }

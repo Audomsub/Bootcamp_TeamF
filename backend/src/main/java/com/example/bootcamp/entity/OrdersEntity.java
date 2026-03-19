@@ -32,7 +32,7 @@ public class OrdersEntity {
     @Column(name = "customer_name", nullable = false)
     private String customerName;
 
-    @Column(name = "customer_phone", nullable = false)
+    @Column(name = "customer_phone", length = 20, nullable = true)
     private String customerPhone;
 
     @Column(name = "shipping_address", nullable = false, columnDefinition = "TEXT")

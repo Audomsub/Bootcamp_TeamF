@@ -22,7 +22,7 @@ public class UsersEntity {
     @Column(name = "password" , nullable = false)
     private String password;
 
-    @Column(name = "phone" , nullable = false)
+    @Column(name = "phone", length = 20)
     private String phone;
 
     @Enumerated(EnumType.STRING)

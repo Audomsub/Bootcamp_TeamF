@@ -35,7 +35,8 @@ public class AdminService {
     private WalletLogRepository walletLogRepository;
 
     public List<UsersEntity> getAllReseller() {
-        return userRepository.findAll();
+        // Return only resellers (role=reseller), pending status first
+        return userRepository.findByRoleOrderByStatusAscCreatedAtDesc(UsersEntity.Role.reseller);
     }
 
     @Transactional
@@ -100,7 +101,7 @@ public class AdminService {
             walletRepository.save(wallet);
 
             WalletLogsEntity log = new WalletLogsEntity();
-            log.setWallet(wallet);
+            log.setUser(reseller);   // user_id FK → users (ตาม SQL schema)
             log.setOrder(order);
             log.setAmount(order.getResellerProfit());
             walletLogRepository.save(log);
