@@ -21,16 +21,16 @@ import java.util.List;
  * Security Configuration
  *
  * Public endpoints (no auth required):
- *   - POST /login           — Unified login for Admin & Reseller
- *   - POST /register        — Reseller registration
- *   - GET  /shop/**         — Customer storefront (public)
- *   - GET  /track-order     — Customer order tracking (public)
- *   - GET  /catalog         — Public product catalog
- *   - OPTIONS /**           — CORS preflight
+ * - POST /login — Unified login for Admin & Reseller
+ * - POST /register — Reseller registration
+ * - GET /shop/** — Customer storefront (public)
+ * - GET /track-order — Customer order tracking (public)
+ * - GET /catalog — Public product catalog
+ * - OPTIONS /** — CORS preflight
  *
  * Protected endpoints:
- *   - /admin/**             — Requires ROLE_ADMIN
- *   - /reseller/**          — Requires ROLE_RESELLER
+ * - /admin/** — Requires ROLE_ADMIN
+ * - /reseller/** — Requires ROLE_RESELLER
  *
  * All other requests also require authentication.
  * The JWT filter sets the authentication context from the Bearer token.
@@ -48,8 +48,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // ─── Allow CORS preflight ───────────────────────────────
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
@@ -57,6 +56,11 @@ public class SecurityConfig {
                         // ─── Public: Auth endpoints ─────────────────────────────
                         .requestMatchers(HttpMethod.POST, "/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/register").permitAll()
+
+                        // ─── Public: Static Resources ──────────────────────────
+                        .requestMatchers("/", "/index.html", "/*.js", "/*.css", "/*.png", "/*.svg", "/*.ico",
+                                "/assets/**", "/static/**", "/uploads/**")
+                        .permitAll()
 
                         // ─── Public: Customer-facing endpoints ──────────────────
                         .requestMatchers(HttpMethod.GET, "/shop/**").permitAll()
@@ -71,8 +75,7 @@ public class SecurityConfig {
                         .requestMatchers("/reseller/**").hasRole("RESELLER")
 
                         // ─── Everything else requires authentication ─────────────
-                        .anyRequest().authenticated()
-                )
+                        .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
