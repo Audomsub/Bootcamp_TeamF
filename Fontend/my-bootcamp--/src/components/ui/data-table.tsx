@@ -9,8 +9,9 @@ import {
   type SortingState,
 } from '@tanstack/react-table';
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ArrowUpDown, Search } from 'lucide-react';
+import { ArrowUpDown, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Pagination } from './pagination';
 
 interface DataTableProps<TData> {
   columns: ColumnDef<TData, any>[];
@@ -128,48 +129,14 @@ export function DataTable<TData>({
 
         {/* Pagination */}
         {table.getPageCount() > 1 && (
-          <div className="flex items-center justify-between px-6 py-3 border-t border-gray-100">
-            <p className="text-sm text-gray-500">
-              Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{' '}
-              {Math.min(
-                (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
-                table.getFilteredRowModel().rows.length
-              )}{' '}
-              of {table.getFilteredRowModel().rows.length} results
-            </p>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => table.setPageIndex(0)}
-                disabled={!table.getCanPreviousPage()}
-                className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ChevronsLeft className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => table.previousPage()}
-                disabled={!table.getCanPreviousPage()}
-                className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </button>
-              <span className="px-3 py-1 text-sm text-gray-700">
-                {table.getState().pagination.pageIndex + 1} / {table.getPageCount()}
-              </span>
-              <button
-                onClick={() => table.nextPage()}
-                disabled={!table.getCanNextPage()}
-                className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                disabled={!table.getCanNextPage()}
-                className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ChevronsRight className="h-4 w-4" />
-              </button>
-            </div>
+          <div className="border-t border-gray-100">
+            <Pagination
+              pageIndex={table.getState().pagination.pageIndex}
+              pageSize={table.getState().pagination.pageSize}
+              totalCount={table.getFilteredRowModel().rows.length}
+              onPageChange={table.setPageIndex}
+              className="px-6 py-2"
+            />
           </div>
         )}
       </div>
