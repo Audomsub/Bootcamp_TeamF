@@ -20,14 +20,14 @@ import java.math.BigDecimal;
 
 /**
  * AuthService handles:
- *  1. Unified authentication (Admin + Reseller) via authenticate()
- *  2. Reseller registration via resellerRegister()
+ * 1. Unified authentication (Admin + Reseller) via authenticate()
+ * 2. Reseller registration via resellerRegister()
  *
  * Login flow:
- *   - Looks up user by email in the DB
- *   - Verifies password (BCrypt, with plain-text fallback for legacy data)
- *   - For resellers: checks status (pending → rejected cannot log in)
- *   - Returns JWT token + role in the response for frontend routing
+ * - Looks up user by email in the DB
+ * - Verifies password (BCrypt, with plain-text fallback for legacy data)
+ * - For resellers: checks status (pending → rejected cannot log in)
+ * - Returns JWT token + role in the response for frontend routing
  */
 @Service
 public class AuthService {
@@ -50,21 +50,30 @@ public class AuthService {
     /**
      * Authenticate a user by email and password.
      * Works for both Admin and Reseller roles.
-     * Returns a response with a JWT token if successful, or an error message otherwise.
+     * Returns a response with a JWT token if successful, or an error message
+     * otherwise.
      */
     public AdminLoginResponse authenticate(String email, String password) {
         return userRepository.findByEmail(email)
                 .map(user -> {
+                    // ── Debug Logging ───────────────────────────────────────────
+                    System.out.println("--- Login Debug ---");
+                    System.out.println("Email provided: [" + email + "]");
+                    System.out.println("Email found in DB: [" + user.getEmail() + "]");
+                    System.out.println("--- Password Check ---");
+
                     // ── Step 1: Verify password ──────────────────────────────────
                     boolean passwordMatches = false;
                     try {
                         passwordMatches = bCryptPasswordEncoder.matches(password, user.getPassword());
-                    } catch (Exception ignored) {
-                        // BCrypt may throw if hash is malformed
+                        System.out.println("BCrypt Match: " + passwordMatches);
+                    } catch (Exception e) {
+                        System.out.println("BCrypt Error: " + e.getMessage());
                     }
                     // Fallback: plain-text comparison (for seeded/legacy accounts)
                     if (!passwordMatches && password.equals(user.getPassword())) {
                         passwordMatches = true;
+                        System.out.println("Plain-text Fallback Match: " + passwordMatches);
                     }
 
                     if (!passwordMatches) {
@@ -107,13 +116,11 @@ public class AuthService {
 
                     // For resellers, also include shop information
                     if ("RESELLER".equals(roleName)) {
-                        shopRepository.findByUserId(user.getId()).ifPresent(shop ->
-                                builder.shop(ShopInfo.builder()
-                                        .id(shop.getId())
-                                        .shopName(shop.getShopName())
-                                        .shopSlug(shop.getShopSlug())
-                                        .build())
-                        );
+                        shopRepository.findByUserId(user.getId()).ifPresent(shop -> builder.shop(ShopInfo.builder()
+                                .id(shop.getId())
+                                .shopName(shop.getShopName())
+                                .shopSlug(shop.getShopSlug())
+                                .build()));
                     }
 
                     return builder.build();
