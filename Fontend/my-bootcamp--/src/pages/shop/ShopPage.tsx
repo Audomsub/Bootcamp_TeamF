@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Store, ShoppingCart, CheckCircle2, Package, ArrowRight, Sparkles, Star, MapPin } from 'lucide-react';
+import { Store, ShoppingCart, CheckCircle2, Package, ArrowRight, Sparkles, Star, MapPin, Search, X } from 'lucide-react';
 import { LoadingSpinner, EmptyState } from '@/components/ui/shared';
 import { shopService } from '@/services/shop.service';
 import { formatCurrency, getImageUrl } from '@/lib/utils';
@@ -13,6 +13,7 @@ export default function ShopPage() {
 
   const [shopName, setShopName] = useState('');
   const [products, setProducts] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [pagination, setPagination] = useState({
     totalPages: 0,
     totalElements: 0,
@@ -22,6 +23,11 @@ export default function ShopPage() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [addedItem, setAddedItem] = useState<number | null>(null);
+
+  // Filter products by search query
+  const filteredProducts = searchQuery.trim()
+    ? products.filter(p => p.productName?.toLowerCase().includes(searchQuery.toLowerCase()))
+    : products;
 
   useEffect(() => {
     if (slug) {
@@ -167,14 +173,45 @@ export default function ShopPage() {
       {/* ── Content ── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 gap-6 flex flex-col">
 
-        {/* ── Section Title ── */}
-        <div className="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm border border-neutral-100 mb-2">
+        {/* ── Search & Section Title ── */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-4 rounded-xl shadow-sm border border-neutral-100 mb-2">
           <div className="flex items-center gap-2">
             <h2 className="text-base font-bold text-neutral-900 uppercase tracking-tight">สินค้าทั้งหมด</h2>
+            {searchQuery && (
+              <span className="text-xs font-bold text-neutral-400">
+                พบ {filteredProducts.length} จาก {products.length} รายการ
+              </span>
+            )}
+          </div>
+          <div className="relative w-full sm:w-72">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="ค้นหาสินค้า..."
+              className="w-full pl-10 pr-9 py-2.5 bg-neutral-50 border border-neutral-200/60 rounded-xl text-sm font-medium text-neutral-800 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#ff2b5e]/20 focus:border-[#ff2b5e]/40 transition-all"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
         </div>
 
-        {products.length === 0 ? (
+        {filteredProducts.length === 0 && searchQuery ? (
+          <div className="py-24 bg-white rounded-2xl flex flex-col items-center gap-4 text-center border border-neutral-100 shadow-sm">
+            <div className="w-16 h-16 rounded-2xl bg-neutral-50 flex items-center justify-center">
+              <Search className="h-8 w-8 text-neutral-300" />
+            </div>
+            <p className="text-lg font-bold text-neutral-700">ไม่พบสินค้าที่ค้นหา</p>
+            <p className="text-sm text-neutral-400">ลองค้นหาด้วยคำอื่น หรือ <button onClick={() => setSearchQuery('')} className="text-[#ff2b5e] font-bold hover:underline">ดูสินค้าทั้งหมด</button></p>
+          </div>
+        ) : products.length === 0 ? (
           <div className="py-24 bg-white rounded-2xl flex flex-col items-center gap-4 text-center border border-neutral-100 shadow-sm">
             <div className="w-16 h-16 rounded-2xl bg-neutral-50 flex items-center justify-center">
               <ShoppingCart className="h-8 w-8 text-neutral-300" />
@@ -186,7 +223,7 @@ export default function ShopPage() {
           <>
             {/* ── Grid ── */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-5">
-              {[...products].sort((a, b) => {
+              {[...filteredProducts].sort((a, b) => {
                 // สินค้าที่มีสต็อก (stock > 0) แสดงก่อน, สินค้าหมด (stock <= 0) แสดงหลัง
                 if (a.stock > 0 && b.stock <= 0) return -1;
                 if (a.stock <= 0 && b.stock > 0) return 1;

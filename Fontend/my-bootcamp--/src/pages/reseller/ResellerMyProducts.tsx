@@ -31,8 +31,32 @@ export default function ResellerMyProducts() {
     try {
       setLoading(true);
       const response = await shopService.getMyProducts();
-      // Spring Page structure: { content: [], ... }
-      setProducts(response.data.content || response.data.data || []);
+      const data = response.data;
+
+      // Spring Boot Page structure: { content: [...], totalPages, ... }
+      const raw = Array.isArray(data)
+        ? data
+        : data.content || data.data || [];
+
+      // Map API response to frontend types
+      const mapped: MyProductItem[] = raw.map((item: any) => ({
+        id: item.id,
+        shop_id: item.shopId ?? item.shop_id,
+        product_id: item.productId ?? item.product_id ?? item.product?.id,
+        selling_price: item.sellingPrice ?? item.selling_price ?? 0,
+        product: {
+          id: item.product?.id ?? item.productId ?? 0,
+          name: item.product?.name ?? item.productName ?? '',
+          description: item.product?.description ?? '',
+          image_url: item.product?.image_url ?? item.product?.imageUrl ?? '',
+          cost_price: item.product?.cost_price ?? item.product?.costPrice ?? 0,
+          min_price: item.product?.min_price ?? item.product?.minSellPrice ?? item.product?.minPrice ?? 0,
+          stock: item.product?.stock ?? 0,
+          created_at: item.product?.created_at ?? item.product?.createdAt ?? '',
+        },
+      }));
+
+      setProducts(mapped);
     } catch (err) {
       console.error("Failed to load my products", err);
     } finally {
@@ -82,16 +106,25 @@ export default function ResellerMyProducts() {
     {
       id: 'product',
       header: 'สินค้า',
-      cell: ({ row }) => (
-        <div className="flex items-center gap-4">
-          <img
-            src={getImageUrl(row.original.product.image_url)}
-            alt={row.original.product.name}
-            className="w-12 h-12 rounded-xl object-cover bg-neutral-50 border border-neutral-100 shadow-sm"
-          />
-          <span className="font-semibold text-neutral-800">{row.original.product.name}</span>
-        </div>
-      ),
+      cell: ({ row }) => {
+        const imgUrl = row.original.product.image_url;
+        return (
+          <div className="flex items-center gap-4">
+            {imgUrl ? (
+              <img
+                src={getImageUrl(imgUrl)}
+                alt={row.original.product.name}
+                className="w-12 h-12 rounded-xl object-cover bg-neutral-50 border border-neutral-100 shadow-sm"
+              />
+            ) : (
+              <div className="w-12 h-12 rounded-xl bg-neutral-100 border border-neutral-200 flex items-center justify-center">
+                <span className="text-neutral-400 text-lg">📦</span>
+              </div>
+            )}
+            <span className="font-semibold text-neutral-800">{row.original.product.name}</span>
+          </div>
+        );
+      },
     },
     {
       id: 'min_price',

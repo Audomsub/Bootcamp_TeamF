@@ -19,8 +19,8 @@ export const shopService = {
     api.get<any>(`/catalog?page=${page}&size=${size}`),
 
   // Get my shop products
-  getMyProducts: () =>
-    api.get<any>('/reseller/products'),
+  getMyProducts: (page: number = 0, size: number = 100) =>
+    api.get<any>(`/reseller/products?page=${page}&size=${size}`),
 
   // Add product to shop
   addProduct: (data: { productId: number; sellingPrice: number }) =>

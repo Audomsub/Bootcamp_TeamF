@@ -4,6 +4,7 @@ import { DataTable } from '@/components/ui/data-table';
 import { PageHeader, LoadingSpinner } from '@/components/ui/shared';
 import { orderService } from '@/services/order.service';
 import { formatCurrency, formatDate, cn } from '@/lib/utils';
+import { Download } from 'lucide-react';
 import type { Order } from '@/types';
 
 
@@ -25,6 +26,29 @@ export default function ResellerOrders() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const exportCSV = () => {
+    if (orders.length === 0) return;
+    const BOM = '\uFEFF';
+    const headers = ['รหัสออเดอร์', 'ลูกค้า', 'สินค้า', 'ยอดรวม', 'กำไร', 'สถานะ', 'วันที่'];
+    const rows = orders.map(o => [
+      o.order_number,
+      o.customer_name,
+      `"${(o.items || []).map(i => `${i.product_name} x${i.quantity}`).join(', ')}"`,
+      o.total_amount,
+      o.reseller_profit,
+      o.status === 'completed' ? 'เสร็จสิ้น' : o.status === 'shipped' ? 'จัดส่งแล้ว' : 'รอดำเนินการ',
+      o.created_at || '-',
+    ]);
+    const csv = BOM + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `orders_${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   const columns: ColumnDef<Order>[] = [
@@ -111,7 +135,16 @@ export default function ResellerOrders() {
       <PageHeader 
         title="รายการคำสั่งซื้อ" 
         subtitle="ติดตามและตรวจสอบรายการสั่งซื้อทั้งหมดจากหน้าร้านของคุณ" 
-      />
+      >
+        <button
+          onClick={exportCSV}
+          disabled={orders.length === 0}
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <Download className="h-4 w-4" />
+          Export CSV
+        </button>
+      </PageHeader>
 
       <div className="glass-card bg-white/80 border-white/60 shadow-xl rounded-[2rem] p-6">
         <DataTable

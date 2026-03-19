@@ -4,6 +4,7 @@ import { CreditCard, Store, Truck, Loader2, Package, ShieldCheck } from 'lucide-
 import { orderService } from '@/services/order.service';
 import { formatCurrency, getImageUrl } from '@/lib/utils';
 import { useCart } from '@/contexts/CartContext';
+import EmailNotification from '@/components/EmailNotification';
 
 export default function PaymentPage() {
   const { slug } = useParams();
@@ -12,6 +13,10 @@ export default function PaymentPage() {
   const { clearCart } = useCart();
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState('');
+
+  // Email notification state
+  const [showEmailNotif, setShowEmailNotif] = useState(false);
+  const [emailData, setEmailData] = useState({ orderNumber: '', customerName: '', totalAmount: 0 });
 
   // รับข้อมูลจาก CheckoutPage ผ่าน location.state
   const orderData = location.state?.orderData as {
@@ -64,16 +69,27 @@ export default function PaymentPage() {
       // ล้างตะกร้าหลังสร้างออเดอร์สำเร็จ
       clearCart();
 
-      // Navigate to success/tracking
-      navigate('/track-order', {
-        state: { orderId: orderNumber, success: true },
-        replace: true,
+      // แสดง Email Notification จำลอง ก่อน navigate
+      setEmailData({
+        orderNumber,
+        customerName: orderData.customerName,
+        totalAmount: orderData.totalAmount,
       });
+      setShowEmailNotif(true);
+
     } catch (err: any) {
       console.error('Payment Error:', err);
       setError(err?.response?.data?.message || 'การชำระเงินล้มเหลว กรุณาลองใหม่อีกครั้ง');
       setProcessing(false);
     }
+  };
+
+  const handleEmailClose = () => {
+    setShowEmailNotif(false);
+    navigate('/track-order', {
+      state: { orderId: emailData.orderNumber, success: true },
+      replace: true,
+    });
   };
 
   const totalAmount = orderData.totalAmount;
@@ -154,7 +170,7 @@ export default function PaymentPage() {
                 </div>
 
                 <div className="space-y-4 mb-10">
-                  <h3 className="text-2xl font-black tracking-tight leading-tight">ยืนยันการ<br/>ชำระเงิน</h3>
+                  <h3 className="text-2xl font-black tracking-tight leading-tight">ยืนยันการ<br />ชำระเงิน</h3>
                   <p className="text-neutral-400 text-xs font-medium leading-relaxed max-w-[90%]">
                     * นี่คือระบบจำลองการชำระเงิน จะไม่มีการหักเงินจากบัญชีของคุณจริงในขั้นตอนนี้
                   </p>
@@ -208,6 +224,14 @@ export default function PaymentPage() {
           </div>
         </div>
       </div>
+
+      <EmailNotification
+        show={showEmailNotif}
+        onClose={handleEmailClose}
+        orderNumber={emailData.orderNumber}
+        customerName={emailData.customerName}
+        totalAmount={emailData.totalAmount}
+      />
     </div>
   );
 }

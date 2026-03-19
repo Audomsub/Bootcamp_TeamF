@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { type ColumnDef } from '@tanstack/react-table';
-import { Truck } from 'lucide-react';
+import { Truck, Download } from 'lucide-react';
 import { DataTable } from '@/components/ui/data-table';
 import { PageHeader, LoadingSpinner } from '@/components/ui/shared';
 import { ConfirmDialog } from '@/components/ui/modal';
@@ -31,6 +31,30 @@ export default function AdminOrders() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const exportCSV = () => {
+    if (orders.length === 0) return;
+    const BOM = '\uFEFF';
+    const headers = ['รหัสออเดอร์', 'ลูกค้า', 'ร้านค้าตัวแทน', 'สินค้า', 'ยอดรวม', 'กำไรตัวแทน', 'สถานะ', 'วันที่'];
+    const rows = orders.map(o => [
+      o.order_number,
+      o.customer_name,
+      o.shop?.shop_name || '-',
+      `"${(o.items || []).map(i => `${i.product_name} x${i.quantity}`).join(', ')}"`,
+      o.total_amount,
+      o.reseller_profit,
+      o.status === 'completed' ? 'เสร็จสิ้น' : o.status === 'shipped' ? 'จัดส่งแล้ว' : 'รอดำเนินการ',
+      o.created_at || '-',
+    ]);
+    const csv = BOM + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `admin_orders_${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   const handleShip = async () => {
@@ -174,7 +198,16 @@ export default function AdminOrders() {
       <PageHeader 
         title="รายการคำสั่งซื้อ" 
         subtitle="ดูและจัดการคำสั่งซื้อทั้งหมดในระบบ" 
-      />
+      >
+        <button
+          onClick={exportCSV}
+          disabled={orders.length === 0}
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <Download className="h-4 w-4" />
+          Export CSV
+        </button>
+      </PageHeader>
 
       <div className="glass-card bg-white/80 border-white/60 shadow-xl rounded-[2rem] p-6">
         <DataTable

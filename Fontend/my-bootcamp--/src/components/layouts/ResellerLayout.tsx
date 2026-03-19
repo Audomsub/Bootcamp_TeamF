@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import ThemeToggle from '@/components/ThemeToggle';
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -220,6 +221,8 @@ export default function ResellerLayout() {
               <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest leading-none">เวลา</span>
               <span className="text-xs font-bold text-neutral-900 mt-1">{time.toLocaleTimeString()}</span>
             </div>
+            <div className="h-10 w-px bg-neutral-200/50 hidden sm:block"></div>
+            <ThemeToggle />
             <div className="h-10 w-px bg-neutral-200/50 hidden sm:block"></div>
             <div className="flex flex-col items-end ">
               <span className="text-[9px] font-black text-neutral-400 uppercase tracking-widest leading-none">โหมดการทำงาน</span>

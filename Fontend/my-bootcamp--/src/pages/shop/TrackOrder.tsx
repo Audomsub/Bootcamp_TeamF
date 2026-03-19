@@ -16,29 +16,33 @@ export default function TrackOrder() {
 
   useEffect(() => {
     if (location.state?.success && location.state?.orderId) {
+      const orderNum = String(location.state.orderId);
       setSuccessMsg('ยืนยันการชำระเงินแล้ว คำสั่งซื้อของคุณกำลังดำเนินการ');
-      handleSearch(String(location.state.orderId));
+      setOrderNumber(orderNum);
+      handleSearch(orderNum);
     }
   }, [location]);
 
   const handleSearch = async (queryNumber: string = orderNumber) => {
-    if (!queryNumber.trim() && !queryNumber) return;
+    if (!queryNumber.trim()) return;
 
     try {
       setLoading(true);
       setError('');
+      setOrder(null);
 
-      const response = await orderService.trackOrder(queryNumber).catch(() => null);
+      console.log('🔍 Searching order:', queryNumber);
+      const response = await orderService.trackOrder(queryNumber);
+      console.log('🔍 Track order response:', response);
 
-      if (response && response.data.data) {
+      if (response && response.data?.data) {
         setOrder(response.data.data);
       } else {
         setError('ค้นหาไม่สำเร็จ ไม่พบคำสั่งซื้อนี้ในระบบของเรา');
-        setOrder(null);
       }
-    } catch {
+    } catch (err: any) {
+      console.error('🔍 Track order error:', err?.response?.status, err?.response?.data, err?.message);
       setError('ค้นหาไม่สำเร็จ ไม่พบคำสั่งซื้อนี้ในระบบของเรา');
-      setOrder(null);
     } finally {
       setLoading(false);
     }
