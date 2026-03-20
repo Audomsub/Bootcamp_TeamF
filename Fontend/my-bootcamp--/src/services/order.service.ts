@@ -39,11 +39,21 @@ const mapOrder = (o: BackendOrder): Order => ({
 
 export const orderService = {
   // Admin - GET /admin/orders
-  getAllOrders: async (_params?: { page?: number; status?: string }) => {
+  getAllOrders: async (params?: { page?: number; size?: number; status?: string }) => {
     // Backend returns Page<AdminOrderResponse>
-    const res = await api.get<{ content: BackendOrder[] }>('/admin/orders');
-    const mapped = (res.data.content || []).map(mapOrder);
-    return { data: { data: { data: mapped } } };
+    const res = await api.get('/admin/orders', { params });
+    const content = res.data.content || [];
+    const mapped = content.map(mapOrder);
+    
+    return {
+      data: {
+        content: mapped,
+        totalPages: res.data.totalPages || 0,
+        totalElements: res.data.totalElements || 0,
+        number: res.data.number || 0,
+        size: res.data.size || 10
+      }
+    };
   },
 
   // Admin - POST /admin/orders/status?status=shipped
@@ -59,7 +69,7 @@ export const orderService = {
       id: o.orderId,
       order_number: o.orderNumber,
       customer_name: o.customerName,
-      customer_phone: '', // Not provided by reseller order response for privacy or simplicity
+      customer_phone: o.customerPhone || '',
       total_amount: o.totalAmount,
       reseller_profit: o.myProfit,
       status: o.status.toLowerCase(),
@@ -75,7 +85,15 @@ export const orderService = {
       }),
     }));
     
-    return { data: { data: { data: mapped } } }; // Keep the expected wrapper for now to minimize frontend changes
+    return {
+      data: {
+        content: mapped,
+        totalPages: res.data.totalPages || 0,
+        totalElements: res.data.totalElements || 0,
+        number: res.data.number || 0,
+        size: res.data.size || 10
+      }
+    };
   },
 
   // Customer

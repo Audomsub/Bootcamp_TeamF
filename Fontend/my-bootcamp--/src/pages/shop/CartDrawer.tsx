@@ -1,7 +1,7 @@
 import React from 'react';
 import { X, ShoppingBag, Plus, Minus, Trash2, ArrowRight } from 'lucide-react';
 import { useCart } from '../../contexts/CartContext';
-import { formatCurrency, getImageUrl } from '../../lib/utils';
+import { formatCurrency, getImageUrl, cn } from '../../lib/utils';
 import { Link, useParams } from 'react-router-dom';
 
 interface CartDrawerProps {
@@ -110,20 +110,26 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                               onChange={(e) => {
                                 const val = parseInt(e.target.value);
                                 if (!isNaN(val) && val >= 1) {
-                                  const maxStock = item.shopProduct.product?.stock || val;
-                                  updateQuantity(item.shopProduct.id, Math.min(val, maxStock));
+                                  const stock = item.shopProduct.product?.stock ?? 999;
+                                  updateQuantity(item.shopProduct.id, Math.min(val, stock));
                                 }
                               }}
                               className="w-10 text-center text-xs font-black text-neutral-900 bg-transparent border-none p-0 focus:ring-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                             />
                             <button
                               onClick={() => {
-                                const maxStock = item.shopProduct.product?.stock || (item.quantity + 1);
-                                if (item.quantity + 1 <= maxStock) {
+                                const stock = item.shopProduct.product?.stock ?? 999;
+                                if (item.quantity < stock) {
                                   updateQuantity(item.shopProduct.id, item.quantity + 1);
                                 }
                               }}
-                              className="w-7 h-7 rounded-lg hover:bg-white flex items-center justify-center text-neutral-400 hover:text-neutral-900 transition-all"
+                              disabled={item.quantity >= (item.shopProduct.product?.stock ?? 999)}
+                              className={cn(
+                                "w-7 h-7 rounded-lg flex items-center justify-center transition-all",
+                                item.quantity >= (item.shopProduct.product?.stock ?? 999)
+                                  ? "bg-neutral-50 text-neutral-200 cursor-not-allowed"
+                                  : "hover:bg-white text-neutral-400 hover:text-neutral-900"
+                              )}
                             >
                               <Plus className="h-3 w-3" />
                             </button>

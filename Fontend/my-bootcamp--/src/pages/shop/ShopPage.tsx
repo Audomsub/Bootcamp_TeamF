@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Store, ShoppingCart, CheckCircle2, Package, ArrowRight, Sparkles, Star, MapPin, Search, X } from 'lucide-react';
 import { LoadingSpinner, EmptyState, Pagination } from '@/components/ui/shared';
+import { Modal } from '@/components/ui/modal';
 import { shopService } from '@/services/shop.service';
 import { formatCurrency, getImageUrl } from '@/lib/utils';
 import { useCart } from '@/contexts/CartContext';
@@ -9,7 +10,7 @@ import { useCart } from '@/contexts/CartContext';
 export default function ShopPage() {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const { addToCart, setResellerEmail } = useCart();
+  const { addToCart, cartItems, setResellerEmail } = useCart();
 
   const [shopName, setShopName] = useState('');
   const [products, setProducts] = useState<any[]>([]);
@@ -23,6 +24,7 @@ export default function ShopPage() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [addedItem, setAddedItem] = useState<number | null>(null);
+  const [viewProduct, setViewProduct] = useState<any>(null);
 
   // Filter products by search query
   const filteredProducts = searchQuery.trim()
@@ -229,21 +231,34 @@ export default function ShopPage() {
                 if (a.stock <= 0 && b.stock > 0) return 1;
                 return 0;
               }).map((item: any, index: number) => {
-                const isAdded = addedItem === item.productId;
-                const outOfStock = item.stock <= 0;
-                return (
+                  const isAdded = addedItem === item.productId;
+                  const outOfStock = item.stock <= 0;
+                  const cartItem = cartItems.find((ci: any) => ci.shopProduct.id === item.productId);
+                  const isMaxReached = cartItem && cartItem.quantity >= (item.stock || 0);
+
+                  return (
                   <div
                     key={`${item.productId}-${index}`}
                     className="w-full group bg-white rounded-[14px] overflow-hidden border border-neutral-100/80 hover:border-[#ff2b5e]/40 hover:shadow-[0_8px_20px_-8px_rgba(255,43,94,0.15)] transition-all duration-300 flex flex-col relative"
                   >
 
                     {/* Image */}
-                    <div className="relative aspect-square overflow-hidden bg-neutral-50 flex-shrink-0">
+                    <div 
+                      className="relative aspect-square overflow-hidden bg-neutral-50 flex-shrink-0 cursor-pointer"
+                      onClick={() => setViewProduct(item)}
+                    >
                       <img
                         src={getImageUrl(item.imageUrl) || 'https://placehold.co/400x400?text=No+Image'}
                         alt={item.productName}
                         className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${outOfStock ? 'opacity-50 grayscale' : ''}`}
                       />
+
+                      {/* Hover details overlay */}
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <span className="text-white text-xs font-bold bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/30">
+                          ดูรายละเอียด
+                        </span>
+                      </div>
 
                       {/* Out of stock overlay */}
                       {outOfStock && (
@@ -301,6 +316,8 @@ export default function ShopPage() {
                             </>
                           ) : outOfStock ? (
                             'สินค้าหมด'
+                          ) : isMaxReached ? (
+                            'ครบตามจำนวนสต็อก'
                           ) : (
                             <>
                               <ShoppingCart className="h-3.5 w-3.5" />
@@ -326,6 +343,65 @@ export default function ShopPage() {
           </>
         )}
       </div>
+
+      {/* ── Product Detail Modal ── */}
+      <Modal
+        isOpen={!!viewProduct}
+        onClose={() => setViewProduct(null)}
+        title="รายละเอียดสินค้า"
+        size="md"
+      >
+        {viewProduct && (() => {
+          const cartItem = cartItems.find((ci: any) => ci.shopProduct.id === viewProduct.productId);
+          const isMaxReached = cartItem && cartItem.quantity >= (viewProduct.stock || 0);
+          
+          return (
+            <div className="flex flex-col gap-6">
+              <div className="aspect-square w-full rounded-2xl overflow-hidden bg-neutral-100 border border-neutral-100">
+                <img
+                  src={getImageUrl(viewProduct.imageUrl) || 'https://placehold.co/400x400?text=No+Image'}
+                  alt={viewProduct.productName}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <h4 className="text-xl font-black text-neutral-900 leading-tight mb-2">{viewProduct.productName}</h4>
+                  <div className="flex items-baseline text-[#ff2b5e]">
+                    <span className="text-sm font-bold mr-1">฿</span>
+                    <span className="text-3xl font-black tracking-tight">{Number(viewProduct.sellingPrice).toLocaleString()}</span>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-neutral-50 rounded-2xl border border-neutral-100 italic space-y-2">
+                  <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">รายละเอียด</p>
+                  <p className="text-sm text-neutral-600 leading-relaxed whitespace-pre-wrap">
+                    {viewProduct.description || 'ไม่มีรายละเอียดสินค้า'}
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between p-3 border border-neutral-100 rounded-xl bg-white">
+                   <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">คงเหลือในระบบ</span>
+                   <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase ${viewProduct.stock > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
+                      {viewProduct.stock > 0 ? `พร้อมส่ง ${viewProduct.stock} ชิ้น` : 'สินค้าหมด'}
+                   </span>
+                </div>
+
+                <button
+                  onClick={() => {
+                    handleAddToCart(viewProduct);
+                    setViewProduct(null);
+                  }}
+                  disabled={viewProduct.stock <= 0 || isMaxReached}
+                  className="w-full py-4 bg-neutral-900 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-[#ff2b5e] hover:shadow-xl hover:shadow-[#ff2b5e]/20 transition-all active:scale-[0.98] disabled:bg-neutral-100 disabled:text-neutral-400 disabled:shadow-none"
+                >
+                  {viewProduct.stock <= 0 ? 'สินค้าหมด' : isMaxReached ? 'ครบตามจำนวนสต็อก' : 'เพิ่มลงตะกร้า'}
+                </button>
+              </div>
+            </div>
+          );
+        })()}
+      </Modal>
     </div>
   );
 }

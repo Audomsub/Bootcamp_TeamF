@@ -5,7 +5,6 @@ import {
   Users,
   Clock,
   TrendingUp,
-  UserCheck,
   UserPlus,
   Package,
   ArrowUpRight,
@@ -22,9 +21,9 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from 'recharts';
-import { PageHeader, LoadingSpinner } from '@/components/ui/shared';
+import { PageHeader, LoadingSpinner, StatCard } from '@/components/ui/shared';
 import { dashboardService } from '@/services/dashboard.service';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface DashboardData {
@@ -88,15 +87,9 @@ export default function AdminDashboard() {
   const profitRate = stats.total_sales > 0 ? (stats.total_reseller_profit / stats.total_sales) * 100 : 0;
   const adminRevenue = stats.total_sales - stats.total_reseller_profit;
 
-  // ── Chart Data (คำนวณจากข้อมูลจริง) ──
   const revenueBreakdown = [
     { name: 'รายได้แอดมิน', value: adminRevenue },
     { name: 'กำไรตัวแทน', value: stats.total_reseller_profit },
-  ];
-
-  const orderStatusData = [
-    { name: 'สำเร็จ', value: completedOrders },
-    { name: 'รอดำเนินการ', value: stats.pending_orders },
   ];
 
   const overviewBarData = [
@@ -113,13 +106,55 @@ export default function AdminDashboard() {
       />
 
       {/* ── Stat Cards optimized for Tablet/Desktop ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-5">
-        <StatCard label="ยอดขายรวม" value={formatCurrency(stats.total_sales)} sub="ออเดอร์ที่จัดส่ง/เสร็จสมบูรณ์" icon={DollarSign} color="emerald" />
-        <StatCard label="กำไรตัวแทนรวม" value={formatCurrency(stats.total_reseller_profit)} sub="ผลรวมกระเป๋าเงินตัวแทนทั้งหมด" icon={TrendingUp} color="blue" />
-        <StatCard label="คำสั่งซื้อทั้งหมด" value={stats.total_orders.toLocaleString()} sub="ออเดอร์ทั้งหมดในระบบ" icon={ShoppingCart} color="violet" />
-        <StatCard label="รอดำเนินการ" value={stats.pending_orders.toLocaleString()} sub="คำสั่งซื้อรอจัดส่ง" icon={Clock} color="amber" />
-        <StatCard label="ตัวแทนที่อนุมัติ" value={stats.total_resellers.toLocaleString()} sub="พาร์ทเนอร์ที่ใช้งานอยู่" icon={Users} color="cyan" />
-        <StatCard label="รออนุมัติ" value={stats.pending_resellers.toLocaleString()} sub="ผู้สมัครรอการตรวจสอบ" icon={UserPlus} color="rose" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
+        <StatCard
+          title="ยอดขายรวม"
+          value={formatCurrency(stats.total_sales)}
+          subtitle="ออเดอร์ที่จัดส่ง/เสร็จสมบูรณ์"
+          icon={DollarSign}
+          color="emerald"
+          className="glass-card bg-white/80 border-white/60 shadow-md"
+        />
+        <StatCard
+          title="กำไรตัวแทนรวม"
+          value={formatCurrency(stats.total_reseller_profit)}
+          subtitle="ผลรวมกระเป๋าเงินตัวแทนทั้งหมด"
+          icon={TrendingUp}
+          color="primary"
+          className="glass-card bg-white/80 border-white/60 shadow-md"
+        />
+        <StatCard
+          title="คำสั่งซื้อทั้งหมด"
+          value={stats.total_orders.toLocaleString()}
+          subtitle="ออเดอร์ทั้งหมดในระบบ"
+          icon={ShoppingCart}
+          color="indigo"
+          className="glass-card bg-white/80 border-white/60 shadow-md"
+        />
+        <StatCard
+          title="รอดำเนินการ"
+          value={stats.pending_orders.toLocaleString()}
+          subtitle="คำสั่งซื้อรอจัดส่ง"
+          icon={Clock}
+          color="amber"
+          className="glass-card bg-white/80 border-white/60 shadow-md"
+        />
+        <StatCard
+          title="ตัวแทนที่อนุมัติ"
+          value={stats.total_resellers.toLocaleString()}
+          subtitle="พาร์ทเนอร์ที่ใช้งานอยู่"
+          icon={Users}
+          color="primary"
+          className="glass-card bg-white/80 border-white/60 shadow-md"
+        />
+        <StatCard
+          title="รออนุมัติ"
+          value={stats.pending_resellers.toLocaleString()}
+          subtitle="ผู้สมัครรอการตรวจสอบ"
+          icon={UserPlus}
+          color="rose"
+          className="glass-card bg-white/80 border-white/60 shadow-md"
+        />
       </div>
 
       {/* ── Charts Row ── */}
@@ -239,10 +274,10 @@ export default function AdminDashboard() {
       </div>
 
       {/* ── Summary Cards ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <SummaryCard icon={ArrowUpRight} color="emerald" label="ค่าเฉลี่ยต่อออเดอร์" value={formatCurrency(avgOrderValue)} />
-        <SummaryCard icon={TrendingUp} color="blue" label="อัตรากำไรตัวแทน" value={`${profitRate.toFixed(1)}%`} />
-        <SummaryCard icon={Package} color="violet" label="ออเดอร์สำเร็จ" value={`${completedOrders.toLocaleString()} (${completionRate.toFixed(1)}%)`} />
+        <SummaryCard icon={TrendingUp} color="primary" label="อัตรากำไรตัวแทน" value={`${profitRate.toFixed(1)}%`} />
+        <SummaryCard icon={Package} color="indigo" label="ออเดอร์สำเร็จ" value={`${completedOrders.toLocaleString()} (${completionRate.toFixed(1)}%)`} />
         <SummaryCard icon={Clock} color="amber" label="ออเดอร์ค้างส่ง" value={`${stats.pending_orders.toLocaleString()} รายการ`} />
       </div>
     </div>
@@ -251,55 +286,25 @@ export default function AdminDashboard() {
 
 // ── Sub Components ──
 
-function StatCard({ label, value, sub, icon: Icon, color }: {
-  label: string; value: string; sub: string; icon: any; color: string;
-}) {
-  const colors: Record<string, { border: string; bg: string; text: string }> = {
-    emerald: { border: 'border-emerald-100', bg: 'bg-emerald-50', text: 'text-emerald-600' },
-    blue: { border: 'border-blue-100', bg: 'bg-blue-50', text: 'text-blue-600' },
-    violet: { border: 'border-violet-100', bg: 'bg-violet-50', text: 'text-violet-600' },
-    amber: { border: 'border-amber-100', bg: 'bg-amber-50', text: 'text-amber-600' },
-    cyan: { border: 'border-cyan-100', bg: 'bg-cyan-50', text: 'text-cyan-600' },
-    rose: { border: 'border-rose-100', bg: 'bg-rose-50', text: 'text-rose-600' },
-  };
-  const c = colors[color] || colors.blue;
-
-  return (
-    <div className={`bg-white rounded-2xl border ${c.border} p-6 shadow-sm hover:shadow-lg transition-all group relative overflow-hidden`}>
-      <div className={`absolute -top-6 -right-6 w-20 h-20 ${c.bg} rounded-full blur-2xl opacity-50 group-hover:opacity-80 transition-opacity`} />
-      <div className="relative flex items-start justify-between">
-        <div className="space-y-2">
-          <p className="text-sm font-medium text-neutral-500">{label}</p>
-          <p className="text-2xl font-bold text-neutral-900">{value}</p>
-          <p className="text-xs text-neutral-400">{sub}</p>
-        </div>
-        <div className={`w-11 h-11 ${c.bg} rounded-xl flex items-center justify-center`}>
-          <Icon className={`w-5 h-5 ${c.text}`} />
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function SummaryCard({ icon: Icon, color, label, value }: {
-  icon: any; color: string; label: string; value: string;
+  icon: any; color: 'primary' | 'emerald' | 'amber' | 'rose' | 'indigo'; label: string; value: string;
 }) {
   const bgMap: Record<string, string> = {
-    emerald: 'bg-emerald-50', blue: 'bg-blue-50', violet: 'bg-violet-50', amber: 'bg-amber-50',
+    primary: 'bg-primary-50', emerald: 'bg-emerald-50', indigo: 'bg-indigo-50', amber: 'bg-amber-50',
   };
   const textMap: Record<string, string> = {
-    emerald: 'text-emerald-500', blue: 'text-blue-500', violet: 'text-violet-500', amber: 'text-amber-500',
+    primary: 'text-primary-500', emerald: 'text-emerald-500', indigo: 'text-indigo-500', amber: 'text-amber-500',
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-neutral-100 p-5 shadow-sm">
-      <div className="flex items-center gap-2 mb-2">
-        <div className={`w-7 h-7 ${bgMap[color]} rounded-lg flex items-center justify-center`}>
-          <Icon className={`w-3.5 h-3.5 ${textMap[color]}`} />
+    <div className="glass-card bg-white/80 border-white/60 p-5 shadow-md rounded-[1.5rem] group hover:shadow-lg transition-all">
+      <div className="flex items-center gap-3 mb-3">
+        <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 group-hover:rotate-3", bgMap[color] || 'bg-neutral-100')}>
+          <Icon className={cn("w-4 h-4", textMap[color] || 'text-neutral-500')} />
         </div>
-        <span className="text-xs font-semibold text-neutral-500">{label}</span>
+        <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest leading-none">{label}</span>
       </div>
-      <p className="text-xl font-bold text-neutral-900">{value}</p>
+      <p className="text-xl font-black text-neutral-900 tracking-tight">{value}</p>
     </div>
   );
 }

@@ -85,7 +85,7 @@ export default function ResellerLayout() {
               </div>
             </div>
             <div className="flex flex-col min-w-0">
-              <h1 className="font-display font-black text-xl tracking-tighter text-neutral-900 truncate leading-none group-hover:text-accent-600 transition-colors">
+              <h1 className="font-display font-black text-xl tracking-tighter text-accent-600 dark:text-accent-400 truncate leading-none transition-colors">
                 {shop?.shop_name || 'ร้านค้าของฉัน'}
               </h1>
               <div className="flex items-center gap-2 mt-2">
@@ -119,10 +119,10 @@ export default function ResellerLayout() {
                 onClick={() => setSidebarOpen(false)}
                 className={cn(
                   'group relative flex items-center gap-4 px-6 py-4 rounded-2xl transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]',
-                  'hover:bg-neutral-50 active:scale-[0.98]',
+                  'active:scale-[0.98]',
                   isActive
-                    ? 'bg-accent-50 text-accent-600 shadow-sm'
-                    : 'text-neutral-500 hover:text-neutral-900'
+                    ? 'bg-white dark:bg-accent-950/30 text-accent-600 dark:text-accent-400 shadow-md border border-neutral-100/50'
+                    : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-50 dark:hover:bg-neutral-800/50'
                 )}
               >
                 {/* Laser Active Indicator - Emerald */}
@@ -136,12 +136,12 @@ export default function ResellerLayout() {
                 <item.icon className={cn(
                   "h-5 w-5 transition-all duration-500",
                   isActive
-                    ? "text-accent-600 scale-110"
-                    : "text-neutral-400 group-hover:text-neutral-600 group-hover:scale-110"
+                    ? "text-accent-600 dark:text-accent-400 scale-110"
+                    : "text-neutral-400 group-hover:text-neutral-600 dark:group-hover:text-neutral-300 group-hover:scale-110"
                 )} />
                 <span className={cn(
                   "text-[13px] font-black uppercase tracking-widest transition-colors",
-                  isActive ? "text-accent-700" : "text-neutral-500 group-hover:text-neutral-900"
+                  isActive ? "text-accent-700 dark:text-accent-300" : "text-neutral-500 group-hover:text-neutral-900 dark:group-hover:text-white"
                 )}>
                   {item.label}
                 </span>
@@ -153,7 +153,7 @@ export default function ResellerLayout() {
 
 
         {/* User Footer - Integrated Status Section */}
-        <div className="mt-auto border-t border-neutral-100 bg-neutral-50/40 p-8">
+        <div className="mt-auto border-t border-neutral-100/50 dark:border-neutral-800/50 p-8">
           <div className="flex items-center gap-4 group">
             <div className="relative">
               <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center border border-neutral-200/50 overflow-hidden shadow-sm group-hover:border-accent-500/50 transition-all duration-500">
@@ -164,11 +164,11 @@ export default function ResellerLayout() {
               </div>
               <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-accent-500 border-2 border-white rounded-full"></div>
             </div>
-            
+
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <p className="text-xs font-black text-neutral-900 truncate tracking-tight group-hover:text-accent-600 transition-colors uppercase">
-                  {user?.name || 'ผู้ดูแลระบบ'}
+                <p className="text-xs font-black text-accent-600 dark:text-accent-400 truncate tracking-tight transition-colors uppercase">
+                  {user?.name}
                 </p>
                 <div className="w-1 h-1 rounded-full bg-neutral-300"></div>
                 <Store className="h-3 w-3 text-accent-500 shrink-0" />
@@ -219,7 +219,7 @@ export default function ResellerLayout() {
               </a>
             )}
             <div className="hidden md:flex flex-col items-end mr-2">
-              <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest leading-none">เวลา</span>
+              <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest leading-none">เวลาของระบบ</span>
               <span className="text-xs font-bold text-neutral-900 mt-1">{time.toLocaleTimeString()}</span>
             </div>
             <div className="h-10 w-px bg-neutral-200/50 hidden sm:block"></div>
@@ -227,7 +227,7 @@ export default function ResellerLayout() {
             <div className="h-10 w-px bg-neutral-200/50 hidden sm:block"></div>
             <div className="flex flex-col items-end ">
               <span className="text-[9px] font-black text-neutral-400 uppercase tracking-widest leading-none">โหมดการทำงาน</span>
-              <span className="text-[11px] font-bold text-neutral-900 mt-1 uppercase">ปกติ</span>
+              <span className="text-[11px] font-bold text-neutral-900 dark:text-white mt-1 uppercase">ปกติ</span>
             </div>
           </div>
         </header>

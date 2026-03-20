@@ -50,7 +50,9 @@ export default function TrackOrder() {
       }
     } catch (err: any) {
       console.error('🔍 Track order error:', err?.response?.status, err?.response?.data, err?.message);
-      const backendMsg = err?.response?.data?.message;
+      const backendMsg = typeof err?.response?.data === 'string'
+        ? err.response.data
+        : err?.response?.data?.message;
       setError(backendMsg || 'ค้นหาไม่สำเร็จ ไม่พบคำสั่งซื้อนี้ในระบบของเรา');
     } finally {
       setLoading(false);

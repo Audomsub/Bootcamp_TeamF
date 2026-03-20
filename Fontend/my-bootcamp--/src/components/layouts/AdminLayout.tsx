@@ -81,7 +81,7 @@ export default function AdminLayout() {
               </div>
             </div>
             <div className="flex flex-col">
-              <span className="font-display font-black text-xl tracking-tighter text-neutral-900 dark:text-white leading-none">ADMIN PORTAL</span>
+              <span className="font-display font-black text-xl tracking-tighter text-primary-600 dark:text-primary-400 leading-none">ADMIN PORTAL</span>
               <span className="text-[9px] font-black tracking-[0.3em] text-primary-600 uppercase mt-1.5">ระบบจัดการส่วนกลาง</span>
             </div>
             <button
@@ -114,10 +114,10 @@ export default function AdminLayout() {
                 onClick={() => setSidebarOpen(false)}
                 className={cn(
                   'group relative flex items-center gap-4 px-6 py-4 rounded-2xl transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]',
-                  'hover:bg-neutral-50 dark:hover:bg-neutral-800/50 active:scale-[0.98]',
+                  'active:scale-[0.98]',
                   isActive
-                    ? 'bg-primary-50 dark:bg-primary-950/30 text-primary-600 dark:text-primary-400 shadow-sm'
-                    : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
+                    ? 'bg-white dark:bg-primary-950/30 text-primary-600 dark:text-primary-400 shadow-md border border-neutral-100/50 dark:border-primary-500/20'
+                    : 'text-neutral-500 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-neutral-100/40 dark:hover:bg-primary-900/20'
                 )}
               >
                 {/* Laser Active Indicator */}
@@ -132,11 +132,11 @@ export default function AdminLayout() {
                   "h-5 w-5 transition-all duration-500",
                   isActive
                     ? "text-primary-600 dark:text-primary-400 scale-110"
-                    : "text-neutral-400 group-hover:text-neutral-600 dark:group-hover:text-neutral-300 group-hover:scale-110"
+                    : "text-neutral-400 group-hover:text-primary-500 dark:group-hover:text-primary-400 group-hover:scale-110"
                 )} />
                 <span className={cn(
                   "text-[13px] font-black uppercase tracking-widest transition-colors",
-                  isActive ? "text-primary-700 dark:text-primary-300" : "text-neutral-500 group-hover:text-neutral-900 dark:group-hover:text-white"
+                  isActive ? "text-primary-700 dark:text-primary-300" : "text-neutral-500 group-hover:text-primary-600 dark:group-hover:text-primary-400"
                 )}>
                   {item.label}
                 </span>
@@ -146,7 +146,7 @@ export default function AdminLayout() {
         </nav>
 
         {/* User Footer - Integrated Status Section */}
-        <div className="mt-auto border-t border-neutral-100 bg-neutral-50/40 p-8">
+        <div className="mt-auto border-t border-neutral-100/50 dark:border-neutral-800/50 p-8">
           <div className="flex items-center gap-4 group">
             <div className="relative">
               <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center border border-neutral-200/50 overflow-hidden shadow-sm group-hover:border-primary-500/50 transition-all duration-500">
@@ -157,10 +157,10 @@ export default function AdminLayout() {
               </div>
               <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></div>
             </div>
-            
+
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <p className="text-xs font-black text-neutral-900 truncate tracking-tight group-hover:text-primary-600 transition-colors uppercase">
+                <p className="text-xs font-black text-primary-600 dark:text-primary-400 truncate tracking-tight transition-colors uppercase">
                   {user?.name || 'Administrator'}
                 </p>
                 <div className="w-1 h-1 rounded-full bg-neutral-300"></div>
@@ -184,17 +184,17 @@ export default function AdminLayout() {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden overflow-y-auto custom-scrollbar">
-        {/* Top Header - Glass Effect */}
-        <header className="h-20 bg-white/30 dark:bg-neutral-900/30 backdrop-blur-2xl border-b border-neutral-200/30 dark:border-neutral-800/30 flex items-center px-10 sticky top-0 z-30 justify-between shrink-0">
+        {/* Top Header - Precision White Look */}
+        <header className="h-20 bg-white border-b border-neutral-100 flex items-center px-10 sticky top-0 z-30 justify-between shrink-0 shadow-sm">
           <div className="flex items-center gap-6">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-3 bg-white dark:bg-neutral-900 rounded-2xl shadow-sm border border-neutral-200/50 dark:border-neutral-800/50 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+              className="lg:hidden p-3 bg-white rounded-2xl shadow-sm border border-neutral-200/50 hover:bg-neutral-50 transition-colors"
             >
-              <Menu className="h-6 w-6 text-neutral-900 dark:text-white" />
+              <Menu className="h-6 w-6 text-neutral-900" />
             </button>
             <div className="hidden sm:flex flex-col">
-              <h1 className="text-lg font-black text-neutral-900 dark:text-white tracking-tight mt-1 capitalize leading-none">
+              <h1 className="text-lg font-black text-neutral-900 tracking-tight mt-1 capitalize leading-none">
                 {getPageTitle(location.pathname)}
               </h1>
             </div>
@@ -203,12 +203,10 @@ export default function AdminLayout() {
           <div className="flex items-center gap-6">
             <div className="hidden md:flex flex-col items-end mr-2">
               <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest leading-none">เวลาของระบบ</span>
-              <span className="text-xs font-bold text-neutral-900 dark:text-white mt-1">{time.toLocaleTimeString('th-TH')}</span>
+              <span className="text-xs font-bold text-neutral-900 mt-1">{time.toLocaleTimeString('th-TH')}</span>
             </div>
-            <div className="h-10 w-px bg-neutral-200/50 dark:bg-neutral-800/50 hidden sm:block"></div>
-            <ThemeToggle />
             <div className="h-10 w-px bg-neutral-200/50 hidden sm:block"></div>
-
+            <ThemeToggle />
           </div>
         </header>
 

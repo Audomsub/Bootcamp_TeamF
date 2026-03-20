@@ -17,6 +17,7 @@ export default function ResellerCatalog() {
   const [hasMore, setHasMore] = useState(true);
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [viewProduct, setViewProduct] = useState<Product | null>(null);
   const [sellingPrice, setSellingPrice] = useState('');
   const [error, setError] = useState('');
   const [adding, setAdding] = useState(false);
@@ -92,7 +93,10 @@ export default function ResellerCatalog() {
         productId: selectedProduct.id,
         sellingPrice: price,
       });
-      // Show success toast or feedback
+      // Update local state to show button as "Already Added"
+      setProducts(prev => prev.map(p =>
+        p.id === selectedProduct.id ? { ...p, is_added: true } : p
+      ));
       setSelectedProduct(null);
       setSellingPrice('');
     } catch (err: any) {
@@ -116,16 +120,16 @@ export default function ResellerCatalog() {
       <div className="relative z-10 max-w-7xl mx-auto pt-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 border-b border-neutral-100 pb-8 gap-6">
           <div>
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-50 border border-primary-100 mb-6 shadow-sm">
+            {/* <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-50 border border-primary-100 mb-6 shadow-sm">
               <Package className="h-4 w-4 text-primary-600" />
-              <span className="text-[11px] font-bold text-primary-700 tracking-wider uppercase">Product Catalog</span>
-            </div>
+              <span className="text-base font-bold text-primary-700 tracking-wider uppercase">Product Catalog</span>
+            </div> */}
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-neutral-900 tracking-tight mb-4 text-center md:text-left">แคตตาล็อกสินค้า</h1>
-            <p className="text-neutral-500 font-bold tracking-widest text-xs uppercase">เลือกดูสินค้าที่พร้อมให้คุณเพิ่มลงในร้านค้าของคุณ</p>
+            <p className="text-neutral-600 font-bold tracking-widest text-base uppercase">เลือกดูสินค้าที่พร้อมให้คุณเพิ่มลงในร้านค้าของคุณ</p>
           </div>
 
           <div className="relative w-full md:w-80 group">
-            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-neutral-400 group-focus-within:text-primary-600 transition-colors">
+            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-neutral-500 group-focus-within:text-primary-600 transition-colors">
               <Search className="h-5 w-5" />
             </div>
             <input
@@ -133,113 +137,133 @@ export default function ResellerCatalog() {
               placeholder="ค้นหาสินค้า..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-12 pr-6 py-4 rounded-2xl bg-white border border-neutral-200/60 focus:bg-white focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all duration-300 font-medium text-neutral-900 placeholder:text-neutral-400 shadow-sm uppercase tracking-wide text-sm"
+              className="w-full pl-12 pr-6 py-4 rounded-2xl bg-white border border-neutral-200/60 focus:bg-white focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all duration-300 font-bold text-neutral-900 placeholder:text-neutral-400 shadow-sm uppercase tracking-wide text-sm"
             />
           </div>
         </div>
 
-        {/* ── Balanced Flex Grid ── */}
-        <div className="flex flex-wrap justify-center gap-6 md:gap-8">
+        {/* ── Standardized Grid ── */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-6 px-4 sm:px-0">
           {filteredProducts.map((product) => {
             const outOfStock = product.stock <= 0;
 
             return (
               <div
                 key={product.id}
-                className="w-[calc(100%-1rem)] sm:w-[calc(50%-1rem)] md:w-[calc(50%-1rem)] lg:w-[calc(33.33%-1rem)] xl:w-[calc(20%-1rem)] group bg-white rounded-2xl overflow-hidden border border-neutral-100 hover:border-neutral-200 hover:shadow-lg transition-all duration-300 flex flex-col"
+                className="w-full group bg-white rounded-[14px] overflow-hidden border border-neutral-100/80 hover:border-[#ff2b5e]/40 hover:shadow-[0_8px_20px_-8px_rgba(255,43,94,0.15)] transition-all duration-300 flex flex-col relative"
               >
-                {/* Image */}
-                <div className="relative aspect-square overflow-hidden bg-neutral-50">
+                {/* Image Section */}
+                <div 
+                  className="relative aspect-square overflow-hidden bg-neutral-50 cursor-pointer flex-shrink-0"
+                  onClick={() => setViewProduct(product)}
+                >
                   <img
                     src={product.image_url}
                     alt={product.name}
                     className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${outOfStock ? 'opacity-50 grayscale' : ''}`}
                   />
 
+                  {/* Hover details overlay */}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <span className="text-white text-[10px] sm:text-xs font-bold bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/30">
+                      ดูรายละเอียด
+                    </span>
+                  </div>
+
                   {/* Out of stock overlay */}
                   {outOfStock && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-[2px]">
-                      <span className="px-3 py-1.5 bg-neutral-900 text-white text-[10px] font-black uppercase tracking-widest rounded-lg">
-                        สินค้าหมด
+                    <div className="absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-[2px]">
+                      <span className="px-3 py-1.5 bg-neutral-900/90 text-white text-[10px] sm:text-[11px] font-bold rounded-lg shadow-sm">
+                        สินค้าหมดชั่วคราว
                       </span>
                     </div>
                   )}
 
-                  {/* Stock badge */}
-                  {!outOfStock && product.stock <= 10 && (
-                    <div className="absolute top-2.5 right-2.5">
-                      <span className="px-2 py-1 bg-amber-50 border border-amber-200 text-amber-700 text-[9px] font-bold rounded-lg shadow-sm">
-                        เหลือ {product.stock} ชิ้น
+                  {/* Stock/Status badges */}
+                  <div className="absolute top-2 right-2 flex flex-col gap-1.5 items-end">
+                    {!outOfStock && product.stock <= 10 && (
+                      <span className="px-2 py-0.5 bg-amber-500 text-white text-[9px] font-bold rounded shadow-sm">
+                        🔥 เหลือ {product.stock} ชิ้น
                       </span>
-                    </div>
-                  )}
-                  {!outOfStock && product.stock > 10 && (
-                    <div className="absolute top-2.5 right-2.5">
-                      <span className="px-2 py-1 bg-white/90 backdrop-blur-md border border-neutral-200/50 text-neutral-700 text-[9px] font-bold rounded-lg shadow-sm">
+                    )}
+                    {!outOfStock && product.stock > 10 && (
+                      <span className="px-2 py-0.5 bg-neutral-900/80 text-white text-[9px] font-bold rounded shadow-sm backdrop-blur-sm">
                         สต็อก: {product.stock}
                       </span>
-                    </div>
-                  )}
+                    )}
+                  </div>
 
-                  {/* Profit Badge Overlay */}
-                  <div className="absolute bottom-2.5 left-2.5">
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-neutral-900 border border-neutral-800 rounded-lg text-white font-bold text-[10px] shadow-lg">
-                      <TrendingUp className="h-3.5 w-3.5 text-emerald-400" />
-                      <span>กำไรขั้นต่ำ {formatCurrency(Math.max(0, product.min_price - product.cost_price))}</span>
+                  {/* Profit Badge - Repositioned to bottom like ShopPage badges */}
+                  <div className="absolute bottom-2 left-2">
+                    <div className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-500 text-white font-bold text-[9px] sm:text-[10px] rounded shadow-sm backdrop-blur-sm">
+                      <TrendingUp className="h-2.5 w-2.5" />
+                      <span>กำไร {formatCurrency(Math.max(0, product.min_price - product.cost_price))}</span>
                     </div>
                   </div>
                 </div>
 
-                {/* Body */}
-                <div className="p-4 flex flex-col flex-1 gap-3">
-                  <h3 className="text-sm font-bold text-neutral-800 leading-snug line-clamp-2 flex-1 group-hover:text-primary-600 transition-colors">
+                {/* Body Content */}
+                <div className="p-2 sm:p-4 flex flex-col flex-1 gap-1.5 sm:gap-2">
+                  <h3 className="text-[12px] sm:text-[13px] font-medium text-neutral-800 leading-snug line-clamp-2 min-h-[2.5rem] group-hover:text-primary-600 transition-colors">
                     {product.name}
                   </h3>
 
-                  <div className="flex items-center justify-between gap-2 pt-3 border-t border-neutral-50">
-                    <div className="flex flex-col">
-                      <span className="text-[9px] text-neutral-400 font-semibold uppercase tracking-wider mb-0.5">ราคาทุน</span>
-                      <span className="text-xs font-black text-neutral-900">{formatCurrency(product.cost_price)}</span>
+                  <div className="mt-auto flex flex-col gap-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col">
+                        <span className="text-[9px] text-neutral-400 font-bold uppercase tracking-wider">ทุน</span>
+                        <span className="text-[12px] sm:text-[14px] font-bold text-neutral-900">{formatCurrency(product.cost_price)}</span>
+                      </div>
+                      <div className="flex flex-col text-right">
+                        <span className="text-[9px] text-rose-400 font-bold uppercase tracking-wider">ขายต่ำสุด</span>
+                        <div className="flex items-baseline text-rose-600">
+                          <span className="text-[11px] font-bold mr-0.5">฿</span>
+                          <span className="text-[14px] sm:text-[18px] font-bold tracking-tight">{Number(product.min_price).toLocaleString()}</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="w-px h-6 bg-neutral-100"></div>
-                    <div className="flex flex-col text-right">
-                      <span className="text-[9px] text-neutral-400 font-semibold uppercase tracking-wider mb-0.5">บังคับขาย (เริ่ม)</span>
-                      <span className="text-[13px] font-black text-rose-500">{formatCurrency(product.min_price)}</span>
-                    </div>
-                  </div>
 
-                  <div className="mt-2">
-                    {product.is_added ? (
-                      <button
-                        onClick={() => window.location.href = '/reseller/my-products'}
-                        className="w-full py-2.5 rounded-xl bg-emerald-50 text-emerald-600 font-bold text-xs hover:bg-emerald-100 transition-colors flex items-center justify-center gap-2 border border-emerald-100"
-                      >
-                        <CheckCircle2 className="h-3.5 w-3.5" />
-                        อยู่ในร้านแล้ว
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          setSelectedProduct(product);
-                          setSellingPrice(product.min_price.toString());
-                          setError('');
-                        }}
-                        disabled={outOfStock}
-                        className={`w-full py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 ${!outOfStock
-                            ? 'bg-neutral-900 text-white hover:bg-primary-600 shadow-md hover:shadow-lg active:scale-[0.98]'
-                            : 'bg-neutral-100 text-neutral-400 cursor-not-allowed border border-neutral-200'
-                          }`}
-                      >
-                        {!outOfStock ? (
-                          <>
-                            <Plus className="h-3.5 w-3.5" />
-                            เพิ่มลงร้านค้า
-                          </>
-                        ) : (
-                          'สินค้าหมดชั่วคราว'
-                        )}
-                      </button>
-                    )}
+                    <div className="pt-1">
+                      {product.is_added ? (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.location.href = '/reseller/my-products';
+                          }}
+                          className="w-full h-8 sm:h-9 rounded-lg flex items-center justify-center gap-1.5 text-[10px] sm:text-[12px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-200 transition-all active:scale-[0.98]"
+                        >
+                          <CheckCircle2 className="h-3.5 w-3.5" />
+                          อยู่ในร้านแล้ว
+                        </button>
+                      ) : (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedProduct(product);
+                            setSellingPrice(product.min_price.toString());
+                            setError('');
+                          }}
+                          disabled={outOfStock}
+                          className={`
+                            w-full h-8 sm:h-9 rounded-lg flex items-center justify-center gap-1.5 text-[10px] sm:text-[12px] font-bold
+                            transition-all duration-300 active:scale-[0.98]
+                            ${outOfStock
+                              ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed border border-neutral-200'
+                              : 'bg-neutral-900 text-white hover:bg-primary-600 hover:shadow-md'
+                            }
+                          `}
+                        >
+                          {outOfStock ? (
+                            'สินค้าหมด'
+                          ) : (
+                            <>
+                              <Plus className="h-3.5 w-3.5" />
+                              เพิ่มลงร้านค้า
+                            </>
+                          )}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -257,6 +281,7 @@ export default function ResellerCatalog() {
         />
       </div>
 
+      {/* ── Pricing Modal ── */}
       <Modal
         isOpen={selectedProduct !== null}
         onClose={() => setSelectedProduct(null)}
@@ -265,7 +290,7 @@ export default function ResellerCatalog() {
         {selectedProduct && (
           <div className="space-y-8 p-2 font-sans">
             {/* Product Summary */}
-            <div className="flex gap-5 p-5 bg-neutral-50 rounded-2xl border border-neutral-100/60">
+            <div className="flex gap-5 p-5 bg-neutral-50 rounded-2xl border border-neutral-100">
               <div className="w-20 h-20 rounded-xl overflow-hidden bg-white shadow-sm shrink-0">
                 <img
                   src={selectedProduct.image_url}
@@ -277,13 +302,13 @@ export default function ResellerCatalog() {
                 <h4 className="font-bold text-neutral-900 text-sm line-clamp-2 leading-tight mb-2">{selectedProduct.name}</h4>
                 <div className="flex items-center gap-4">
                   <div className="flex flex-col">
-                    <span className="text-[9px] font-black text-neutral-400 uppercase tracking-widest">ราคาทุน</span>
+                    <span className="text-[10px] font-black text-neutral-500 uppercase tracking-widest">ราคาทุน</span>
                     <strong className="text-neutral-900 text-sm">{formatCurrency(selectedProduct.cost_price)}</strong>
                   </div>
                   <div className="w-px h-6 bg-neutral-200"></div>
                   <div className="flex flex-col">
-                    <span className="text-[9px] font-black text-primary-500 uppercase tracking-widest">ราคาขั้นต่ำ</span>
-                    <strong className="text-primary-600 text-sm">{formatCurrency(selectedProduct.min_price)}</strong>
+                    <span className="text-[10px] font-black text-primary-600 uppercase tracking-widest">ราคาขั้นต่ำ</span>
+                    <strong className="text-primary-700 text-sm">{formatCurrency(selectedProduct.min_price)}</strong>
                   </div>
                 </div>
               </div>
@@ -291,20 +316,20 @@ export default function ResellerCatalog() {
 
             {/* Pricing Input */}
             <div className="space-y-3">
-              <label className="text-[11px] font-black text-neutral-900 uppercase tracking-widest ml-1">ราคาขายของคุณ (บาท)</label>
+              <label className="text-16px font-black text-neutral-900 uppercase tracking-widest ml-1">ราคาขายของคุณ (บาท)</label>
               <div className="relative">
-                <span className="absolute left-6 top-1/2 -translate-y-1/2 font-black text-neutral-400">฿</span>
+                <span className="absolute left-6 top-1/2 -translate-y-1/2 font-black text-neutral-400 text-xl">฿</span>
                 <input
                   type="number"
                   value={sellingPrice}
                   onChange={(e) => setSellingPrice(e.target.value)}
-                  className="w-full px-6 py-5 pl-12 rounded-2xl bg-white border border-neutral-200 focus:bg-white focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all font-black text-2xl text-neutral-900 placeholder:text-neutral-300"
+                  className="w-full px-6 py-5 pl-12 rounded-2xl bg-white border border-neutral-200 focus:bg-white focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all font-black text-3xl text-neutral-900 placeholder:text-neutral-300"
                   placeholder="0.00"
                 />
               </div>
 
               {error && (
-                <div className="p-3 bg-rose-50 border border-rose-100 rounded-xl text-xs font-bold text-rose-500 flex items-center gap-2">
+                <div className="p-3 bg-rose-50 border border-rose-100 rounded-xl text-16px font-bold text-rose-500 flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></div>
                   {error}
                 </div>
@@ -312,19 +337,19 @@ export default function ResellerCatalog() {
 
               {/* Estimated Profit Banner */}
               {Number(sellingPrice) >= selectedProduct.min_price && (
-                <div className="mt-6 p-5 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl text-white shadow-lg shadow-emerald-500/20 relative overflow-hidden group">
+                <div className="mt-6 p-6 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl text-white shadow-lg shadow-emerald-500/20 relative overflow-hidden group">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 blur-[30px] rounded-full -mr-16 -mt-16 pointer-events-none"></div>
                   <div className="relative z-10 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
-                        <TrendingUp className="h-5 w-5 text-white" />
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                        <TrendingUp className="h-6 w-6 text-white" />
                       </div>
                       <div>
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-100">กำไรสุทธิต่อชิ้น</p>
-                        <p className="text-[10px] opacity-70 mt-0.5">* เมื่อหักต้นทุนแล้ว</p>
+                        <p className="text-base font-black uppercase tracking-widest text-emerald-50">กำไรสุทธิต่อชิ้น</p>
+                        <p className="text-base font-medium text-emerald-200 mt-0.5">* เมื่อหักต้นทุนแล้ว</p>
                       </div>
                     </div>
-                    <p className="text-2xl font-black tracking-tight shrink-0">
+                    <p className="text-3xl font-black tracking-tight shrink-0">
                       +{formatCurrency(Number(sellingPrice) - selectedProduct.cost_price)}
                     </p>
                   </div>
@@ -336,7 +361,7 @@ export default function ResellerCatalog() {
             <div className="flex gap-4 pt-6">
               <button
                 onClick={() => setSelectedProduct(null)}
-                className="flex-1 py-4 rounded-2xl font-bold text-sm tracking-wide bg-neutral-100 text-neutral-600 hover:bg-neutral-200 transition-colors"
+                className="flex-1 py-4 rounded-2xl font-bold text-sm tracking-wide bg-neutral-100 text-neutral-700 hover:bg-neutral-200 transition-colors"
                 disabled={adding}
               >
                 ยกเลิก
@@ -353,10 +378,74 @@ export default function ResellerCatalog() {
                   </>
                 ) : (
                   <>
-                    <Plus className="h-4 w-4" />
+                    <Plus className="h-5 w-5" />
                     ยืนยันเพิ่มเข้าลิตส์
                   </>
                 )}
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* ── Product Detail Preview Modal ── */}
+      <Modal
+        isOpen={!!viewProduct}
+        onClose={() => setViewProduct(null)}
+        title="รายละเอียดสินค้า"
+        size="md"
+      >
+        {viewProduct && (
+          <div className="flex flex-col gap-6 font-sans">
+            <div className="aspect-square w-full rounded-2xl overflow-hidden bg-neutral-100 border border-neutral-100">
+              <img
+                src={viewProduct.image_url}
+                alt={viewProduct.name}
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="space-y-4">
+              <div>
+                <h4 className="text-xl font-black text-neutral-900 leading-tight mb-2">{viewProduct.name}</h4>
+                <div className="flex items-center gap-6">
+                  <div className="flex flex-col">
+                    <span className="text-[11px] font-black text-neutral-500 uppercase tracking-widest">ราคาทุน</span>
+                    <strong className="text-neutral-950 text-xl">{formatCurrency(viewProduct.cost_price)}</strong>
+                  </div>
+                  <div className="w-px h-10 bg-neutral-200"></div>
+                  <div className="flex flex-col">
+                    <span className="text-[11px] font-black text-rose-500 uppercase tracking-widest">ราคาขั้นต่ำ</span>
+                    <strong className="text-rose-600 text-xl">{formatCurrency(viewProduct.min_price)}</strong>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-5 bg-neutral-50 rounded-2xl border border-neutral-100 space-y-3">
+                <p className="text-[11px] font-black text-neutral-600 uppercase tracking-widest">รายละเอียดสินค้า</p>
+                <p className="text-sm font-bold text-neutral-700 leading-relaxed whitespace-pre-wrap">
+                  {viewProduct.description || 'ไม่มีรายละเอียดสินค้า'}
+                </p>
+              </div>
+
+              <div className="flex items-center justify-between p-4 border border-neutral-200/60 rounded-xl bg-white shadow-sm">
+                <span className="text-base font-black text-neutral-600 uppercase tracking-wider">กำไรขั้นต่ำที่คุณจะได้รับ</span>
+                <span className="px-3 py-2 bg-emerald-50 text-emerald-600 rounded-xl text-sm font-black border border-emerald-100">
+                  +{formatCurrency(Math.max(0, viewProduct.min_price - viewProduct.cost_price))}
+                </span>
+              </div>
+
+              <button
+                onClick={() => {
+                  const prod = viewProduct;
+                  setViewProduct(null);
+                  setSelectedProduct(prod);
+                  setSellingPrice(prod.min_price.toString());
+                  setError('');
+                }}
+                disabled={viewProduct.stock <= 0 || viewProduct.is_added}
+                className="w-full py-4 bg-neutral-900 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-primary-600 hover:shadow-xl hover:shadow-primary-600/20 transition-all active:scale-[0.98] disabled:bg-neutral-100 disabled:text-neutral-400 disabled:shadow-none"
+              >
+                {viewProduct.is_added ? 'อยู่ในร้านแล้ว' : viewProduct.stock <= 0 ? 'สินค้าหมด' : 'ตั้งราคาและเพิ่มลงร้าน'}
               </button>
             </div>
           </div>

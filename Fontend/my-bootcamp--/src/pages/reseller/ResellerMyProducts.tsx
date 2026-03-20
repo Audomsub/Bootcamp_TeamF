@@ -130,14 +130,14 @@ export default function ResellerMyProducts() {
       id: 'min_price',
       header: 'ราคาขายขั้นต่ำ',
       cell: ({ row }) => (
-        <span className="text-neutral-500 font-medium">{formatCurrency(row.original.product.min_price)}</span>
+        <span className="text-neutral-600 font-bold text-sm italic">{formatCurrency(row.original.product.min_price)}</span>
       ),
     },
     {
       accessorKey: 'selling_price',
       header: 'ราคาขายของคุณ',
       cell: ({ row }) => (
-        <span className="font-bold text-primary-600 bg-primary-50 px-3 py-1.5 rounded-lg border border-primary-100">
+        <span className="text-base font-black text-primary-600 bg-primary-50 px-3.5 py-1.5 rounded-xl border border-primary-100/60 shadow-sm">
           {formatCurrency(row.original.selling_price)}
         </span>
       ),
@@ -146,7 +146,7 @@ export default function ResellerMyProducts() {
       id: 'profit',
       header: 'กำไรโดยประมาณ',
       cell: ({ row }) => (
-        <span className="font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100">
+        <span className="text-base font-black text-emerald-600 bg-emerald-50 px-3.5 py-1.5 rounded-xl border border-emerald-100/60 shadow-sm">
           +{formatCurrency(row.original.selling_price - row.original.product.cost_price)}
         </span>
       ),
@@ -205,17 +205,18 @@ export default function ResellerMyProducts() {
       >
         {editItem && (
           <div className="space-y-5">
-            <div className="bg-neutral-50 p-4 rounded-xl border border-neutral-100 flex items-center gap-4">
+            <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200/60 flex items-center gap-4">
               <img
                 src={getImageUrl(editItem.product.image_url)}
                 alt={editItem.product.name}
-                className="w-12 h-12 rounded-lg object-cover bg-white shadow-sm border border-neutral-200"
+                className="w-14 h-14 rounded-xl object-cover bg-white shadow-sm border border-neutral-200"
               />
-              <div>
-                <p className="text-sm font-semibold text-neutral-800 mb-0.5 line-clamp-1">{editItem.product.name}</p>
-                <p className="text-xs font-medium text-neutral-500">
-                  ราคาขายขั้นต่ำ: <span className="text-neutral-700">{formatCurrency(editItem.product.min_price)}</span>
-                </p>
+              <div className="flex-1">
+                <p className="text-sm font-black text-neutral-900 mb-1 line-clamp-1 italic">{editItem.product.name}</p>
+                <div className="flex items-center gap-2">
+                   <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest leading-none">Min Price</span>
+                   <span className="text-sm font-black text-rose-500 leading-none">{formatCurrency(editItem.product.min_price)}</span>
+                </div>
               </div>
             </div>
 

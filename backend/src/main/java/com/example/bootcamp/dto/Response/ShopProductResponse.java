@@ -12,13 +12,16 @@ public class ShopProductResponse {
     private BigDecimal sellingPrice;
 
     private Integer stock;
+    
+    private String description;
 
-    public ShopProductResponse(Integer productId , String productName , String imageUrl , BigDecimal sellingPrice , Integer stock) {
+    public ShopProductResponse(Integer productId , String productName , String imageUrl , BigDecimal sellingPrice , Integer stock, String description) {
         this.productId = productId;
         this.productName = productName;
         this.imageUrl = imageUrl;
         this.sellingPrice = sellingPrice;
         this.stock = stock;
+        this.description = description;
     }
 
     public Integer getProductId() {
@@ -59,5 +62,13 @@ public class ShopProductResponse {
 
     public void setStock(Integer stock) {
         this.stock = stock;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

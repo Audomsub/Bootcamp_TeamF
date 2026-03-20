@@ -57,7 +57,8 @@ public class CustomerService {
                     shopProductsEntity.getProduct().getProductName(),
                     shopProductsEntity.getProduct().getImageUrl(),
                     shopProductsEntity.getSellingPrice(),
-                    shopProductsEntity.getProduct().getStock());
+                    shopProductsEntity.getProduct().getStock(),
+                    shopProductsEntity.getProduct().getDescription());
             shopProductResponses.add(shopProductResponse);
         }
         return new ShopFrontResponse(
@@ -151,7 +152,9 @@ public class CustomerService {
         return "ขำระเงินจำลองสำเร็จ สถานะออเดอร์เปลี่ยนเป็น รอดำเนินการ";
     }
 
+    @Transactional
     public TrackOrderResponse trackOrder(String orderNumber) {
+        System.out.println("🔍 Backend: Tracking order: " + orderNumber);
         OrdersEntity order = orderRepository.findByOrderNumber(orderNumber)
                 .orElseThrow(() -> new RuntimeException("ไม่พบออเดอร์นี้"));
                 
@@ -178,6 +181,7 @@ public class CustomerService {
         );
     }
 
+    @Transactional
     public OrderDetailResponse getOrderDetails(Integer orderId) {
         OrdersEntity order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("ไม่พบออเดอร์นี้"));

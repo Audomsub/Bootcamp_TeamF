@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { type ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/data-table';
-import { PageHeader, LoadingSpinner } from '@/components/ui/shared';
+import { PageHeader, LoadingSpinner, Pagination } from '@/components/ui/shared';
 import { orderService } from '@/services/order.service';
 import { formatCurrency, formatDate, cn } from '@/lib/utils';
 import { Download } from 'lucide-react';
@@ -12,20 +12,35 @@ export default function ResellerOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    loadOrders();
-  }, []);
+  // Pagination states
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
 
-  const loadOrders = async () => {
+  useEffect(() => {
+    loadOrders(page);
+  }, [page]);
+
+  const loadOrders = async (pageToLoad: number) => {
     try {
       setLoading(true);
-      const response = await orderService.getMyOrders();
-      setOrders(response.data.data.data);
+      const response = await orderService.getMyOrders({ page: pageToLoad, size: 10 });
+      const { content, totalPages: totalP, totalElements: totalE } = response.data;
+      
+      setOrders(content);
+      setTotalPages(totalP);
+      setTotalElements(totalE);
     } catch (err) {
       console.error("Failed to load orders", err);
+      setOrders([]);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const exportCSV = () => {
@@ -66,8 +81,8 @@ export default function ResellerOrders() {
       header: 'ลูกค้า',
       cell: ({ row }) => (
         <div>
-          <p className="font-semibold text-neutral-800">{row.original.customer_name}</p>
-          <p className="text-xs font-medium text-neutral-500 mt-0.5">{row.original.customer_phone}</p>
+          <p className="font-bold text-neutral-900 text-sm mb-0.5">{row.original.customer_name}</p>
+          <p className="text-sm font-bold text-neutral-600 tracking-tight">{row.original.customer_phone}</p>
         </div>
       ),
     },
@@ -75,10 +90,10 @@ export default function ResellerOrders() {
       id: 'items',
       header: 'รายการสินค้า',
       cell: ({ row }) => (
-        <div className="max-w-xs flex flex-wrap gap-1">
+        <div className="max-w-xs flex flex-wrap gap-1.5">
           {row.original.items?.map((item, i) => (
-            <span key={i} className="text-xs font-medium text-neutral-600 bg-neutral-100/80 px-2 py-1 rounded-md border border-neutral-200/60">
-              {item.product_name} <span className="text-neutral-400">x{item.quantity}</span>
+            <span key={i} className="text-sm font-bold text-neutral-700 bg-neutral-100/60 px-2 py-0.5 rounded-lg border border-neutral-200/50">
+              {item.product_name} <span className="text-neutral-400 font-black">x{item.quantity}</span>
             </span>
           ))}
         </div>
@@ -88,7 +103,7 @@ export default function ResellerOrders() {
       accessorKey: 'total_amount',
       header: 'ยอดรวม',
       cell: ({ row }) => (
-        <span className="font-semibold text-neutral-800">
+        <span className="text-base font-black text-neutral-900 tracking-tight">
           {formatCurrency(row.original.total_amount)}
         </span>
       ),
@@ -97,7 +112,7 @@ export default function ResellerOrders() {
       accessorKey: 'reseller_profit',
       header: 'กำไรของคุณ',
       cell: ({ row }) => (
-        <span className="inline-flex font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100">
+        <span className="inline-flex font-black text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-100 shadow-sm text-sm">
           +{formatCurrency(row.original.reseller_profit)}
         </span>
       ),
@@ -109,10 +124,10 @@ export default function ResellerOrders() {
         const status = row.original.status;
         return (
           <span className={cn(
-            "inline-flex px-3 py-1.5 rounded-full text-xs font-medium border",
-            status === 'completed' ? "bg-emerald-50 text-emerald-700 border-emerald-100" :
-            status === 'shipped' ? "bg-primary-50 text-primary-700 border-primary-100" :
-            "bg-amber-50 text-amber-700 border-amber-100"
+            "inline-flex px-3.5 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider border shadow-sm",
+            status === 'completed' ? "bg-emerald-50 text-emerald-700 border-emerald-100/60" :
+            status === 'shipped' ? "bg-primary-50 text-primary-700 border-primary-100/60" :
+            "bg-amber-50 text-amber-700 border-amber-100/60"
           )}>
             {status === 'completed' ? 'เสร็จสิ้น' : status === 'shipped' ? 'จัดส่งแล้ว' : 'รอดำเนินการ'}
           </span>
@@ -123,7 +138,7 @@ export default function ResellerOrders() {
       accessorKey: 'created_at',
       header: 'วันที่สั่งซื้อ',
       cell: ({ row }) => (
-        <span className="text-sm font-medium text-neutral-500">{formatDate(row.original.created_at)}</span>
+        <span className="text-sm font-bold text-neutral-600">{formatDate(row.original.created_at)}</span>
       ),
     },
   ];
@@ -152,6 +167,14 @@ export default function ResellerOrders() {
           data={orders}
           searchColumn="order_number"
           searchPlaceholder="ค้นหาจากรหัสคำสั่งซื้อ..."
+        />
+        <Pagination
+          pageIndex={page}
+          pageSize={10}
+          totalElements={totalElements}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          className="mt-6"
         />
       </div>
     </div>

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { type ColumnDef } from '@tanstack/react-table';
 import { Truck, Download, CheckCircle2 } from 'lucide-react';
 import { DataTable } from '@/components/ui/data-table';
-import { PageHeader, LoadingSpinner } from '@/components/ui/shared';
+import { PageHeader, LoadingSpinner, Pagination } from '@/components/ui/shared';
 import { ConfirmDialog } from '@/components/ui/modal';
 import { orderService } from '@/services/order.service';
 import { formatCurrency, formatDate, cn } from '@/lib/utils';
@@ -16,22 +16,35 @@ export default function AdminOrders() {
   const [completeId, setCompleteId] = useState<number | null>(null);
   const [processing, setProcessing] = useState(false);
 
-  useEffect(() => {
-    loadOrders();
-  }, []);
+  // Pagination states
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
 
-  const loadOrders = async () => {
+  useEffect(() => {
+    loadOrders(page);
+  }, [page]);
+
+  const loadOrders = async (pageToLoad: number) => {
     try {
       setLoading(true);
-      const response = await orderService.getAllOrders();
-      const data = response.data?.data?.data;
-      setOrders(Array.isArray(data) ? data : []);
+      const response = await orderService.getAllOrders({ page: pageToLoad, size: 10 });
+      const { content, totalPages: totalP, totalElements: totalE } = response.data;
+      
+      setOrders(content);
+      setTotalPages(totalP);
+      setTotalElements(totalE);
     } catch (err) {
       console.error('Failed to load orders', err);
       setOrders([]);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const exportCSV = () => {
@@ -112,8 +125,8 @@ export default function AdminOrders() {
       header: 'ลูกค้า',
       cell: ({ row }) => (
         <div>
-          <p className="font-medium text-neutral-800">{row.original.customer_name}</p>
-          <p className="text-sm text-neutral-500">{row.original.customer_phone}</p>
+          <p className="font-bold text-neutral-900 text-sm mb-0.5">{row.original.customer_name}</p>
+          <p className="text-sm font-bold text-neutral-600 tracking-tight">{row.original.customer_phone}</p>
         </div>
       ),
     },
@@ -121,11 +134,10 @@ export default function AdminOrders() {
       id: 'products',
       header: 'สินค้า',
       cell: ({ row }) => (
-        <div className="max-w-xs">
+        <div className="max-w-xs flex flex-wrap gap-1.5">
           {row.original.items?.map((item, i) => (
-            <span key={i} className="text-sm text-neutral-600">
-              {item.product_name} x{item.quantity}
-              {i < (row.original.items?.length || 0) - 1 ? ', ' : ''}
+            <span key={i} className="text-sm font-bold text-neutral-700 bg-neutral-100/60 px-2 py-0.5 rounded-lg border border-neutral-200/50">
+              {item.product_name} <span className="text-neutral-400 font-black">x{item.quantity}</span>
             </span>
           ))}
         </div>
@@ -136,7 +148,7 @@ export default function AdminOrders() {
       header: 'ยอดรวม',
       meta: { align: 'right' },
       cell: ({ row }) => (
-        <span className="font-semibold text-neutral-800">
+        <span className="text-base font-black text-neutral-900 tracking-tight">
           {formatCurrency(row.original.total_amount)}
         </span>
       ),
@@ -146,7 +158,7 @@ export default function AdminOrders() {
       header: 'วันที่',
       meta: { align: 'right' },
       cell: ({ row }) => (
-        <span className="text-sm text-neutral-500 font-medium">{formatDate(row.original.created_at)}</span>
+        <span className="text-sm text-neutral-600 font-bold">{formatDate(row.original.created_at)}</span>
       ),
     },
     {
@@ -164,10 +176,10 @@ export default function AdminOrders() {
 
         return (
           <span className={cn(
-            "inline-flex px-3 py-1 rounded-full text-xs font-medium border",
-            status === 'completed' ? "bg-emerald-50 text-emerald-700 border-emerald-100" :
-            status === 'shipped' ? "bg-primary-50 text-primary-700 border-primary-100" :
-            "bg-amber-50 text-amber-700 border-amber-100"
+            "inline-flex px-3.5 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider border shadow-sm",
+            status === 'completed' ? "bg-emerald-50 text-emerald-700 border-emerald-100/60" :
+            status === 'shipped' ? "bg-primary-50 text-primary-700 border-primary-100/60" :
+            "bg-amber-50 text-amber-700 border-amber-100/60"
           )}>
             {statusText}
           </span>
@@ -180,10 +192,10 @@ export default function AdminOrders() {
       meta: { align: 'right' },
       cell: ({ row }) => (
         <div className="text-right">
-          <p className="font-semibold text-emerald-600">
+          <p className="text-sm font-black text-emerald-600">
             +{formatCurrency(row.original.reseller_profit)}
           </p>
-          <p className="text-xs font-medium text-neutral-500 mt-0.5">เข้ากระเป๋าเงิน</p>
+          <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest mt-0.5">เข้ากระเป๋าเงิน</p>
         </div>
       ),
     },
@@ -246,6 +258,14 @@ export default function AdminOrders() {
           data={orders}
           searchColumn="order_number"
           searchPlaceholder="ค้นหาด้วยหมายเลขคำสั่งซื้อ..."
+        />
+        <Pagination
+          pageIndex={page}
+          pageSize={10}
+          totalElements={totalElements}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          className="mt-6"
         />
       </div>
 

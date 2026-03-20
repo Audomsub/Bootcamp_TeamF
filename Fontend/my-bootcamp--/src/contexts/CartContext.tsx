@@ -15,6 +15,7 @@ interface CartContextType {
   updateQuantity: (shopProductId: number, quantity: number) => void;
   clearCart: () => void;
   totalItems: number;
+  totalQuantity: number;
   totalAmount: number;
 }
 
@@ -41,14 +42,17 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const addToCart = (shopProduct: ShopProduct, quantity: number) => {
     setCartItems(prev => {
       const existing = prev.find(item => item.shopProduct.id === shopProduct.id);
+      const stock = shopProduct.product?.stock ?? 999;
+      
       if (existing) {
+        const newQuantity = Math.min(existing.quantity + quantity, stock);
         return prev.map(item => 
           item.shopProduct.id === shopProduct.id 
-            ? { ...item, quantity: item.quantity + quantity } 
+            ? { ...item, quantity: newQuantity } 
             : item
         );
       }
-      return [...prev, { shopProduct, quantity }];
+      return [...prev, { shopProduct, quantity: Math.min(quantity, stock) }];
     });
   };
 
@@ -57,18 +61,21 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const updateQuantity = (shopProductId: number, quantity: number) => {
-    setCartItems(prev => prev.map(item => 
-      item.shopProduct.id === shopProductId 
-        ? { ...item, quantity: Math.max(1, quantity) } 
-        : item
-    ));
+    setCartItems(prev => prev.map(item => {
+      if (item.shopProduct.id === shopProductId) {
+        const stock = item.shopProduct.product?.stock ?? 999;
+        return { ...item, quantity: Math.min(Math.max(1, quantity), stock) };
+      }
+      return item;
+    }));
   };
 
   const clearCart = () => {
     setCartItems([]);
   };
 
-  const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const totalItems = cartItems.length;
+  const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const totalAmount = cartItems.reduce((sum, item) => 
     sum + (item.shopProduct.selling_price * item.quantity), 0
   );
@@ -83,6 +90,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updateQuantity, 
       clearCart, 
       totalItems, 
+      totalQuantity,
       totalAmount 
     }}>
       {children}

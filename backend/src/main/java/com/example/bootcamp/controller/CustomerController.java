@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,9 +24,10 @@ public class CustomerController {
     public ResponseEntity<?> getShopDetail(
             @PathVariable String slug,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "12") int size) {
+            @RequestParam(defaultValue = "15") int size) {
         
-        Pageable pageable = PageRequest.of(page, size);
+        Sort sort = Sort.by(Sort.Direction.DESC, "product.stock").and(Sort.by(Sort.Direction.ASC, "id"));
+        Pageable pageable = PageRequest.of(page, size, sort);
         ShopFrontResponse shopFrontResponse = customerService.getShopFront(slug, pageable);
         
         if (shopFrontResponse == null) {
@@ -72,12 +74,12 @@ public class CustomerController {
     }
 
     @GetMapping("/track-order")
-    public ResponseEntity<com.example.bootcamp.dto.Response.TrackOrderResponse> trackOrder(@RequestParam String orderNumber) {
+    public ResponseEntity<?> trackOrder(@RequestParam String orderNumber) {
         try {
             com.example.bootcamp.dto.Response.TrackOrderResponse response = customerService.trackOrder(orderNumber);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(null);
+            return ResponseEntity.status(404).body(java.util.Map.of("message", e.getMessage()));
         }
     }
 
