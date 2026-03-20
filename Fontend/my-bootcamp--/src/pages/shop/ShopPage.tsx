@@ -139,13 +139,13 @@ export default function ShopPage() {
         <div className="absolute inset-0 h-32 bg-gradient-to-r from-[#ff2b5e] via-pink-500 to-[#ff681a] opacity-90 blur-sm"></div>
         <div className="absolute inset-0 h-32 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20 border-b border-black/10"></div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 pt-16 pb-6">
-          <div className="flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 pt-10 sm:pt-16 pb-6">
+          <div className="flex flex-col md:flex-row items-center md:items-end gap-4 md:gap-8">
 
             {/* Avatar */}
-            <div className="w-24 h-24 rounded-full bg-white p-1 shadow-xl shrink-0 -mt-6 relative">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white p-1 shadow-xl shrink-0 -mt-10 sm:-mt-6 relative">
               <div className="w-full h-full rounded-full bg-neutral-800 flex items-center justify-center overflow-hidden">
-                <Store className="h-10 w-10 text-white" />
+                <Store className="h-8 w-8 sm:h-10 sm:h-10 text-white" />
               </div>
             </div>
 
@@ -155,7 +155,7 @@ export default function ShopPage() {
                 <Sparkles className="h-3 w-3" />
                 ร้านค้าแนะนำ
               </div>
-              <h1 className="text-2xl md:text-3xl font-black text-neutral-900 tracking-tight truncate mb-1.5">{shopName}</h1>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-neutral-900 tracking-tight truncate mb-1.5">{shopName}</h1>
 
               <div className="flex items-center justify-center md:justify-start gap-4 text-xs text-neutral-500 font-medium">
                 <span className="flex items-center gap-1">
@@ -221,8 +221,8 @@ export default function ShopPage() {
           </div>
         ) : (
           <>
-            {/* ── Grid ── */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-5">
+            {/* ── Balanced Flex Grid ── */}
+            <div className="flex flex-wrap justify-center gap-4 sm:gap-6 md:gap-8 lg:gap-10">
               {[...filteredProducts].sort((a, b) => {
                 // สินค้าที่มีสต็อก (stock > 0) แสดงก่อน, สินค้าหมด (stock <= 0) แสดงหลัง
                 if (a.stock > 0 && b.stock <= 0) return -1;
@@ -234,7 +234,7 @@ export default function ShopPage() {
                 return (
                   <div
                     key={`${item.productId}-${index}`}
-                    className="group bg-white rounded-[14px] overflow-hidden border border-neutral-100/80 hover:border-[#ff2b5e]/40 hover:shadow-[0_8px_20px_-8px_rgba(255,43,94,0.15)] transition-all duration-300 flex flex-col relative"
+                    className="w-full sm:w-[280px] md:w-[240px] xl:w-[260px] group bg-white rounded-[14px] overflow-hidden border border-neutral-100/80 hover:border-[#ff2b5e]/40 hover:shadow-[0_8px_20px_-8px_rgba(255,43,94,0.15)] transition-all duration-300 flex flex-col relative"
                   >
 
                     {/* Image */}

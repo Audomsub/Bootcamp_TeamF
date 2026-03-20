@@ -151,19 +151,19 @@ export default function CheckoutPage() {
           {/* Main Checkout Section */}
           <div className="lg:col-span-7 space-y-10">
             <div className="glass-card !bg-white/80 backdrop-blur-3xl !rounded-[2.5rem] border-white/60 shadow-xl overflow-hidden">
-              <div className="p-8 lg:p-12 border-b border-neutral-100 bg-neutral-50/50">
+              <div className="p-6 sm:p-8 lg:p-12 border-b border-neutral-100 bg-neutral-50/50">
                 <div className="flex items-center gap-5">
-                  <div className="w-14 h-14 rounded-2xl bg-primary-100 flex items-center justify-center shadow-inner">
-                    <Store className="h-7 w-7 text-primary-600" />
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-primary-100 flex items-center justify-center shadow-inner">
+                    <Store className="h-6 w-6 sm:h-7 sm:h-7 text-primary-600" />
                   </div>
                   <div>
-                    <h1 className="text-2xl lg:text-3xl font-black text-neutral-900 tracking-tight">ข้อมูลการจัดส่ง</h1>
-                    <p className="text-sm font-medium text-neutral-500 mt-1">กรุณาระบุที่อยู่สำหรับจัดส่งสินค้า</p>
+                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-neutral-900 tracking-tight">ข้อมูลการจัดส่ง</h1>
+                    <p className="text-xs sm:text-sm font-medium text-neutral-500 mt-1">กรุณาระบุที่อยู่สำหรับจัดส่งสินค้า</p>
                   </div>
                 </div>
               </div>
 
-              <div className="p-8 lg:p-12">
+              <div className="p-6 sm:p-8 lg:p-12">
                 {error && (
                   <div className="mb-8 p-4 bg-rose-50 border border-rose-100 rounded-2xl text-sm font-bold text-rose-600 flex items-center gap-4 animate-in slide-in-from-top-4 duration-500">
                     <div className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse shrink-0"></div>
@@ -219,7 +219,7 @@ export default function CheckoutPage() {
 
           {/* Order Summary Sidebar */}
           <div className="lg:col-span-5">
-            <div className="glass-card !bg-white/95 backdrop-blur-3xl !rounded-[2.5rem] shadow-2xl p-8 lg:p-10 sticky top-10 border-white/60">
+            <div className="glass-card !bg-white/95 backdrop-blur-3xl !rounded-[2rem] sm:!rounded-[2.5rem] shadow-2xl p-6 sm:p-8 lg:p-10 sticky top-10 border-white/60">
               <div className="relative z-10 space-y-8">
                 {/* Header */}
                 <div className="flex justify-between items-start">
@@ -345,9 +345,9 @@ export default function CheckoutPage() {
                   </div>
 
                   <div className="pt-6 border-t border-neutral-200">
-                    <div className="flex justify-between items-end">
-                      <span className="text-lg font-bold text-neutral-900 pb-1">ยอดรวมทั้งสิ้น</span>
-                      <p className="text-4xl lg:text-5xl font-black text-primary-600 tracking-tight">{formatCurrency(grandTotal)}</p>
+                    <div className="flex justify-between items-end gap-2">
+                      <span className="text-base sm:text-lg font-bold text-neutral-900 pb-1">ยอดรวมทั้งสิ้น</span>
+                      <p className="text-3xl sm:text-4xl lg:text-5xl font-black text-primary-600 tracking-tight">{formatCurrency(grandTotal)}</p>
                     </div>
                   </div>
                 </div>

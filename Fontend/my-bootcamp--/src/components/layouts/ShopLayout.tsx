@@ -1,19 +1,21 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useParams } from 'react-router-dom';
-import { Store, ShoppingBag, Truck, ShoppingCart } from 'lucide-react';
+import { Store, ShoppingBag, Truck, ShoppingCart, Menu, X } from 'lucide-react';
 import { useCart } from '../../contexts/CartContext';
 import CartDrawer from '../../pages/shop/CartDrawer';
+import { cn } from '@/lib/utils';
 
 export default function ShopLayout() {
   const { slug } = useParams();
   const { totalItems } = useCart();
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
     <div className="min-h-screen mesh-bg flex flex-col">
       {/* Shop Header - Refined Consumer Experience */}
-      <header className="bg-white/60 backdrop-blur-2xl border-b border-neutral-200/30 sticky top-0 z-50 h-24">
-        <div className="max-w-[1440px] mx-auto px-10 h-full">
+      <header className="bg-white/60 backdrop-blur-2xl border-b border-neutral-200/30 sticky top-0 z-50 h-20 lg:h-24">
+        <div className="max-w-[1440px] mx-auto px-6 lg:px-10 h-full">
           <div className="h-full flex items-center justify-between">
             {/* Logo area */}
             <Link
@@ -37,12 +39,12 @@ export default function ShopLayout() {
             </Link>
 
             {/* Navigation & Cart */}
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 pr-4 border-r border-neutral-100">
+            <div className="flex items-center gap-2 lg:gap-4">
+              <div className="flex items-center gap-2 pr-2 lg:pr-4 border-r border-neutral-100">
                 {slug && (
                   <Link
                     to={`/shop/${slug}`}
-                    className="px-6 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest text-neutral-500 hover:text-neutral-900 transition-all"
+                    className="hidden sm:px-6 sm:py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest text-neutral-500 hover:text-neutral-900 transition-all"
                   >
                     สินค้า
                   </Link>
@@ -51,7 +53,7 @@ export default function ShopLayout() {
                 {/* Cart Toggle Button */}
                 <button
                   onClick={() => setIsCartOpen(true)}
-                  className="relative group p-3 rounded-2xl bg-white border border-neutral-100 shadow-sm hover:border-primary-500 transition-all duration-300"
+                  className="relative group p-2.5 lg:p-3 rounded-2xl bg-white border border-neutral-100 shadow-sm hover:border-primary-500 transition-all duration-300"
                 >
                   <ShoppingCart className="h-5 w-5 text-neutral-600 group-hover:text-primary-600" />
                   {totalItems > 0 && (
@@ -64,18 +66,53 @@ export default function ShopLayout() {
 
               <Link
                 to="/track-order"
-                className="btn-primary !px-8 !py-3 font-black text-[14px] "
+                className="hidden md:flex btn-primary !px-8 !py-3 font-black text-[14px]"
               >
                 ติดตามสถานะ
               </Link>
+
+              {/* Mobile Menu Toggle */}
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="lg:hidden p-2.5 rounded-2xl bg-white border border-neutral-100 shadow-sm text-neutral-600 hover:text-primary-600 transition-all"
+              >
+                {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </button>
             </div>
+          </div>
+        </div>
+
+        {/* Mobile Navigation Menu */}
+        <div className={cn(
+          "lg:hidden fixed inset-x-0 top-20 bg-white/95 backdrop-blur-xl border-b border-neutral-100 shadow-xl transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] overflow-hidden z-40",
+          isMenuOpen ? "max-h-64 opacity-100" : "max-h-0 opacity-0"
+        )}>
+          <div className="px-6 py-8 flex flex-col gap-4">
+            {slug && (
+              <Link
+                to={`/shop/${slug}`}
+                onClick={() => setIsMenuOpen(false)}
+                className="flex items-center justify-between px-6 py-4 rounded-2xl bg-neutral-50 text-sm font-black uppercase tracking-widest text-neutral-900"
+              >
+                <span>เลือกซื้อสินค้า</span>
+                <ShoppingBag className="h-5 w-5 text-neutral-400" />
+              </Link>
+            )}
+            <Link
+              to="/track-order"
+              onClick={() => setIsMenuOpen(false)}
+              className="flex items-center justify-between px-6 py-4 rounded-2xl bg-primary-600 text-white text-sm font-black uppercase tracking-widest shadow-lg shadow-primary-600/20"
+            >
+              <span>ติดตามสถานะออเดอร์</span>
+              <Truck className="h-5 w-5" />
+            </Link>
           </div>
         </div>
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 py-16 animate-in fade-in slide-in-from-bottom-4 duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)]">
-        <div className="max-w-[1440px] mx-auto px-10">
+      <main className="flex-1 py-8 lg:py-16 animate-in fade-in slide-in-from-bottom-4 duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)]">
+        <div className="max-w-[1440px] mx-auto px-6 lg:px-10">
           <Outlet />
         </div>
       </main>

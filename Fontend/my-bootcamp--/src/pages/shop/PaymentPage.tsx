@@ -100,26 +100,26 @@ export default function PaymentPage() {
       <div className="fixed inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(var(--primary-rgb),0.03),transparent_40%)] pointer-events-none"></div>
 
       <div className="relative z-10">
-        <div className="text-center mb-12 lg:mb-16 pt-8">
+        <div className="text-center mb-8 lg:mb-16 pt-8">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-50 border border-primary-100 mb-6 shadow-sm">
             <ShieldCheck className="h-4 w-4 text-primary-600" />
             <span className="text-[11px] font-bold text-primary-700 tracking-wider">ระบบชำระเงินปลอดภัย 100%</span>
           </div>
-          <h1 className="text-4xl lg:text-5xl font-black text-neutral-900 tracking-tight mb-4">ดำเนินการชำระเงิน</h1>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-neutral-900 tracking-tight mb-4">ดำเนินการชำระเงิน</h1>
           <p className="text-neutral-500 font-bold tracking-widest text-xs">ตรวจสอบรายการสินค้าก่อนยืนยันชำระเงิน</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-start">
           {/* Order Summary Card */}
-          <div className="glass-card !bg-white/80 backdrop-blur-3xl !rounded-[2.5rem] border-white/60 shadow-xl overflow-hidden order-2 lg:order-1">
-            <div className="p-8 lg:p-10 border-b border-neutral-100 bg-neutral-50/50">
+          <div className="glass-card !bg-white/80 backdrop-blur-3xl !rounded-[2rem] sm:!rounded-[2.5rem] border-white/60 shadow-xl overflow-hidden order-2 lg:order-1">
+            <div className="p-6 sm:p-8 lg:p-10 border-b border-neutral-100 bg-neutral-50/50">
               <h3 className="text-sm font-black text-neutral-900 tracking-wider flex items-center gap-3">
                 <Package className="h-4 w-4 text-primary-600" />
                 สรุปคำสั่งซื้อ
               </h3>
             </div>
 
-            <div className="p-8 lg:p-10">
+            <div className="p-6 sm:p-8 lg:p-10">
               <div className="space-y-4">
                 {cartItems.map((item: any, idx: number) => (
                   <div key={idx} className="flex items-center gap-4 group">
@@ -148,9 +148,9 @@ export default function PaymentPage() {
                   <span className="text-[11px] font-black tracking-wider text-neutral-400">ค่าจัดส่ง</span>
                   <span className="text-sm font-bold text-neutral-900">฿50.00</span>
                 </div>
-                <div className="flex justify-between items-end pt-4">
-                  <span className="text-lg font-black text-neutral-900 tracking-tight">ยอดรวมทั้งสิ้น</span>
-                  <p className="text-4xl font-black text-primary-600 tracking-tighter leading-none">{formatCurrency(totalAmount)}</p>
+                <div className="flex justify-between items-end pt-4 gap-2">
+                  <span className="text-base sm:text-lg font-black text-neutral-900 tracking-tight">ยอดรวมทั้งสิ้น</span>
+                  <p className="text-3xl sm:text-4xl font-black text-primary-600 tracking-tighter leading-none">{formatCurrency(totalAmount)}</p>
                 </div>
               </div>
             </div>
@@ -158,7 +158,7 @@ export default function PaymentPage() {
 
           {/* Payment Action Card */}
           <div className="space-y-8 order-1 lg:order-2">
-            <div className="glass-card !bg-neutral-900 backdrop-blur-3xl !rounded-[2.5rem] p-8 lg:p-10 text-white shadow-2xl relative overflow-hidden group border-neutral-800">
+            <div className="glass-card !bg-neutral-900 backdrop-blur-3xl !rounded-[2rem] sm:!rounded-[2.5rem] p-6 sm:p-8 lg:p-10 text-white shadow-2xl relative overflow-hidden group border-neutral-800">
               {/* Decorative elements */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/20 blur-[60px] rounded-full -mr-16 -mt-16 group-hover:bg-primary-500/30 transition-all duration-1000 pointer-events-none"></div>
 

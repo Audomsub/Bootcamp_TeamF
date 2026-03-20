@@ -122,11 +122,11 @@
 
   /* Typography: The "Power" Look */
   .page-title {
-    @apply text-5xl sm:text-6xl font-black tracking-[-0.05em] text-neutral-900 mb-4 leading-[0.95] drop-shadow-sm;
+    @apply text-3xl sm:text-4xl lg:text-6xl font-black tracking-[-0.05em] text-neutral-900 mb-4 leading-[0.95] drop-shadow-sm;
   }
 
   .page-subtitle {
-    @apply text-base text-neutral-500 font-bold max-w-xl leading-relaxed tracking-tight;
+    @apply text-sm sm:text-base text-neutral-500 font-bold max-w-xl leading-relaxed tracking-tight;
   }
 }
 

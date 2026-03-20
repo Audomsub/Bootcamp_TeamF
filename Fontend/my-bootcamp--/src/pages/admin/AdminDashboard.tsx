@@ -6,6 +6,7 @@ import {
   Clock,
   TrendingUp,
   UserCheck,
+  UserPlus,
   Package,
   ArrowUpRight,
 } from 'lucide-react';
@@ -118,7 +119,7 @@ export default function AdminDashboard() {
         <StatCard label="คำสั่งซื้อทั้งหมด" value={stats.total_orders.toLocaleString()} sub="ออเดอร์ทั้งหมดในระบบ" icon={ShoppingCart} color="violet" />
         <StatCard label="รอดำเนินการ" value={stats.pending_orders.toLocaleString()} sub="คำสั่งซื้อรอจัดส่ง" icon={Clock} color="amber" />
         <StatCard label="ตัวแทนที่อนุมัติ" value={stats.total_resellers.toLocaleString()} sub="พาร์ทเนอร์ที่ใช้งานอยู่" icon={Users} color="cyan" />
-        <StatCard label="รออนุมัติ" value={stats.pending_resellers.toLocaleString()} sub="ผู้สมัครรอการตรวจสอบ" icon={UserCheck} color="rose" />
+        <StatCard label="รออนุมัติ" value={stats.pending_resellers.toLocaleString()} sub="ผู้สมัครรอการตรวจสอบ" icon={UserPlus} color="rose" />
       </div>
 
       {/* ── Charts Row ── */}
@@ -131,8 +132,8 @@ export default function AdminDashboard() {
             <p className="text-sm text-neutral-500 mt-1">ยอดขาย vs กำไรตัวแทน vs รายได้แอดมิน</p>
           </div>
           <div className="p-6">
-            <div style={{ width: '100%', height: 300 }}>
-              <ResponsiveContainer width="100%" height={300}>
+            <div className="h-[250px] sm:h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={overviewBarData} margin={{ top: 10, right: 20, left: 10, bottom: 10 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
                   <XAxis dataKey="name" tick={{ fontSize: 13, fill: '#6B7280' }} axisLine={false} tickLine={false} />
@@ -172,11 +173,11 @@ export default function AdminDashboard() {
             <h3 className="text-lg font-bold text-neutral-800">สัดส่วนรายได้</h3>
             <p className="text-sm text-neutral-500 mt-1">แอดมิน vs ตัวแทนจำหน่าย</p>
           </div>
-          <div className="p-6 flex flex-col items-center justify-center" style={{ minHeight: 280 }}>
+          <div className="p-6 flex flex-col items-center justify-center min-h-[250px] sm:min-h-[280px]">
             {stats.total_sales > 0 ? (
               <>
-                <div style={{ width: '100%', height: 200 }}>
-                  <ResponsiveContainer width="100%" height={200}>
+                <div className="h-[180px] sm:h-[200px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
                         data={revenueBreakdown}

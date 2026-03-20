@@ -232,7 +232,7 @@ export default function ResellerLayout() {
         </header>
 
         {/* Global Page Entrance Animation */}
-        <main className="p-8 lg:p-12 max-w-[1600px] w-full mx-auto animate-in fade-in slide-in-from-bottom-8 duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)]">
+        <main className="p-4 sm:p-8 lg:p-12 max-w-[1600px] w-full mx-auto animate-in fade-in slide-in-from-bottom-8 duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)]">
           <Outlet />
         </main>
       </div>

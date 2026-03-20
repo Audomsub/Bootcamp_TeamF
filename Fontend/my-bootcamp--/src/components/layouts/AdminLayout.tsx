@@ -165,7 +165,7 @@ export default function AdminLayout() {
                     <p className="text-xs font-black text-neutral-900 dark:text-white truncate tracking-tight">{user?.name || 'Administrator'}</p>
                     <Shield className="h-3 w-3 text-primary-500 shrink-0" />
                   </div>
-                  <p className="text-[10px] text-neutral-500 dark:text-neutral-400 truncate leading-none mt-1.5 font-black uppercase tracking-tighter">ผู้ดูแลระบบสูงสุด</p>
+                  <p className="text-[10px] text-neutral-500 dark:text-neutral-400 truncate leading-none mt-1.5 font-black uppercase tracking-tighter">ผู้ดูแลระบบ</p>
                 </div>
               </div>
 
@@ -215,7 +215,7 @@ export default function AdminLayout() {
         </header>
 
         {/* Global Page Entrance Animation */}
-        <main className="p-8 lg:p-12 max-w-[1600px] w-full mx-auto animate-in fade-in slide-in-from-bottom-8 duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)]">
+        <main className="p-4 sm:p-8 lg:p-12 max-w-[1600px] w-full mx-auto animate-in fade-in slide-in-from-bottom-8 duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)]">
           <Outlet />
         </main>
       </div>

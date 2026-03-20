@@ -109,7 +109,7 @@ export default function ResellerCatalog() {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="pb-32 px-4 sm:px-0 animate-in fade-in duration-1000 font-sans">
+    <div className="pb-32 px-6 sm:px-10 lg:px-0 animate-in fade-in duration-1000 font-sans">
       {/* Visual background gradient */}
       <div className="fixed inset-0 bg-[radial-gradient(circle_at_top_right,rgba(var(--primary-rgb),0.03),transparent_40%)] pointer-events-none"></div>
 
@@ -120,7 +120,7 @@ export default function ResellerCatalog() {
               <Package className="h-4 w-4 text-primary-600" />
               <span className="text-[11px] font-bold text-primary-700 tracking-wider uppercase">Product Catalog</span>
             </div>
-            <h1 className="text-4xl lg:text-5xl font-black text-neutral-900 tracking-tight mb-4">แคตตาล็อกสินค้า</h1>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-neutral-900 tracking-tight mb-4 text-center md:text-left">แคตตาล็อกสินค้า</h1>
             <p className="text-neutral-500 font-bold tracking-widest text-xs uppercase">เลือกดูสินค้าที่พร้อมให้คุณเพิ่มลงในร้านค้าของคุณ</p>
           </div>
 
@@ -138,14 +138,15 @@ export default function ResellerCatalog() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-5">
+        {/* ── Balanced Flex Grid ── */}
+        <div className="flex flex-wrap justify-center gap-6 md:gap-8">
           {filteredProducts.map((product) => {
             const outOfStock = product.stock <= 0;
 
             return (
               <div
                 key={product.id}
-                className="group bg-white rounded-2xl overflow-hidden border border-neutral-100 hover:border-neutral-200 hover:shadow-lg transition-all duration-300 flex flex-col"
+                className="w-full sm:w-[280px] md:w-[240px] lg:w-[220px] xl:w-[240px] group bg-white rounded-2xl overflow-hidden border border-neutral-100 hover:border-neutral-200 hover:shadow-lg transition-all duration-300 flex flex-col"
               >
                 {/* Image */}
                 <div className="relative aspect-square overflow-hidden bg-neutral-50">

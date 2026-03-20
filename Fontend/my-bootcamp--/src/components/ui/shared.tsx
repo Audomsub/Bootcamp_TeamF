@@ -52,7 +52,7 @@ export function StatCard({
         <div className="space-y-4">
           <p className="label !ml-0 !mb-0">{title}</p>
           <div className="flex flex-col gap-1.5">
-            <p className="text-4xl font-black text-neutral-900 tracking-tighter drop-shadow-sm group-hover:text-primary-950 transition-colors uppercase">{value}</p>
+            <p className="text-2xl sm:text-3xl lg:text-4xl font-black text-neutral-900 tracking-tighter drop-shadow-sm group-hover:text-primary-950 transition-colors uppercase">{value}</p>
             {trend && (
               <div className="flex items-center gap-2 mt-1 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-xl border border-neutral-200/50 w-fit">
                 <span className={cn(
@@ -89,7 +89,7 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, subtitle, children }: PageHeaderProps) {
   return (
-    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8 mb-12 animate-in fade-in slide-in-from-top-4 duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)]">
+    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 lg:gap-8 mb-8 lg:mb-12 animate-in fade-in slide-in-from-top-4 duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)]">
       <div className="space-y-2">
         <h1 className="page-title !mb-0">{title}</h1>
         {subtitle && <p className="page-subtitle">{subtitle}</p>}
