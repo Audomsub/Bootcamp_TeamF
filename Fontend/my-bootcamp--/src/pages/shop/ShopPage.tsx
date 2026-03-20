@@ -41,7 +41,7 @@ export default function ShopPage() {
       if (page === 0) setLoading(true);
       else setLoadingMore(true);
 
-      const response = await shopService.getBySlug(shopSlug, page, 12);
+      const response = await shopService.getBySlug(shopSlug, page, 15); //load shop 15 oder per page
       const data = (response.data as any).data || response.data;
 
       if (data && data.shopName) {
@@ -139,13 +139,13 @@ export default function ShopPage() {
         <div className="absolute inset-0 h-32 bg-gradient-to-r from-[#ff2b5e] via-pink-500 to-[#ff681a] opacity-90 blur-sm"></div>
         <div className="absolute inset-0 h-32 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20 border-b border-black/10"></div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 pt-10 sm:pt-16 pb-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 pt-8 sm:pt-16 pb-6">
           <div className="flex flex-col md:flex-row items-center md:items-end gap-4 md:gap-8">
 
             {/* Avatar */}
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white p-1 shadow-xl shrink-0 -mt-10 sm:-mt-6 relative">
+            <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-full bg-white p-1 shadow-xl shrink-0 -mt-8 sm:-mt-6 relative">
               <div className="w-full h-full rounded-full bg-neutral-800 flex items-center justify-center overflow-hidden">
-                <Store className="h-8 w-8 sm:h-10 sm:h-10 text-white" />
+                <Store className="h-6 w-6 sm:h-10 text-white" />
               </div>
             </div>
 
@@ -159,7 +159,7 @@ export default function ShopPage() {
 
               <div className="flex items-center justify-center md:justify-start gap-4 text-xs text-neutral-500 font-medium">
                 <span className="flex items-center gap-1">
-                  <Package className="h-3.5 w-3.5" />
+                  <Package className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   สินค้าทั้งหมด {pagination.totalElements} ชิ้น
                 </span>
               </div>
@@ -174,9 +174,9 @@ export default function ShopPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 gap-6 flex flex-col">
 
         {/* ── Search & Section Title ── */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-4 rounded-xl shadow-sm border border-neutral-100 mb-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-neutral-100 mb-2">
           <div className="flex items-center gap-2">
-            <h2 className="text-base font-bold text-neutral-900 uppercase tracking-tight">สินค้าทั้งหมด</h2>
+            <h2 className="text-sm sm:text-base font-bold text-neutral-900 uppercase tracking-tight">สินค้าทั้งหมด</h2>
             {searchQuery && (
               <span className="text-xs font-bold text-neutral-400">
                 พบ {filteredProducts.length} ในหน้านี้ จาก {pagination.totalElements} รายการ
@@ -221,8 +221,8 @@ export default function ShopPage() {
           </div>
         ) : (
           <>
-            {/* ── Balanced Flex Grid ── */}
-            <div className="flex flex-wrap justify-center gap-4 sm:gap-6 md:gap-8 lg:gap-10">
+            {/* ── Responsive Product Grid ── */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-6">
               {[...filteredProducts].sort((a, b) => {
                 // สินค้าที่มีสต็อก (stock > 0) แสดงก่อน, สินค้าหมด (stock <= 0) แสดงหลัง
                 if (a.stock > 0 && b.stock <= 0) return -1;
@@ -234,7 +234,7 @@ export default function ShopPage() {
                 return (
                   <div
                     key={`${item.productId}-${index}`}
-                    className="w-full sm:w-[280px] md:w-[240px] xl:w-[260px] group bg-white rounded-[14px] overflow-hidden border border-neutral-100/80 hover:border-[#ff2b5e]/40 hover:shadow-[0_8px_20px_-8px_rgba(255,43,94,0.15)] transition-all duration-300 flex flex-col relative"
+                    className="w-full group bg-white rounded-[14px] overflow-hidden border border-neutral-100/80 hover:border-[#ff2b5e]/40 hover:shadow-[0_8px_20px_-8px_rgba(255,43,94,0.15)] transition-all duration-300 flex flex-col relative"
                   >
 
                     {/* Image */}
@@ -265,17 +265,17 @@ export default function ShopPage() {
                     </div>
 
                     {/* Body */}
-                    <div className="p-3 sm:p-4 flex flex-col flex-1 gap-2">
-                      <h3 className="text-[13px] font-medium text-neutral-800 leading-snug line-clamp-2 min-h-[2.5rem] group-hover:text-[#ff2b5e] transition-colors">
+                    <div className="p-2 sm:p-4 flex flex-col flex-1 gap-1.5 sm:gap-2">
+                      <h3 className="text-[12px] sm:text-[13px] font-medium text-neutral-800 leading-snug line-clamp-2 min-h-[2.5rem] group-hover:text-[#ff2b5e] transition-colors">
                         {item.productName}
                       </h3>
 
                       <div className="mt-auto flex flex-col">
 
                         {/* Selling Price */}
-                        <div className="flex items-baseline text-[#ff2b5e] mb-3">
-                          <span className="text-[13px] font-bold mr-0.5">฿</span>
-                          <span className="text-[18px] sm:text-[20px] font-bold tracking-tight">{Number(item.sellingPrice).toLocaleString()}</span>
+                        <div className="flex items-baseline text-[#ff2b5e] mb-2 sm:mb-3">
+                          <span className="text-[11px] sm:text-[13px] font-bold mr-0.5">฿</span>
+                          <span className="text-[16px] sm:text-[20px] font-bold tracking-tight">{Number(item.sellingPrice).toLocaleString()}</span>
                         </div>
 
                         {/* Enhanced Add to Cart Button */}
@@ -283,7 +283,7 @@ export default function ShopPage() {
                           onClick={() => !outOfStock && handleAddToCart(item)}
                           disabled={outOfStock || isAdded}
                           className={`
-                            w-full h-9 rounded-lg flex items-center justify-center gap-1.5 text-[12px] font-bold
+                            w-full h-8 sm:h-9 rounded-lg flex items-center justify-center gap-1 sm:gap-1.5 text-[10px] sm:text-[12px] font-bold
                             transition-all duration-300 active:scale-[0.98]
                             ${outOfStock
                               ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed border border-neutral-200'
@@ -317,7 +317,7 @@ export default function ShopPage() {
 
             <Pagination
               pageIndex={pagination.currentPage}
-              pageSize={12}
+              pageSize={15}
               totalElements={pagination.totalElements}
               totalPages={pagination.totalPages}
               onPageChange={handlePageChange}

@@ -44,7 +44,7 @@ export default function ResellerDashboard() {
   };
 
   // Ensure we use the latest slug from the shop object
-  const shopUrl = shop?.shop_slug 
+  const shopUrl = shop?.shop_slug
     ? `${window.location.origin}/shop/${shop.shop_slug}`
     : `${window.location.origin}/shop/not-found`;
 
@@ -95,8 +95,8 @@ export default function ResellerDashboard() {
         </div>
       </PageHeader>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+      {/* Stats Grid - Optimized for Tablet & Desktop */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
         <StatCard
           title="กำไรคาดการณ์"
           value={formatCurrency(stats.total_profit)}
@@ -139,24 +139,43 @@ export default function ResellerDashboard() {
             </a>
             <button
               onClick={() => {
-                navigator.clipboard.writeText(shopUrl);
-                const btn = document.getElementById('copy-btn');
-                const iconCopy = document.getElementById('icon-copy');
-                const iconCheck = document.getElementById('icon-check');
-                const text = document.getElementById('copy-text');
-                
-                if (btn && iconCopy && iconCheck && text) {
-                  iconCopy.classList.add('hidden');
-                  iconCheck.classList.remove('hidden');
-                  text.innerText = 'คัดลอกแล้ว!';
-                  btn.classList.add('bg-emerald-500/40');
-                  
-                  setTimeout(() => {
-                    iconCopy.classList.remove('hidden');
-                    iconCheck.classList.add('hidden');
-                    text.innerText = 'คัดลอกลิงก์';
-                    btn.classList.remove('bg-emerald-500/40');
-                  }, 2000);
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                  navigator.clipboard.writeText(shopUrl);
+                  const btn = document.getElementById('copy-btn');
+                  const iconCopy = document.getElementById('icon-copy');
+                  const iconCheck = document.getElementById('icon-check');
+                  const text = document.getElementById('copy-text');
+
+                  if (btn && iconCopy && iconCheck && text) {
+                    iconCopy.classList.add('hidden');
+                    iconCheck.classList.remove('hidden');
+                    text.innerText = 'คัดลอกแล้ว!';
+                    btn.classList.add('bg-emerald-500/40');
+
+                    setTimeout(() => {
+                      iconCopy.classList.remove('hidden');
+                      iconCheck.classList.add('hidden');
+                      text.innerText = 'คัดลอกลิงก์';
+                      btn.classList.remove('bg-emerald-500/40');
+                    }, 2000);
+                  }
+                } else {
+                  // Fallback for browsers that don't support navigator.clipboard
+                  const textArea = document.createElement("textarea");
+                  textArea.value = shopUrl;
+                  document.body.appendChild(textArea);
+                  textArea.select();
+                  try {
+                    document.execCommand('copy');
+                    const text = document.getElementById('copy-text');
+                    if (text) text.innerText = 'เข้าร้านค้ากันเลย!';
+                    setTimeout(() => {
+                      if (text) text.innerText = 'คัดลอกลิงก์';
+                    }, 2000);
+                  } catch (err) {
+                    console.error('Fallback copy failed', err);
+                  }
+                  document.body.removeChild(textArea);
                 }
               }}
               id="copy-btn"
@@ -180,65 +199,65 @@ export default function ResellerDashboard() {
             <p className="text-sm font-medium text-neutral-500 mt-1">ติดตามการเติบโตของร้านค้าคุณได้อย่างใกล้ชิด (รวมออเดอร์รอดำเนินการ)</p>
           </div>
         </div>
-        
+
         <div className="h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={stats.sales_chart || []} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#818cf8" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#818cf8" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#818cf8" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#818cf8" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="colorProfit" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#34d399" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#34d399" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#34d399" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#34d399" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-              <XAxis 
-                dataKey="date" 
-                axisLine={false} 
-                tickLine={false} 
-                tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 600 }} 
+              <XAxis
+                dataKey="date"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 600 }}
                 dy={10}
               />
-              <YAxis 
+              <YAxis
                 yAxisId="left"
-                axisLine={false} 
-                tickLine={false} 
-                tick={{ fill: '#94a3b8', fontSize: 12 }} 
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: '#94a3b8', fontSize: 12 }}
                 tickFormatter={(value) => `฿${value}`}
               />
-              <YAxis 
+              <YAxis
                 yAxisId="right"
                 orientation="right"
-                axisLine={false} 
-                tickLine={false} 
-                tick={{ fill: '#94a3b8', fontSize: 12 }} 
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: '#94a3b8', fontSize: 12 }}
                 tickFormatter={(value) => `฿${value}`}
               />
-              <Tooltip 
+              <Tooltip
                 contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)', fontWeight: 'bold' }}
                 formatter={(value: any, name: any) => [`฿${Number(value).toLocaleString()}`, name]}
               />
-              <Area 
+              <Area
                 yAxisId="left"
-                type="monotone" 
-                dataKey="amount" 
-                stroke="#818cf8" 
+                type="monotone"
+                dataKey="amount"
+                stroke="#818cf8"
                 strokeWidth={3}
-                fillOpacity={1} 
-                fill="url(#colorAmount)" 
+                fillOpacity={1}
+                fill="url(#colorAmount)"
                 name="ยอดขายสุทธิ"
               />
-              <Area 
+              <Area
                 yAxisId="right"
-                type="monotone" 
-                dataKey="profit" 
-                stroke="#34d399" 
+                type="monotone"
+                dataKey="profit"
+                stroke="#34d399"
                 strokeWidth={3}
-                fillOpacity={1} 
-                fill="url(#colorProfit)" 
+                fillOpacity={1}
+                fill="url(#colorProfit)"
                 name="กำไรของคุณ"
               />
             </AreaChart>

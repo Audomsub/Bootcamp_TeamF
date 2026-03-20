@@ -89,10 +89,10 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, subtitle, children }: PageHeaderProps) {
   return (
-    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 lg:gap-8 mb-8 lg:mb-12 animate-in fade-in slide-in-from-top-4 duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)]">
-      <div className="space-y-2">
-        <h1 className="page-title !mb-0">{title}</h1>
-        {subtitle && <p className="page-subtitle">{subtitle}</p>}
+    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:gap-8 mb-8 lg:mb-12 animate-in fade-in slide-in-from-top-4 duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)]">
+      <div className="space-y-1 sm:space-y-2">
+        <h1 className="text-2xl sm:text-3xl lg:text-5xl font-black tracking-[-0.05em] text-neutral-900 mb-1 sm:mb-4 leading-none uppercase">{title}</h1>
+        {subtitle && <p className="text-[10px] sm:text-sm text-neutral-500 font-bold uppercase tracking-widest">{subtitle}</p>}
       </div>
       {children && (
         <div className="flex items-center gap-4 shrink-0">
@@ -133,12 +133,12 @@ interface LoadingSpinnerProps {
 
 export function LoadingSpinner({ className, size = 'md' }: LoadingSpinnerProps) {
   const sizeClasses = { 
-    sm: 'h-6 w-6 border-2', 
-    md: 'h-10 w-10 border-[3px]', 
-    lg: 'h-16 w-16 border-[4px]' 
+    sm: 'h-5 w-5 border-2', 
+    md: 'h-8 w-8 sm:h-10 sm:w-10 border-[3px]', 
+    lg: 'h-12 w-12 sm:h-16 sm:w-16 border-[4px]' 
   };
   return (
-    <div className={cn('flex items-center justify-center py-20', className)}>
+    <div className={cn('flex items-center justify-center py-10 sm:py-20', className)}>
       <div className="relative">
         <div className={cn('opacity-10 border-neutral-900 rounded-full', sizeClasses[size])} />
         <div className={cn('absolute inset-0 border-transparent border-t-primary-600 rounded-full animate-spin', sizeClasses[size])} />

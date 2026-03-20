@@ -94,7 +94,6 @@ export default function ShopLayout() {
                 onClick={() => setIsMenuOpen(false)}
                 className="flex items-center justify-between px-6 py-4 rounded-2xl bg-neutral-50 text-sm font-black uppercase tracking-widest text-neutral-900"
               >
-                <span>เลือกซื้อสินค้า</span>
                 <ShoppingBag className="h-5 w-5 text-neutral-400" />
               </Link>
             )}

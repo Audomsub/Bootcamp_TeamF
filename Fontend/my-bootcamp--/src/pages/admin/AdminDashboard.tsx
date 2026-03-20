@@ -112,8 +112,8 @@ export default function AdminDashboard() {
         subtitle={`ยินดีต้อนรับ ${user?.name || 'ผู้ดูแลระบบ'} — ข้อมูลสรุปจากระบบจริง`}
       />
 
-      {/* ── Stat Cards 6 ช่อง ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      {/* ── Stat Cards optimized for Tablet/Desktop ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-5">
         <StatCard label="ยอดขายรวม" value={formatCurrency(stats.total_sales)} sub="ออเดอร์ที่จัดส่ง/เสร็จสมบูรณ์" icon={DollarSign} color="emerald" />
         <StatCard label="กำไรตัวแทนรวม" value={formatCurrency(stats.total_reseller_profit)} sub="ผลรวมกระเป๋าเงินตัวแทนทั้งหมด" icon={TrendingUp} color="blue" />
         <StatCard label="คำสั่งซื้อทั้งหมด" value={stats.total_orders.toLocaleString()} sub="ออเดอร์ทั้งหมดในระบบ" icon={ShoppingCart} color="violet" />

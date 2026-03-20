@@ -64,10 +64,10 @@ export default function ResellerLayout() {
         />
       )}
 
-      {/* Sidebar - Precision Light Glass Look */}
+      {/* Sidebar - Precision Solid White Look (Matching Footer) */}
       <aside
         className={cn(
-          'fixed lg:sticky top-0 left-0 z-50 h-screen w-80 bg-white/80 backdrop-blur-2xl border-r border-neutral-200/50 transform transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] lg:translate-x-0 flex flex-col',
+          'fixed lg:sticky top-0 left-0 z-50 h-screen w-80 bg-white border-r border-neutral-100/80 shadow-sm transform transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] lg:translate-x-0 flex flex-col',
           sidebarOpen ? 'translate-x-0 shadow-[0_0_100px_rgba(0,0,0,0.1)]' : '-translate-x-full'
         )}
       >
@@ -152,39 +152,40 @@ export default function ResellerLayout() {
 
 
 
-        {/* User Footer - Command Center Status Card */}
-        <div className="p-6 mt-auto">
-          <div className="relative group">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-accent-500 to-primary-500 rounded-[2rem] blur opacity-0 group-hover:opacity-10 transition-opacity duration-700"></div>
-            <div className="relative bg-white border border-neutral-100 shadow-sm rounded-[2rem] p-5">
-              <div className="flex items-center gap-4">
-                <div className="relative">
-                  <div className="w-12 h-12 bg-neutral-50 rounded-2xl flex items-center justify-center border border-neutral-200/50 overflow-hidden group-hover:border-accent-500/50 transition-colors duration-500">
-                    <span className="text-sm font-black text-neutral-900 relative z-10 transition-transform duration-500 group-hover:scale-125">
-                      {(user?.name?.charAt(0) || 'R').toUpperCase()}
-                    </span>
-                    <div className="absolute inset-0 bg-gradient-to-tr from-accent-600/5 to-primary-600/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  </div>
-                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-accent-500 border-2 border-white rounded-full"></div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-xs font-black text-accent-600 truncate tracking-tight">{user?.name || 'ผู้ดูแลระบบ'}</p>
-                    <Store className="h-3 w-3 text-accent-400 shrink-0" />
-                  </div>
-                  <p className="text-[10px] text-neutral-500 truncate leading-none mt-1.5 font-black uppercase tracking-tighter">ตัวแทนจำหน่ายที่ได้รับการรับรอง</p>
-                </div>
+        {/* User Footer - Integrated Status Section */}
+        <div className="mt-auto border-t border-neutral-100 bg-neutral-50/40 p-8">
+          <div className="flex items-center gap-4 group">
+            <div className="relative">
+              <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center border border-neutral-200/50 overflow-hidden shadow-sm group-hover:border-accent-500/50 transition-all duration-500">
+                <span className="text-sm font-black text-accent-600 relative z-10 transition-transform duration-500 group-hover:scale-110">
+                  {(user?.name?.charAt(0) || 'R').toUpperCase()}
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-tr from-accent-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </div>
-
-              <button
-                onClick={handleLogout}
-                className="w-full mt-5 flex items-center justify-between px-4 py-3 rounded-xl bg-neutral-50 text-[12px] font-black text-neutral-500 hover:text-white hover:bg-rose-600 transition-all duration-500 group/logout"
-              >
-                <span>ออกจากระบบ</span>
-                <LogOut className="h-3.5 w-3.5 group-hover/logout:translate-x-1 transition-transform" />
-              </button>
+              <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-accent-500 border-2 border-white rounded-full"></div>
+            </div>
+            
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <p className="text-xs font-black text-neutral-900 truncate tracking-tight group-hover:text-accent-600 transition-colors uppercase">
+                  {user?.name || 'ผู้ดูแลระบบ'}
+                </p>
+                <div className="w-1 h-1 rounded-full bg-neutral-300"></div>
+                <Store className="h-3 w-3 text-accent-500 shrink-0" />
+              </div>
+              <p className="text-[9px] text-neutral-400 truncate leading-none mt-1.5 font-black uppercase tracking-[0.2em]">
+                ตัวแทนจำหน่ายมาตรฐาน
+              </p>
             </div>
           </div>
+
+          <button
+            onClick={handleLogout}
+            className="w-full mt-6 flex items-center justify-between px-5 py-3.5 rounded-xl bg-white border border-neutral-200/50 text-[11px] font-black text-neutral-500 hover:text-white hover:bg-rose-600 hover:border-rose-600 transition-all duration-500 group/logout shadow-sm"
+          >
+            <span className="uppercase tracking-widest">ออกจากระบบ</span>
+            <LogOut className="h-3.5 w-3.5 group-hover/logout:translate-x-1 transition-transform" />
+          </button>
         </div>
       </aside>
 

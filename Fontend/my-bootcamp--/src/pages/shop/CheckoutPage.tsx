@@ -153,12 +153,12 @@ export default function CheckoutPage() {
             <div className="glass-card !bg-white/80 backdrop-blur-3xl !rounded-[2.5rem] border-white/60 shadow-xl overflow-hidden">
               <div className="p-6 sm:p-8 lg:p-12 border-b border-neutral-100 bg-neutral-50/50">
                 <div className="flex items-center gap-5">
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-primary-100 flex items-center justify-center shadow-inner">
-                    <Store className="h-6 w-6 sm:h-7 sm:h-7 text-primary-600" />
+                  <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-2xl bg-primary-100 flex items-center justify-center shadow-inner">
+                    <Store className="h-5 w-5 sm:h-7 text-primary-600" />
                   </div>
                   <div>
-                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-neutral-900 tracking-tight">ข้อมูลการจัดส่ง</h1>
-                    <p className="text-xs sm:text-sm font-medium text-neutral-500 mt-1">กรุณาระบุที่อยู่สำหรับจัดส่งสินค้า</p>
+                    <h1 className="text-lg sm:text-2xl lg:text-3xl font-black text-neutral-900 tracking-tight">ข้อมูลการจัดส่ง</h1>
+                    <p className="text-[10px] sm:text-sm font-medium text-neutral-500 mt-1">กรุณาระบุที่อยู่สำหรับจัดส่งสินค้า</p>
                   </div>
                 </div>
               </div>
@@ -177,7 +177,7 @@ export default function CheckoutPage() {
                       <label className="text-xs font-bold text-neutral-500 ml-1">ชื่อ-นามสกุลผู้รับ</label>
                       <input
                         {...register('customer_name')}
-                        className="w-full px-6 py-4 rounded-2xl bg-neutral-50 border border-neutral-200 focus:bg-white focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all duration-300 font-medium text-neutral-900 placeholder:text-neutral-400"
+                        className="w-full px-5 py-3.5 sm:px-6 sm:py-4 rounded-2xl bg-neutral-50 border border-neutral-200 focus:bg-white focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all duration-300 text-sm sm:text-base font-medium text-neutral-900 placeholder:text-neutral-400"
                         placeholder="เช่น สมชาย รักดี"
                       />
                       {errors.customer_name && <p className="text-xs font-semibold text-rose-500 ml-1">{errors.customer_name.message}</p>}
@@ -187,7 +187,7 @@ export default function CheckoutPage() {
                       <label className="text-xs font-bold text-neutral-500 ml-1">เบอร์โทรศัพท์ติดต่อ</label>
                       <input
                         {...register('customer_phone')}
-                        className="w-full px-6 py-4 rounded-2xl bg-neutral-50 border border-neutral-200 focus:bg-white focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all duration-300 font-medium text-neutral-900 placeholder:text-neutral-400"
+                        className="w-full px-5 py-3.5 sm:px-6 sm:py-4 rounded-2xl bg-neutral-50 border border-neutral-200 focus:bg-white focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all duration-300 text-sm sm:text-base font-medium text-neutral-900 placeholder:text-neutral-400"
                         placeholder="08X-XXX-XXXX (10 หลัก)"
                       />
                       {errors.customer_phone && <p className="text-xs font-semibold text-rose-500 ml-1">{errors.customer_phone.message}</p>}
@@ -199,7 +199,7 @@ export default function CheckoutPage() {
                     <textarea
                       {...register('shipping_address')}
                       rows={4}
-                      className="w-full px-6 py-5 rounded-2xl bg-neutral-50 border border-neutral-200 focus:bg-white focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all duration-300 font-medium text-neutral-900 placeholder:text-neutral-400 resize-none leading-relaxed"
+                      className="w-full px-5 py-4 sm:px-6 sm:py-5 rounded-2xl bg-neutral-50 border border-neutral-200 focus:bg-white focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all duration-300 text-sm sm:text-base font-medium text-neutral-900 placeholder:text-neutral-400 resize-none leading-relaxed"
                       placeholder="บ้านเลขที่, อาคาร/หมู่บ้าน, ซอย, ถนน, ตำบล/แขวง, อำเภอ/เขต, จังหวัด, รหัสไปรษณีย์"
                     />
                     {errors.shipping_address && <p className="text-xs font-semibold text-rose-500 ml-1">{errors.shipping_address.message}</p>}
@@ -235,24 +235,24 @@ export default function CheckoutPage() {
                 </div>
 
                 {/* รายละเอียด */}
-                <div className="grid grid-cols-2 gap-y-6 gap-x-8 border-y border-neutral-100 py-6">
+                <div className="grid grid-cols-2 gap-y-4 sm:gap-y-6 gap-x-6 sm:gap-x-8 border-y border-neutral-100 py-6">
                   <div>
-                    <p className="text-xs font-bold text-neutral-400 mb-1">จำนวนสินค้า</p>
-                    <p className="text-base font-black text-neutral-900">{totalItems} ชิ้น</p>
+                    <p className="text-[10px] sm:text-xs font-bold text-neutral-400 mb-1 uppercase tracking-wider">จำนวนสินค้า</p>
+                    <p className="text-sm sm:text-base font-black text-neutral-900">{totalItems} ชิ้น</p>
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-neutral-400 mb-1">ร้านค้า</p>
-                    <p className="text-base font-black text-neutral-900 truncate pr-2" title={slug?.toUpperCase()}>
+                    <p className="text-[10px] sm:text-xs font-bold text-neutral-400 mb-1 uppercase tracking-wider">ร้านค้า</p>
+                    <p className="text-sm sm:text-base font-black text-neutral-900 truncate pr-2" title={slug?.toUpperCase()}>
                       {slug?.toUpperCase()}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-neutral-400 mb-1">การจัดส่ง</p>
-                    <p className="text-base font-black text-emerald-600">Express Delivery</p>
+                    <p className="text-[10px] sm:text-xs font-bold text-neutral-400 mb-1 uppercase tracking-wider">การจัดส่ง</p>
+                    <p className="text-sm sm:text-base font-black text-emerald-600">Express Delivery</p>
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-neutral-400 mb-1">สถานะ</p>
-                    <p className="text-base font-black text-neutral-900">พร้อมดำเนินการ</p>
+                    <p className="text-[10px] sm:text-xs font-bold text-neutral-400 mb-1 uppercase tracking-wider">สถานะ</p>
+                    <p className="text-sm sm:text-base font-black text-neutral-900">พร้อมดำเนินการ</p>
                   </div>
                 </div>
 
@@ -273,7 +273,7 @@ export default function CheckoutPage() {
                     }).map((item) => (
                       <div key={item.shopProduct.id} className="group/item relative bg-white rounded-2xl border border-neutral-100 p-3 hover:border-primary-200 hover:shadow-md transition-all duration-300">
                         <div className="flex gap-4">
-                          <div className="w-20 h-20 rounded-xl overflow-hidden bg-neutral-50 flex-shrink-0 border border-neutral-100">
+                          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-neutral-50 flex-shrink-0 border border-neutral-100">
                             <img
                               src={getImageUrl(item.shopProduct.product?.image_url)}
                               alt={item.shopProduct.product?.name}
@@ -294,12 +294,12 @@ export default function CheckoutPage() {
 
                             <div className="flex items-center justify-between mt-2">
                               {/* ปุ่มปรับจำนวน */}
-                              <div className="flex items-center bg-neutral-50 rounded-lg border border-neutral-200/60 p-0.5">
+                              <div className="flex items-center bg-neutral-50 rounded-lg border border-neutral-200/60 p-0.5 scale-90 sm:scale-100 origin-left">
                                 <button
                                   onClick={(e) => { e.preventDefault(); handleUpdateQuantity(item.shopProduct.id, item.quantity - 1); }}
-                                  className="w-7 h-7 rounded-md hover:bg-white flex items-center justify-center text-neutral-500 hover:text-neutral-900 transition-colors shadow-sm"
+                                  className="w-6 h-6 sm:w-7 sm:h-7 rounded-md hover:bg-white flex items-center justify-center text-neutral-500 hover:text-neutral-900 transition-colors shadow-sm"
                                 >
-                                  <Minus className="h-3 w-3" />
+                                  <Minus className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                                 </button>
                                 <input
                                   type="number"
@@ -311,16 +311,16 @@ export default function CheckoutPage() {
                                       handleUpdateQuantity(item.shopProduct.id, val);
                                     }
                                   }}
-                                  className="w-10 text-center text-xs font-bold text-neutral-900 bg-transparent border-none p-0 focus:ring-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                                  className="w-8 sm:w-10 text-center text-[10px] sm:text-xs font-bold text-neutral-900 bg-transparent border-none p-0 focus:ring-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                                 />
                                 <button
                                   onClick={(e) => { e.preventDefault(); handleUpdateQuantity(item.shopProduct.id, item.quantity + 1); }}
-                                  className="w-7 h-7 rounded-md hover:bg-white flex items-center justify-center text-neutral-500 hover:text-neutral-900 transition-colors shadow-sm"
+                                  className="w-6 h-6 sm:w-7 sm:h-7 rounded-md hover:bg-white flex items-center justify-center text-neutral-500 hover:text-neutral-900 transition-colors shadow-sm"
                                 >
-                                  <Plus className="h-3 w-3" />
+                                  <Plus className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                                 </button>
                               </div>
-                              <p className="text-sm font-black text-neutral-900">
+                              <p className="text-[13px] sm:text-sm font-black text-neutral-900">
                                 {formatCurrency(item.shopProduct.selling_price * item.quantity)}
                               </p>
                             </div>
@@ -346,8 +346,8 @@ export default function CheckoutPage() {
 
                   <div className="pt-6 border-t border-neutral-200">
                     <div className="flex justify-between items-end gap-2">
-                      <span className="text-base sm:text-lg font-bold text-neutral-900 pb-1">ยอดรวมทั้งสิ้น</span>
-                      <p className="text-3xl sm:text-4xl lg:text-5xl font-black text-primary-600 tracking-tight">{formatCurrency(grandTotal)}</p>
+                      <span className="text-sm sm:text-lg font-bold text-neutral-900 pb-1">ยอดรวมทั้งสิ้น</span>
+                      <p className="text-2xl sm:text-4xl lg:text-5xl font-black text-primary-600 tracking-tight">{formatCurrency(grandTotal)}</p>
                     </div>
                   </div>
                 </div>

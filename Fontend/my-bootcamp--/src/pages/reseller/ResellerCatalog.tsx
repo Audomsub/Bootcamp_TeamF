@@ -28,7 +28,7 @@ export default function ResellerCatalog() {
   const loadCatalog = async (pageToLoad: number, isInitial: boolean = false) => {
     try {
       setLoading(true);
-      const response = await shopService.getCatalog(pageToLoad);
+      const response = await shopService.getCatalog(pageToLoad, 15);
       const data = response.data;
 
       const content = Array.isArray(data) ? data : (data.content || []);
@@ -146,7 +146,7 @@ export default function ResellerCatalog() {
             return (
               <div
                 key={product.id}
-                className="w-full sm:w-[280px] md:w-[240px] lg:w-[220px] xl:w-[240px] group bg-white rounded-2xl overflow-hidden border border-neutral-100 hover:border-neutral-200 hover:shadow-lg transition-all duration-300 flex flex-col"
+                className="w-[calc(100%-1rem)] sm:w-[calc(50%-1rem)] md:w-[calc(50%-1rem)] lg:w-[calc(33.33%-1rem)] xl:w-[calc(20%-1rem)] group bg-white rounded-2xl overflow-hidden border border-neutral-100 hover:border-neutral-200 hover:shadow-lg transition-all duration-300 flex flex-col"
               >
                 {/* Image */}
                 <div className="relative aspect-square overflow-hidden bg-neutral-50">
@@ -155,7 +155,7 @@ export default function ResellerCatalog() {
                     alt={product.name}
                     className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${outOfStock ? 'opacity-50 grayscale' : ''}`}
                   />
-                  
+
                   {/* Out of stock overlay */}
                   {outOfStock && (
                     <div className="absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-[2px]">
@@ -225,11 +225,10 @@ export default function ResellerCatalog() {
                           setError('');
                         }}
                         disabled={outOfStock}
-                        className={`w-full py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 ${
-                          !outOfStock
+                        className={`w-full py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 ${!outOfStock
                             ? 'bg-neutral-900 text-white hover:bg-primary-600 shadow-md hover:shadow-lg active:scale-[0.98]'
                             : 'bg-neutral-100 text-neutral-400 cursor-not-allowed border border-neutral-200'
-                        }`}
+                          }`}
                       >
                         {!outOfStock ? (
                           <>
@@ -250,7 +249,7 @@ export default function ResellerCatalog() {
 
         <Pagination
           pageIndex={page}
-          pageSize={20}
+          pageSize={15}
           totalElements={totalElements}
           totalPages={totalPages}
           onPageChange={handlePageChange}

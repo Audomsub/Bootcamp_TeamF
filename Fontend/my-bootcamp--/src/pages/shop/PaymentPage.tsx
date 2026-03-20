@@ -101,19 +101,19 @@ export default function PaymentPage() {
 
       <div className="relative z-10">
         <div className="text-center mb-8 lg:mb-16 pt-8">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-50 border border-primary-100 mb-6 shadow-sm">
-            <ShieldCheck className="h-4 w-4 text-primary-600" />
-            <span className="text-[11px] font-bold text-primary-700 tracking-wider">ระบบชำระเงินปลอดภัย 100%</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-primary-50 border border-primary-100 mb-6 shadow-sm">
+            <ShieldCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary-600" />
+            <span className="text-[10px] sm:text-[11px] font-bold text-primary-700 tracking-wider uppercase">ระบบชำระเงินปลอดภัย 100%</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-neutral-900 tracking-tight mb-4">ดำเนินการชำระเงิน</h1>
-          <p className="text-neutral-500 font-bold tracking-widest text-xs">ตรวจสอบรายการสินค้าก่อนยืนยันชำระเงิน</p>
+          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-neutral-900 tracking-tight mb-4 uppercase">ดำเนินการชำระเงิน</h1>
+          <p className="text-neutral-500 font-bold tracking-[0.2em] text-[10px] sm:text-xs uppercase">ตรวจสอบรายการสินค้าก่อนยืนยันชำระเงิน</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-start">
           {/* Order Summary Card */}
           <div className="glass-card !bg-white/80 backdrop-blur-3xl !rounded-[2rem] sm:!rounded-[2.5rem] border-white/60 shadow-xl overflow-hidden order-2 lg:order-1">
             <div className="p-6 sm:p-8 lg:p-10 border-b border-neutral-100 bg-neutral-50/50">
-              <h3 className="text-sm font-black text-neutral-900 tracking-wider flex items-center gap-3">
+              <h3 className="text-xs sm:text-sm font-black text-neutral-900 tracking-widest flex items-center gap-3 uppercase">
                 <Package className="h-4 w-4 text-primary-600" />
                 สรุปคำสั่งซื้อ
               </h3>
@@ -131,8 +131,8 @@ export default function PaymentPage() {
                       />
                     </div>
                     <div className="flex-1 min-w-0 pr-4">
-                      <p className="font-bold text-neutral-900 text-sm truncate">{item.shopProduct?.product?.name}</p>
-                      <p className="text-xs font-bold text-neutral-400 mt-1">
+                      <p className="font-bold text-neutral-900 text-sm truncate uppercase tracking-tighter">{item.shopProduct?.product?.name}</p>
+                      <p className="text-[10px] sm:text-xs font-bold text-neutral-400 mt-1 uppercase">
                         {item.quantity} ชิ้น @ {formatCurrency(item.shopProduct?.selling_price || 0)}
                       </p>
                     </div>
@@ -145,12 +145,12 @@ export default function PaymentPage() {
 
               <div className="mt-8 pt-8 border-t border-neutral-100 space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-[11px] font-black tracking-wider text-neutral-400">ค่าจัดส่ง</span>
+                  <span className="text-[10px] sm:text-[11px] font-black tracking-widest text-neutral-400 uppercase">ค่าจัดส่ง</span>
                   <span className="text-sm font-bold text-neutral-900">฿50.00</span>
                 </div>
                 <div className="flex justify-between items-end pt-4 gap-2">
-                  <span className="text-base sm:text-lg font-black text-neutral-900 tracking-tight">ยอดรวมทั้งสิ้น</span>
-                  <p className="text-3xl sm:text-4xl font-black text-primary-600 tracking-tighter leading-none">{formatCurrency(totalAmount)}</p>
+                  <span className="text-sm sm:text-lg font-black text-neutral-900 tracking-tight uppercase">ยอดรวมทั้งสิ้น</span>
+                  <p className="text-2xl sm:text-4xl font-black text-primary-600 tracking-tighter leading-none">{formatCurrency(totalAmount)}</p>
                 </div>
               </div>
             </div>
@@ -169,9 +169,9 @@ export default function PaymentPage() {
                   </div>
                 </div>
 
-                <div className="space-y-4 mb-10">
-                  <h3 className="text-2xl font-black tracking-tight leading-tight">ยืนยันการ<br />ชำระเงิน</h3>
-                  <p className="text-neutral-400 text-xs font-medium leading-relaxed max-w-[90%]">
+                <div className="space-y-3 sm:space-y-4 mb-8 sm:mb-10 text-center sm:text-left">
+                  <h3 className="text-xl sm:text-2xl font-black tracking-tight leading-tight uppercase">ยืนยันการ<br className="hidden sm:block" />ชำระเงิน</h3>
+                  <p className="text-neutral-400 text-[10px] sm:text-xs font-medium leading-relaxed max-w-[90%] mx-auto sm:mx-0">
                     * นี่คือระบบจำลองการชำระเงิน จะไม่มีการหักเงินจากบัญชีของคุณจริงในขั้นตอนนี้
                   </p>
                 </div>
@@ -189,15 +189,15 @@ export default function PaymentPage() {
                   className="w-full relative group/btn"
                 >
                   <div className="absolute -inset-1 bg-gradient-to-r from-primary-600 to-primary-400 rounded-2xl blur opacity-30 group-hover/btn:opacity-60 transition duration-1000"></div>
-                  <div className="relative bg-primary-600 hover:bg-primary-500 py-5 rounded-2xl font-bold text-sm tracking-wide transition-all duration-300 flex items-center justify-center gap-3 overflow-hidden shadow-xl disabled:opacity-70 disabled:cursor-not-allowed">
+                  <div className="relative bg-primary-600 hover:bg-primary-500 py-4 sm:py-5 rounded-2xl font-bold text-[13px] sm:text-sm tracking-wide transition-all duration-300 flex items-center justify-center gap-3 overflow-hidden shadow-xl disabled:opacity-70 disabled:cursor-not-allowed uppercase">
                     {processing ? (
                       <>
-                        <Loader2 className="h-5 w-5 animate-spin" />
+                        <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
                         กำลังดำเนินการ...
                       </>
                     ) : (
                       <>
-                        <ShieldCheck className="h-5 w-5" />
+                        <ShieldCheck className="h-4 w-4 sm:h-5 sm:w-5" />
                         ชำระเงิน {formatCurrency(totalAmount)}
                       </>
                     )}

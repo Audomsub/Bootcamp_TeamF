@@ -30,7 +30,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/5 rounded-full blur-3xl pointer-events-none -mr-32 -mt-32"></div>
 
             {/* Header */}
-            <div className="relative p-8 border-b border-neutral-100 flex items-center justify-between">
+            <div className="relative p-5 sm:p-8 border-b border-neutral-100 flex items-center justify-between">
               <div>
                 <h2 className="text-xl font-bold text-neutral-900 tracking-tight">รถเข็นสั่งซื้อสินค้า</h2>
                 <div className="flex items-center gap-2 mt-1">
@@ -49,7 +49,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             </div>
 
             {/* Items List */}
-            <div className="flex-1 overflow-y-auto p-8 space-y-6">
+            <div className="flex-1 overflow-y-auto p-5 sm:p-8 space-y-4 sm:space-y-6">
               {cartItems.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center space-y-6">
                   <div className="w-20 h-20 rounded-[2.5rem] bg-neutral-50 flex items-center justify-center">
@@ -69,8 +69,8 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
               ) : (
                 cartItems.map((item) => (
                   <div key={item.shopProduct.id} className="group relative bg-white rounded-3xl border border-neutral-100 p-4 hover:border-primary-100 transition-all duration-300">
-                    <div className="flex gap-5">
-                      <div className="w-24 h-24 rounded-2xl overflow-hidden bg-neutral-50 flex-shrink-0">
+                    <div className="flex gap-4 sm:gap-5">
+                      <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-neutral-50 flex-shrink-0">
                         <img
                           src={getImageUrl(item.shopProduct.product?.image_url)}
                           alt={item.shopProduct.product?.name}
@@ -79,8 +79,8 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                       </div>
                       <div className="flex-1 min-w-0 flex flex-col justify-between">
                         <div>
-                          <div className="flex justify-between items-start">
-                            <h4 className="font-bold text-neutral-900 truncate pr-2">
+                          <div className="flex justify-between items-start gap-2">
+                            <h4 className="font-bold text-neutral-900 text-sm sm:text-base truncate pr-2">
                               {item.shopProduct.product?.name}
                             </h4>
                             <button
@@ -141,11 +141,11 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
 
             {/* Footer */}
             {cartItems.length > 0 && (
-              <div className="p-8 bg-neutral-50/50 border-t border-neutral-100 space-y-6">
+              <div className="p-6 sm:p-8 bg-neutral-50/50 border-t border-neutral-100 space-y-4 sm:space-y-6">
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-black text-neutral-400 uppercase tracking-widest">ยอดรวมคำสั่งซื้อ</span>
-                    <span className="text-lg font-bold text-neutral-900">{formatCurrency(totalAmount)}</span>
+                    <span className="text-[10px] sm:text-xs font-black text-neutral-400 uppercase tracking-widest">ยอดรวมคำสั่งซื้อ</span>
+                    <span className="text-base sm:text-lg font-bold text-neutral-900">{formatCurrency(totalAmount)}</span>
                   </div>
                   <p className="text-[10px] text-neutral-400 font-medium">ค่าจัดส่งและภาษีจะถูกคำนวณในขั้นตอนการชำระเงิน</p>
                 </div>
@@ -156,9 +156,9 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                   className="w-full relative group block"
                 >
                   <div className="absolute -inset-1 bg-gradient-to-r from-primary-600 to-accent-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-500"></div>
-                  <div className="relative w-full py-5 bg-neutral-900 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] flex items-center justify-center gap-3 transition-all duration-300 group-hover:bg-black group-hover:scale-[1.02] active:scale-[0.98]">
+                  <div className="relative w-full py-4 sm:py-5 bg-neutral-900 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] sm:text-[11px] flex items-center justify-center gap-3 transition-all duration-300 group-hover:bg-black group-hover:scale-[1.02] active:scale-[0.98]">
                     ดำเนินการสั่งซื้อสินค้า
-                    <ArrowRight className="h-4 w-4" />
+                    <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   </div>
                 </Link>
               </div>
