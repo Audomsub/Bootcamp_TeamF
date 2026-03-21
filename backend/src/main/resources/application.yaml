@@ -21,6 +21,21 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:your-email@gmail.com}
+    password: ${MAIL_PASSWORD:your-app-password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
 logging:
   level:
     org.hibernate.SQL: WARN     # ซ่อน SQL log ที่ไม่จำเป็น (เปลี่ยนเป็น DEBUG ถ้าอยากดู)

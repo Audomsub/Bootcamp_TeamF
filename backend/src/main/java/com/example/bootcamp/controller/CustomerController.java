@@ -90,4 +90,9 @@ public class CustomerController {
         org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by("id").descending());
         return ResponseEntity.ok(customerService.getAllCatalog(pageable));
     }
+
+    @GetMapping("/shops")
+    public ResponseEntity<?> getShops() {
+        return ResponseEntity.ok(customerService.getAllShops());
+    }
 }

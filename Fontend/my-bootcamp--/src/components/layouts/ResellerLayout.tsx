@@ -13,6 +13,7 @@ import {
   X,
   ChevronRight,
   Store,
+  Bell,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -224,6 +225,14 @@ export default function ResellerLayout() {
             </div>
             <div className="h-10 w-px bg-neutral-200/50 hidden sm:block"></div>
             <ThemeToggle />
+            <div className="h-10 w-px bg-neutral-200/50 hidden sm:block"></div>
+            
+            {/* Notification Bell */}
+            <button className="relative group p-2.5 rounded-2xl bg-white border border-neutral-100 shadow-sm hover:border-accent-500 transition-all duration-300">
+              <Bell className="h-5 w-5 text-neutral-500 group-hover:text-accent-600" />
+              <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white shadow-sm ring-4 ring-rose-500/10"></span>
+            </button>
+
             <div className="h-10 w-px bg-neutral-200/50 hidden sm:block"></div>
             <div className="flex flex-col items-end ">
               <span className="text-[9px] font-black text-neutral-400 uppercase tracking-widest leading-none">โหมดการทำงาน</span>

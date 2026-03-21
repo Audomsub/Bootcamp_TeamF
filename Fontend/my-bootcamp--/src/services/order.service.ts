@@ -143,4 +143,9 @@ export const orderService = {
 
   simulatePayment: (slug: string, orderId: number) =>
     api.post(`/shop/${slug}/payment/${orderId}`),
+
+  getShops: async () => {
+    const res = await api.get('/shops');
+    return res.data;
+  },
 };
