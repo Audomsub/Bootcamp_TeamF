@@ -14,8 +14,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import java.util.List;
 
 /**
@@ -44,12 +42,6 @@ public class SecurityConfig {
     private JwtFilter jwtFilter;
 
     @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring()
-                .requestMatchers("/api/approved-shops", "/api/approved-shops/**");
-    }
-
-    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(Customizer.withDefaults())
@@ -57,10 +49,11 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // ─── Absolute Top: Public Shop API ───────────────────────
-                        .requestMatchers("/api/approved-shops", "/api/approved-shops/**").permitAll()
                         // ─── Allow CORS preflight ───────────────────────────────
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // ─── Public: New Approved Shops APIs ────────────────────
+                        .requestMatchers(HttpMethod.GET, "/api/approved-shops", "/api/approved-shops/**").permitAll()
 
                         // ─── Public: Auth endpoints ─────────────────────────────
                         .requestMatchers(HttpMethod.POST, "/login").permitAll()

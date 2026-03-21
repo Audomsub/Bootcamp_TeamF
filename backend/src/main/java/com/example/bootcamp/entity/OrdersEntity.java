@@ -1,11 +1,9 @@
 package com.example.bootcamp.entity;
 
 import jakarta.persistence.*;
-import lombok.Builder;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import org.w3c.dom.Text;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
