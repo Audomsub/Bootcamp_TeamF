@@ -1,11 +1,7 @@
 package com.example.bootcamp.entity;
 
 import jakarta.persistence.*;
-import lombok.Builder;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-import org.w3c.dom.Text;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -52,8 +48,6 @@ public class OrdersEntity {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "is_read_by_reseller", nullable = false)
-    private boolean isReadByReseller = false;
 
     public enum Status {
         pending,
@@ -149,11 +143,4 @@ public class OrdersEntity {
         this.createdAt = createdAt;
     }
 
-    public boolean isReadByReseller() {
-        return isReadByReseller;
-    }
-
-    public void setReadByReseller(boolean readByReseller) {
-        isReadByReseller = readByReseller;
-    }
 }

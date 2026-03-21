@@ -46,7 +46,7 @@ public class SecurityConfig {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
-                .requestMatchers("/api/approved-shops", "/api/approved-shops/**");
+                .requestMatchers("/customer/**");
     }
 
     @Bean
@@ -57,8 +57,9 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // ─── Absolute Top: Public Shop API ───────────────────────
-                        .requestMatchers("/api/approved-shops", "/api/approved-shops/**").permitAll()
+                        // ─── Public: Customer-facing endpoints ──────────────────
+                        .requestMatchers("/customer/**").permitAll()
+
                         // ─── Allow CORS preflight ───────────────────────────────
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
@@ -70,11 +71,6 @@ public class SecurityConfig {
                         .requestMatchers("/", "/index.html", "/*.js", "/*.css", "/*.png", "/*.svg", "/*.ico",
                                 "/assets/**", "/static/**", "/uploads/**")
                         .permitAll()
-
-                        // ─── Public: Customer-facing endpoints ──────────────────
-                        .requestMatchers("/customer/shop/**").permitAll()
-                        .requestMatchers("/customer/track-order", "/customer/track-order/**").permitAll()
-                        .requestMatchers("/customer/catalog").permitAll()
 
                         // ─── Protected: Admin (ROLE_ADMIN required) ─────────────
                         .requestMatchers("/admin/**").hasRole("ADMIN")

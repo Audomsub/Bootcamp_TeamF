@@ -85,14 +85,6 @@ public class CustomerController {
         }
     }
 
-    @GetMapping("/catalog")
-    public ResponseEntity<org.springframework.data.domain.Page<com.example.bootcamp.entity.ProductsEntity>> getCatalog(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size,
-                org.springframework.data.domain.Sort.by("id").descending());
-        return ResponseEntity.ok(customerService.getAllCatalog(pageable));
-    }
 
     @GetMapping("/shop")
     public ResponseEntity<?> getShops() {
@@ -107,7 +99,7 @@ public class CustomerController {
     /**
      * API #1: แสดงร้าน reseller ที่มีสถานะ approved ทั้งหมด (สำหรับหน้าแรกของเว็บไซต์)
      */
-    @GetMapping("/api/approved-shops")
+    @GetMapping("/approved-shops")
     public ResponseEntity<?> getApprovedShops() {
         return ResponseEntity.ok(customerService.getApprovedShops());
     }
@@ -116,7 +108,7 @@ public class CustomerController {
      * API #2: แสดง products ทั้งหมดของร้านที่เลือก (เมื่อคลิกเข้าไปในร้าน)
      * พร้อมสามารถสั่งซื้อได้ผ่าน POST /shop/{slug}/checkout ที่มีอยู่แล้ว
      */
-    @GetMapping("/api/approved-shops/{slug}/products")
+    @GetMapping("/approved-shops/{slug}/products")
     public ResponseEntity<?> getApprovedShopProducts(
             @PathVariable String slug,
             @RequestParam(defaultValue = "0") int page,

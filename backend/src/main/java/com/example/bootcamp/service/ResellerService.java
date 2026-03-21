@@ -323,7 +323,7 @@ public class ResellerService {
                                 .orElseThrow(() -> new RuntimeException("ไม่พบผู้ใช้งาน"));
                 ShopsEntity shop = shopRepository.findByUserId(user.getId())
                                 .orElseThrow(() -> new RuntimeException("ไม่พบร้านค้าของคุณ"));
-                return orderRepository.countByShopIdAndIsReadByResellerFalse(shop.getId());
+                return orderRepository.countByShopIdAndStatus(shop.getId(), OrdersEntity.Status.pending);
         }
 
         @Transactional
@@ -332,6 +332,8 @@ public class ResellerService {
                                 .orElseThrow(() -> new RuntimeException("ไม่พบผู้ใช้งาน"));
                 ShopsEntity shop = shopRepository.findByUserId(user.getId())
                                 .orElseThrow(() -> new RuntimeException("ไม่พบร้านค้าของคุณ"));
-                orderRepository.markAllOrdersAsReadByShopId(shop.getId());
+                // No-op: Since we don't have isReadByReseller column and we don't want to change order status
+                // simply by marking it as "read".
+                // orderRepository.markAllOrdersAsReadByShopId(shop.getId());
         }
 }

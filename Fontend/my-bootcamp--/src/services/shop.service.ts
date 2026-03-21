@@ -4,7 +4,7 @@ import type { ShopProduct, Product, Shop, ApiResponse } from '@/types';
 export const shopService = {
   // Get shop by slug (public)
   getBySlug: (slug: string, page: number = 0, size: number = 12) =>
-    api.get<ApiResponse<{ 
+    api.get<ApiResponse<{
       shopName: string,
       productResponses: any[],
       totalPages: number,
@@ -16,7 +16,7 @@ export const shopService = {
 
   // Get catalog (all products for reseller to browse)
   getCatalog: (page: number = 0, size: number = 20) =>
-    api.get<any>(`/catalog?page=${page}&size=${size}`),
+    api.get<any>(`/reseller/catalog?page=${page}&size=${size}`),
 
   // Get my shop products
   getMyProducts: (page: number = 0, size: number = 100) =>
