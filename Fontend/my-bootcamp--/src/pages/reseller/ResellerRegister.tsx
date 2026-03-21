@@ -150,7 +150,7 @@ export default function ResellerRegister() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-neutral-800 mb-1.5">ชื่อร้านค้า</label>
+                <label className="block text-sm font-semibold text-neutral-800 mb-1.5">ชื่อร้านค้า (URL)</label>
                 <input {...register('shopName')} className="input-field w-full" placeholder="ร้านของสมชาย" />
                 {errors.shopName && <p className="mt-1.5 text-xs font-medium text-rose-500">{errors.shopName.message}</p>}
               </div>
@@ -172,14 +172,14 @@ export default function ResellerRegister() {
               <div>
                 <label className="block text-sm font-semibold text-neutral-800 mb-1.5">ยืนยันรหัสผ่าน</label>
                 <input type="password" {...register('confirmPassword')} className="input-field w-full" placeholder="••••••••" />
-                {errors.confirmPassword && <p className="mt-1.5 text-xs font-medium text-rose-500">{errors.confirmPassword.message}</p>}
+                {errors.confirmPassword && <p className="mt-1.5 text-16px font-medium text-rose-500">{errors.confirmPassword.message}</p>}
               </div>
             </div>
 
             <div>
               <label className="block text-sm font-semibold text-neutral-800 mb-1.5">เบอร์โทรศัพท์</label>
               <input {...register('phone')} className="input-field w-full" placeholder="0812345678" />
-              {errors.phone && <p className="mt-1.5 text-xs font-medium text-rose-500">{errors.phone.message}</p>}
+              {errors.phone && <p className="mt-1.5 text-16px font-medium text-rose-500">{errors.phone.message}</p>}
             </div>
 
             <div>
@@ -190,7 +190,7 @@ export default function ResellerRegister() {
                 className="input-field w-full resize-none"
                 placeholder="บ้านเลขที่, ซอย, ถนน, ตำบล/แขวง, อำเภอ/เขต, จังหวัด, รหัสไปรษณีย์"
               />
-              {errors.address && <p className="mt-1.5 text-xs font-medium text-rose-500">{errors.address.message}</p>}
+              {errors.address && <p className="mt-1.5 text-16px font-medium text-rose-500">{errors.address.message}</p>}
             </div>
 
             <div className="pt-4">

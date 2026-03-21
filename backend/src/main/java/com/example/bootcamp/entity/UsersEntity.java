@@ -6,35 +6,38 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "users" , schema = "public")
+@Table(name = "users", schema = "public")
 public class UsersEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
 
-    @Column(name = "name" , nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "email" , unique = true , nullable = false)
+    @Column(name = "email", unique = true, nullable = false)
     private String email;
 
-    @Column(name = "password" , nullable = false)
+    @Column(name = "password", nullable = false)
     private String password;
 
     @Column(name = "phone", length = 20)
     private String phone;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "role" , nullable = false)
+    @Column(name = "role", nullable = false)
     private Role role;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     private Status status;
 
-    @Column(name = "address" , columnDefinition = "TEXT")
+    @Column(name = "address", columnDefinition = "TEXT")
     private String address;
+
+    @Column(name = "url_path" , length = 255)
+    private String urlPath;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -113,6 +116,14 @@ public class UsersEntity {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public String getUrlPath() {
+        return urlPath;
+    }
+
+    public void setUrlPath(String urlPath) {
+        this.urlPath = urlPath;
     }
 
     public LocalDateTime getCreatedAt() {

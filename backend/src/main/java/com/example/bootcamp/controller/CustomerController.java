@@ -10,6 +10,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 @RequestMapping("/customer")
@@ -90,4 +93,43 @@ public class CustomerController {
                 org.springframework.data.domain.Sort.by("id").descending());
         return ResponseEntity.ok(customerService.getAllCatalog(pageable));
     }
+
+    @GetMapping("/shop")
+    public ResponseEntity<?> getShops() {
+        return ResponseEntity.ok(customerService.getAllShops());
+    }
+
+    @GetMapping("/shops2")
+    public ResponseEntity<?> getShops2() {
+        return ResponseEntity.ok(customerService.getAllShopWithProducts());
+    }
+
+    /**
+     * API #1: แสดงร้าน reseller ที่มีสถานะ approved ทั้งหมด (สำหรับหน้าแรกของเว็บไซต์)
+     */
+    @GetMapping("/api/approved-shops")
+    public ResponseEntity<?> getApprovedShops() {
+        return ResponseEntity.ok(customerService.getApprovedShops());
+    }
+
+    /**
+     * API #2: แสดง products ทั้งหมดของร้านที่เลือก (เมื่อคลิกเข้าไปในร้าน)
+     * พร้อมสามารถสั่งซื้อได้ผ่าน POST /shop/{slug}/checkout ที่มีอยู่แล้ว
+     */
+    @GetMapping("/api/approved-shops/{slug}/products")
+    public ResponseEntity<?> getApprovedShopProducts(
+            @PathVariable String slug,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "15") int size) {
+
+        Sort sort = Sort.by(Sort.Direction.DESC, "product.stock").and(Sort.by(Sort.Direction.ASC, "id"));
+        Pageable pageable = PageRequest.of(page, size, sort);
+        ShopFrontResponse shopFrontResponse = customerService.getApprovedShopProducts(slug, pageable);
+
+        if (shopFrontResponse == null) {
+            return ResponseEntity.status(404).body(java.util.Map.of("message", "ไม่พบร้านค้านี้ หรือร้านค้ายังไม่ได้รับการอนุมัติ"));
+        }
+        return ResponseEntity.ok(shopFrontResponse);
+    }
+    
 }

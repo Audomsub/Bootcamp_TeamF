@@ -31,6 +31,7 @@ import ShopPage from './pages/shop/ShopPage';
 import CheckoutPage from './pages/shop/CheckoutPage';
 import PaymentPage from './pages/shop/PaymentPage';
 import TrackOrder from './pages/shop/TrackOrder';
+import LandingPage from './pages/shop/LandingPage';
 
 export default function App() {
   return (
@@ -38,8 +39,8 @@ export default function App() {
       <AuthProvider>
         <CartProvider>
           <Routes>
-            {/* Public Root Redirect */}
-            <Route path="/" element={<Navigate to="/login" replace />} />
+            {/* Public Root Marketplace */}
+            <Route path="/" element={<LandingPage />} />
             <Route path="/admin/login" element={<Login />} />
 
             {/* Auth */}

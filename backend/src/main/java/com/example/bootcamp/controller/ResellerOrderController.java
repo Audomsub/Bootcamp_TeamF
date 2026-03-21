@@ -24,7 +24,7 @@ public class ResellerOrderController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             Authentication authentication) {
-        
+
         if (authentication == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -37,5 +37,22 @@ public class ResellerOrderController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    @GetMapping("/unread-count")
+    public ResponseEntity<Long> getUnreadCount(Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok(resellerService.getUnreadOrderCount(authentication.getName()));
+    }
+
+    @PostMapping("/mark-read")
+    public ResponseEntity<Void> markAsRead(Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        resellerService.markOrdersAsRead(authentication.getName());
+        return ResponseEntity.ok().build();
     }
 }

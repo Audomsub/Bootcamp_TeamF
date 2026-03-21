@@ -38,7 +38,8 @@ public class CustomerService {
     @Autowired
     private ProductRepository productRepository;
 
-
+    @Autowired
+    private EmailService emailService;
 
     public ShopFrontResponse getShopFront(String slug, Pageable pageable) {
         Optional<ShopsEntity> shopsEntity = shopRepository.findByShopSlug(slug);
@@ -63,11 +64,11 @@ public class CustomerService {
         }
         return new ShopFrontResponse(
                 currentShop.getShopName(),
+                currentShop.getUser().getEmail(),
                 shopProductResponses,
                 shopProductsPage.getTotalPages(),
                 shopProductsPage.getTotalElements(),
-                shopProductsPage.getNumber()
-        );
+                shopProductsPage.getNumber());
     }
 
     @Transactional
@@ -91,12 +92,12 @@ public class CustomerService {
             ShopProductsEntity shopProduct = shopProductRepository
                     .findByShopIdAndProductId(shopsEntity.getId(), itemReq.getProductId())
                     .orElseThrow(() -> new RuntimeException("ไม่มีสินค้า ID " + itemReq.getProductId() + " ในร้าน"));
-            
+
             ProductsEntity product = shopProduct.getProduct();
             if (product.getStock() < itemReq.getQuantity()) {
                 throw new RuntimeException("สินค้า " + product.getProductName() + " มีไม่เพียงพอ");
             }
-            
+
             product.setStock(product.getStock() - itemReq.getQuantity());
             productRepository.save(product);
 
@@ -123,12 +124,26 @@ public class CustomerService {
         } else {
             ordersEntity.setTotalAmount(totalAmount);
         }
-        
+
         ordersEntity.setResellerProfit(totalProfit);
         ordersEntity.setOrderItems(orderItems);
-        
+
         OrdersEntity savedOrder = orderRepository.save(ordersEntity);
         orderItemRepository.saveAll(orderItems);
+
+        // --- ส่ง Email แจ้งเตือนไปยังตัวแทนจำหน่าย ---
+        try {
+            String resellerEmail = shopsEntity.getUser().getEmail();
+            emailService.sendNewOrderNotification(
+                    resellerEmail,
+                    savedOrder.getOrderNumber(),
+                    savedOrder.getCustomerName(),
+                    savedOrder.getTotalAmount(),
+                    shopsEntity.getUser().getUrlPath()
+            );
+        } catch (Exception e) {
+            System.err.println("⚠️ Email notification failed, but order was created: " + e.getMessage());
+        }
 
         return savedOrder;
     }
@@ -157,15 +172,14 @@ public class CustomerService {
         System.out.println("🔍 Backend: Tracking order: " + orderNumber);
         OrdersEntity order = orderRepository.findByOrderNumber(orderNumber)
                 .orElseThrow(() -> new RuntimeException("ไม่พบออเดอร์นี้"));
-                
+
         List<TrackOrderResponse.TrackOrderItemResponse> items = new ArrayList<>();
         if (order.getOrderItems() != null) {
             for (OrderItemsEntity item : order.getOrderItems()) {
                 items.add(new TrackOrderResponse.TrackOrderItemResponse(
                         item.getProductName(),
                         item.getQuantity(),
-                        item.getSellingPrice()
-                ));
+                        item.getSellingPrice()));
             }
         }
 
@@ -177,15 +191,14 @@ public class CustomerService {
                 order.getCustomerPhone(),
                 order.getShippingAddress(),
                 order.getTotalAmount(),
-                order.getCreatedAt()
-        );
+                order.getCreatedAt());
     }
 
     @Transactional
     public OrderDetailResponse getOrderDetails(Integer orderId) {
         OrdersEntity order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("ไม่พบออเดอร์นี้"));
-        
+
         List<String> items = new ArrayList<>();
         if (order.getOrderItems() != null) {
             for (OrderItemsEntity item : order.getOrderItems()) {
@@ -201,11 +214,111 @@ public class CustomerService {
                 items,
                 order.getTotalAmount(),
                 order.getStatus().toString(),
-                order.getCreatedAt()
-        );
+                order.getCreatedAt());
     }
 
     public Page<ProductsEntity> getAllCatalog(Pageable pageable) {
         return productRepository.findAll(pageable);
+    }
+
+    public List<java.util.Map<String, Object>> getAllShops() {
+        List<ShopsEntity> shops = shopRepository.findAll();
+        List<java.util.Map<String, Object>> result = new ArrayList<>();
+        for (ShopsEntity shop : shops) {
+            java.util.Map<String, Object> map = new java.util.HashMap<>();
+            map.put("id", shop.getId());
+            map.put("shopName", shop.getShopName());
+            map.put("shopSlug", shop.getShopSlug());
+            // Add more info if needed, like logo or product count
+            result.add(map);
+        }
+        return result;
+    }
+
+    public List<java.util.Map<String , Object>> getAllShopWithProducts() {
+        List<ShopsEntity> shops = shopRepository.findAll();
+        List<java.util.Map<String, Object>> result = new ArrayList<>();
+        for (ShopsEntity shop : shops) {
+            java.util.Map<String, Object> map = new java.util.HashMap<>();
+            map.put("id", shop.getId());
+            map.put("shopName", shop.getShopName());
+            map.put("shopSlug", shop.getShopSlug());
+
+            List<ShopProductsEntity> shopProducts = shopProductRepository.findByShopId(shop.getId(), Pageable.unpaged()).getContent();
+            List<java.util.Map<String, Object>> products = new ArrayList<>();
+            for (ShopProductsEntity sp : shopProducts) {
+                java.util.Map<String, Object> productMap = new java.util.HashMap<>();
+                productMap.put("id", sp.getProduct().getId());
+                productMap.put("productName", sp.getProduct().getProductName());
+                productMap.put("sellingPrice", sp.getSellingPrice());
+                products.add(productMap);
+            }
+            map.put("products", products);
+            result.add(map);
+        }
+        return result;
+    }
+
+    /**
+     * API #1: Get all reseller shops with approved status
+     * Returns shop info including product count for the landing page
+     */
+    @Transactional
+    public List<java.util.Map<String, Object>> getApprovedShops() {
+        List<ShopsEntity> shops = shopRepository.findByUserStatus(UsersEntity.Status.approved);
+        List<java.util.Map<String, Object>> result = new ArrayList<>();
+        for (ShopsEntity shop : shops) {
+            java.util.Map<String, Object> map = new java.util.HashMap<>();
+            map.put("id", shop.getId());
+            map.put("shopName", shop.getShopName());
+            map.put("shopSlug", shop.getShopSlug());
+            map.put("ownerName", shop.getUser().getName());
+            // Count total products in this shop
+            List<ShopProductsEntity> shopProducts = shopProductRepository.findByShopId(shop.getId());
+            map.put("productCount", shopProducts.size());
+            result.add(map);
+        }
+        return result;
+    }
+
+    /**
+     * API #2: Get all products of a specific approved shop by slug
+     * Returns shop info + paginated product list for shopping
+     */
+    @Transactional
+    public ShopFrontResponse getApprovedShopProducts(String slug, Pageable pageable) {
+        Optional<ShopsEntity> shopsEntity = shopRepository.findByShopSlug(slug);
+
+        if (shopsEntity.isEmpty()) {
+            return null;
+        }
+
+        ShopsEntity currentShop = shopsEntity.get();
+
+        // Check if the shop owner is approved
+        if (currentShop.getUser().getStatus() != UsersEntity.Status.approved) {
+            return null;
+        }
+
+        Page<ShopProductsEntity> shopProductsPage = shopProductRepository.findByShopId(currentShop.getId(), pageable);
+
+        List<ShopProductResponse> shopProductResponses = new ArrayList<>();
+        for (ShopProductsEntity shopProductsEntity : shopProductsPage.getContent()) {
+            ShopProductResponse shopProductResponse = new ShopProductResponse(
+                    shopProductsEntity.getProduct().getId(),
+                    shopProductsEntity.getProduct().getProductName(),
+                    shopProductsEntity.getProduct().getImageUrl(),
+                    shopProductsEntity.getSellingPrice(),
+                    shopProductsEntity.getProduct().getStock(),
+                    shopProductsEntity.getProduct().getDescription());
+            shopProductResponses.add(shopProductResponse);
+        }
+        return new ShopFrontResponse(
+                currentShop.getShopName(),
+                currentShop.getUser().getEmail(),
+                shopProductResponses,
+                shopProductsPage.getTotalPages(),
+                shopProductsPage.getTotalElements(),
+                shopProductsPage.getNumber());
     }
 }

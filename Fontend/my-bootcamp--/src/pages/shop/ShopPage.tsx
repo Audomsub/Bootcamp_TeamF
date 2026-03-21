@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Store, ShoppingCart, CheckCircle2, Package, ArrowRight, Sparkles, Star, MapPin, Search, X } from 'lucide-react';
 import { LoadingSpinner, EmptyState, Pagination } from '@/components/ui/shared';
 import { Modal } from '@/components/ui/modal';
-import { shopService } from '@/services/shop.service';
+import { orderService } from '@/services/order.service';
 import { formatCurrency, getImageUrl } from '@/lib/utils';
 import { useCart } from '@/contexts/CartContext';
 
@@ -43,7 +43,7 @@ export default function ShopPage() {
       if (page === 0) setLoading(true);
       else setLoadingMore(true);
 
-      const response = await shopService.getBySlug(shopSlug, page, 15); //load shop 15 oder per page
+      const response = await orderService.getApprovedShopProducts(shopSlug, page, 15);
       const data = (response.data as any).data || response.data;
 
       if (data && data.shopName) {
@@ -116,12 +116,12 @@ export default function ShopPage() {
             <Store className="h-13 w-13 text-rose-400" />
           </div>
           <div className="absolute -top-2 -right-2 w-8 h-8 bg-rose-500 rounded-xl flex items-center justify-center shadow-lg">
-            <span className="text-white text-xs font-black">!</span>
+            <span className="text-white text-16px font-black">!</span>
           </div>
         </div>
-        <p className="text-xs font-bold text-rose-400 uppercase tracking-[0.3em] mb-3">Error 404</p>
+        <p className="text-16px font-bold text-rose-400 uppercase tracking-[0.3em] mb-3">Error 404</p>
         <h1 className="text-3xl font-black text-neutral-900 tracking-tight mb-3">ไม่พบร้านค้า</h1>
-        <p className="text-neutral-500 max-w-xs leading-relaxed text-sm">
+        <p className="text-neutral-500 max-w-16px leading-relaxed text-sm">
           ร้านค้า <span className="text-neutral-800 font-semibold">"{slug}"</span> ไม่มีอยู่ในระบบ
           กรุณาตรวจสอบลิงก์อีกครั้ง
         </p>
@@ -159,7 +159,7 @@ export default function ShopPage() {
               </div>
               <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-neutral-900 tracking-tight truncate mb-1.5">{shopName}</h1>
 
-              <div className="flex items-center justify-center md:justify-start gap-4 text-xs text-neutral-500 font-medium">
+              <div className="flex items-center justify-center md:justify-start gap-4 text-16px text-neutral-500 font-medium">
                 <span className="flex items-center gap-1">
                   <Package className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   สินค้าทั้งหมด {pagination.totalElements} ชิ้น
@@ -180,7 +180,7 @@ export default function ShopPage() {
           <div className="flex items-center gap-2">
             <h2 className="text-sm sm:text-base font-bold text-neutral-900 uppercase tracking-tight">สินค้าทั้งหมด</h2>
             {searchQuery && (
-              <span className="text-xs font-bold text-neutral-400">
+              <span className="text-16px font-bold text-neutral-400">
                 พบ {filteredProducts.length} ในหน้านี้ จาก {pagination.totalElements} รายการ
               </span>
             )}
@@ -231,19 +231,19 @@ export default function ShopPage() {
                 if (a.stock <= 0 && b.stock > 0) return 1;
                 return 0;
               }).map((item: any, index: number) => {
-                  const isAdded = addedItem === item.productId;
-                  const outOfStock = item.stock <= 0;
-                  const cartItem = cartItems.find((ci: any) => ci.shopProduct.id === item.productId);
-                  const isMaxReached = cartItem && cartItem.quantity >= (item.stock || 0);
+                const isAdded = addedItem === item.productId;
+                const outOfStock = item.stock <= 0;
+                const cartItem = cartItems.find((ci: any) => ci.shopProduct.id === item.productId);
+                const isMaxReached = cartItem && cartItem.quantity >= (item.stock || 0);
 
-                  return (
+                return (
                   <div
                     key={`${item.productId}-${index}`}
                     className="w-full group bg-white rounded-[14px] overflow-hidden border border-neutral-100/80 hover:border-[#ff2b5e]/40 hover:shadow-[0_8px_20px_-8px_rgba(255,43,94,0.15)] transition-all duration-300 flex flex-col relative"
                   >
 
                     {/* Image */}
-                    <div 
+                    <div
                       className="relative aspect-square overflow-hidden bg-neutral-50 flex-shrink-0 cursor-pointer"
                       onClick={() => setViewProduct(item)}
                     >
@@ -255,7 +255,7 @@ export default function ShopPage() {
 
                       {/* Hover details overlay */}
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <span className="text-white text-xs font-bold bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/30">
+                        <span className="text-white text-16px font-bold bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/30">
                           ดูรายละเอียด
                         </span>
                       </div>
@@ -354,7 +354,7 @@ export default function ShopPage() {
         {viewProduct && (() => {
           const cartItem = cartItems.find((ci: any) => ci.shopProduct.id === viewProduct.productId);
           const isMaxReached = cartItem && cartItem.quantity >= (viewProduct.stock || 0);
-          
+
           return (
             <div className="flex flex-col gap-6">
               <div className="aspect-square w-full rounded-2xl overflow-hidden bg-neutral-100 border border-neutral-100">
@@ -381,10 +381,10 @@ export default function ShopPage() {
                 </div>
 
                 <div className="flex items-center justify-between p-3 border border-neutral-100 rounded-xl bg-white">
-                   <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">คงเหลือในระบบ</span>
-                   <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase ${viewProduct.stock > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
-                      {viewProduct.stock > 0 ? `พร้อมส่ง ${viewProduct.stock} ชิ้น` : 'สินค้าหมด'}
-                   </span>
+                  <span className="text-16px font-bold text-neutral-500 uppercase tracking-wider">คงเหลือในระบบ</span>
+                  <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase ${viewProduct.stock > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
+                    {viewProduct.stock > 0 ? `พร้อมส่ง ${viewProduct.stock} ชิ้น` : 'สินค้าหมด'}
+                  </span>
                 </div>
 
                 <button

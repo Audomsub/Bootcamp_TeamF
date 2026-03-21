@@ -15,6 +15,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import java.util.List;
 
 /**
@@ -36,11 +37,17 @@ import java.util.List;
  * The JWT filter sets the authentication context from the Bearer token.
  */
 @Configuration
-@EnableWebSecurity
+@EnableWebSecurity(debug = true)
 public class SecurityConfig {
 
     @Autowired
     private JwtFilter jwtFilter;
+
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring()
+                .requestMatchers("/api/approved-shops", "/api/approved-shops/**");
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -50,6 +57,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        // ─── Absolute Top: Public Shop API ───────────────────────
+                        .requestMatchers("/api/approved-shops", "/api/approved-shops/**").permitAll()
                         // ─── Allow CORS preflight ───────────────────────────────
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
