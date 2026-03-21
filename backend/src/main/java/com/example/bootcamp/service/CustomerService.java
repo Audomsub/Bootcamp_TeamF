@@ -257,4 +257,66 @@ public class CustomerService {
         }
         return result;
     }
+
+    /**
+     * API #1: Get all reseller shops with approved status
+     * Returns shop info including product count for the landing page
+     */
+    @Transactional
+    public List<java.util.Map<String, Object>> getApprovedShops() {
+        List<ShopsEntity> shops = shopRepository.findByUserStatus(UsersEntity.Status.approved);
+        List<java.util.Map<String, Object>> result = new ArrayList<>();
+        for (ShopsEntity shop : shops) {
+            java.util.Map<String, Object> map = new java.util.HashMap<>();
+            map.put("id", shop.getId());
+            map.put("shopName", shop.getShopName());
+            map.put("shopSlug", shop.getShopSlug());
+            map.put("ownerName", shop.getUser().getName());
+            // Count total products in this shop
+            List<ShopProductsEntity> shopProducts = shopProductRepository.findByShopId(shop.getId());
+            map.put("productCount", shopProducts.size());
+            result.add(map);
+        }
+        return result;
+    }
+
+    /**
+     * API #2: Get all products of a specific approved shop by slug
+     * Returns shop info + paginated product list for shopping
+     */
+    @Transactional
+    public ShopFrontResponse getApprovedShopProducts(String slug, Pageable pageable) {
+        Optional<ShopsEntity> shopsEntity = shopRepository.findByShopSlug(slug);
+
+        if (shopsEntity.isEmpty()) {
+            return null;
+        }
+
+        ShopsEntity currentShop = shopsEntity.get();
+
+        // Check if the shop owner is approved
+        if (currentShop.getUser().getStatus() != UsersEntity.Status.approved) {
+            return null;
+        }
+
+        Page<ShopProductsEntity> shopProductsPage = shopProductRepository.findByShopId(currentShop.getId(), pageable);
+
+        List<ShopProductResponse> shopProductResponses = new ArrayList<>();
+        for (ShopProductsEntity shopProductsEntity : shopProductsPage.getContent()) {
+            ShopProductResponse shopProductResponse = new ShopProductResponse(
+                    shopProductsEntity.getProduct().getId(),
+                    shopProductsEntity.getProduct().getProductName(),
+                    shopProductsEntity.getProduct().getImageUrl(),
+                    shopProductsEntity.getSellingPrice(),
+                    shopProductsEntity.getProduct().getStock(),
+                    shopProductsEntity.getProduct().getDescription());
+            shopProductResponses.add(shopProductResponse);
+        }
+        return new ShopFrontResponse(
+                currentShop.getShopName(),
+                shopProductResponses,
+                shopProductsPage.getTotalPages(),
+                shopProductsPage.getTotalElements(),
+                shopProductsPage.getNumber());
+    }
 }

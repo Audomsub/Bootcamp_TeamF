@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Store, ArrowRight, ShoppingBag, User, UserPlus } from 'lucide-react';
+import { Search, Store, ArrowRight, ShoppingBag, User, UserPlus, Package } from 'lucide-react';
 import { orderService } from '@/services/order.service';
 
 interface Shop {
   id: number;
   shopName: string;
   shopSlug: string;
+  ownerName: string;
+  productCount: number;
 }
 
 export default function LandingPage() {
@@ -17,10 +19,11 @@ export default function LandingPage() {
   useEffect(() => {
     const fetchShops = async () => {
       try {
-        const data = await orderService.getShops();
+        // Use new API that only returns approved reseller shops
+        const data = await orderService.getApprovedShops();
         setShops(data || []);
       } catch (error) {
-        console.error('Failed to fetch shops:', error);
+        console.error('Failed to fetch approved shops:', error);
       } finally {
         setLoading(false);
       }
@@ -130,10 +133,20 @@ export default function LandingPage() {
                   <p className="text-xs text-neutral-400 font-medium uppercase tracking-widest truncate">
                     @{shop.shopSlug}
                   </p>
+                  {shop.ownerName && (
+                    <p className="text-xs text-neutral-500 mt-1">
+                      โดย {shop.ownerName}
+                    </p>
+                  )}
                 </div>
 
                 <div className="mt-6 pt-6 border-t border-neutral-50 flex items-center justify-between">
-                  <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">Visit Store</span>
+                  <div className="flex items-center gap-1.5">
+                    <Package className="h-3.5 w-3.5 text-neutral-400" />
+                    <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">
+                      {shop.productCount} สินค้า
+                    </span>
+                  </div>
                   <div className="w-8 h-8 rounded-full bg-neutral-50 flex items-center justify-center group-hover:bg-rose-600 transition-colors">
                     <ArrowRight className="h-4 w-4 text-neutral-400 group-hover:text-white transition-colors" />
                   </div>
