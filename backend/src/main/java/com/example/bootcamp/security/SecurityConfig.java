@@ -43,14 +43,11 @@ public class SecurityConfig {
     @Autowired
     private JwtFilter jwtFilter;
 
-<<<<<<< HEAD
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
                 .requestMatchers("/customer/**", "/api/customer/**");
     }
-=======
->>>>>>> 195ac19b2bbaa563afc32807047aa8e8b0075f95
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

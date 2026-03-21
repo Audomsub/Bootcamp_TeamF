@@ -47,7 +47,6 @@ export default function ShopPage() {
       // Handle various response patterns (Axios-wrapped, direct body, or missing data)
       const rawData = (response as any)?.data || response;
       const data = (rawData as any)?.data || rawData || {};
-
       if (data && data.shopName) {
         setShopName(data.shopName);
         setProducts(data.productResponses || []); // Always replace
