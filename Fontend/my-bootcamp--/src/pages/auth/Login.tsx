@@ -142,14 +142,14 @@ export default function Login() {
           <div className="grid grid-cols-2 gap-6">
             <div className="p-8 glass-card border-none bg-white/40 rounded-[2rem]">
               <div className="flex items-center gap-4 mb-3">
-                <Store className="h-6 w-6 text-primary-500" />
+                <Store className="h-6 w-6 text-accent-500" />
                 <span className="text-xs font-semibold text-neutral-500">สำหรับตัวแทนจำหน่าย</span>
               </div>
               <p className="text-neutral-800 font-semibold text-sm">จัดการแคตตาล็อกและยอดขาย</p>
             </div>
             <div className="p-8 glass-card border-none bg-white/40 rounded-[2rem]">
               <div className="flex items-center gap-4 mb-3">
-                <Shield className="h-6 w-6 text-accent-500" />
+                <Shield className="h-6 w-6 text-primary-500" />
                 <span className="text-xs font-semibold text-neutral-500">สำหรับผู้ดูแลระบบ</span>
               </div>
               <p className="text-neutral-800 font-semibold text-sm">ควบคุมระบบและเครือข่ายทั้งหมด</p>
@@ -274,7 +274,7 @@ export default function Login() {
             <div className="mt-8 pt-6 border-t border-neutral-100 text-center">
               <p className="text-sm text-neutral-600">
                 ยังไม่มีบัญชีตัวแทนจำหน่าย?{' '}
-                <Link to="/register" className="font-semibold text-primary-600 hover:text-primary-700 hover:underline">
+                <Link to="/register" className="font-semibold text-accent-600 hover:text-accent-700 hover:underline">
                   สมัครสมาชิกที่นี่
                 </Link>
               </p>

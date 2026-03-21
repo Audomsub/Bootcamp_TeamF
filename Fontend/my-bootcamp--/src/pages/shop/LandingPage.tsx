@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, Store, ArrowRight, ShoppingBag, User, UserPlus, Package } from 'lucide-react';
 import { shopService } from '@/services/shop.service';
+import { Pagination } from '@/components/ui/pagination';
 
 interface Shop {
   id: number;
@@ -15,6 +16,8 @@ export default function LandingPage() {
   const [shops, setShops] = useState<Shop[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const [pageIndex, setPageIndex] = useState(0);
+  const pageSize = 8;
 
   useEffect(() => {
     const fetchShops = async () => {
@@ -31,8 +34,17 @@ export default function LandingPage() {
     fetchShops();
   }, []);
 
+  useEffect(() => {
+    setPageIndex(0);
+  }, [searchTerm]);
+
   const filteredShops = shops.filter(shop =>
     shop.shopName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const paginatedShops = filteredShops.slice(
+    pageIndex * pageSize,
+    (pageIndex + 1) * pageSize
   );
 
   return (
@@ -76,19 +88,33 @@ export default function LandingPage() {
         </div>
       </header>
 
+      {/* Mobile Search Bar - Visible only on mobile */}
+      <div className="md:hidden px-4 mt-4">
+        <div className="relative group">
+          <input
+            type="text"
+            placeholder="ค้นหาร้านค้าที่ต้องการ..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full bg-white border border-neutral-200 rounded-xl px-12 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 shadow-sm transition-all"
+          />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400 group-focus-within:text-rose-500 transition-colors" />
+        </div>
+      </div>
+
       {/* Hero Section */}
-      <section className="relative h-[400px] overflow-hidden bg-rose-600 mt-4 mx-4 sm:mx-8 rounded-3xl group">
+      <section className="relative h-[240px] sm:h-[280px] overflow-hidden bg-rose-600 mt-4 mx-4 sm:mx-8 rounded-3xl group">
         {/* Animated Background Gradients */}
         <div className="absolute inset-0 bg-gradient-to-br from-rose-500 via-rose-600 to-rose-700 opacity-90"></div>
         <div className="absolute -top-24 -right-24 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-rose-400/20 rounded-full blur-3xl"></div>
 
         <div className="relative z-10 h-full flex flex-col justify-center px-8 sm:px-16 max-w-4xl">
-          <h2 className="text-[10px] font-black tracking-[0.4em] text-white/70 uppercase mb-4 animate-in fade-in slide-in-from-left duration-700">Reseller Management System</h2>
-          <h1 className="text-4xl sm:text-6xl font-black text-white leading-[1.1] mb-8 animate-in fade-in slide-in-from-left duration-1000">
+          <h2 className="text-[10px] font-black tracking-[0.4em] text-white/70 uppercase mb-2 animate-in fade-in slide-in-from-left duration-700">Reseller Management System</h2>
+          <h1 className="text-3xl sm:text-5xl font-black text-white leading-[1.1] mb-4 animate-in fade-in slide-in-from-left duration-1000">
             เลือกช้อปสินค้า <br /> จาก <span className="text-rose-200">ร้านค้าพรีเมียม</span>
           </h1>
-          <p className="text-white/80 text-lg max-w-lg mb-10 hidden sm:block">
+          <p className="text-white/80 text-sm sm:text-base max-w-lg mb-6 hidden sm:block">
             พบกับร้านค้าตัวแทนจำหน่ายคุณภาพที่ผ่านการคัดสรรมาอย่างดี พร้อมโปรโมชั่นและสินค้าหลากหลายรายการ
           </p>
         </div>
@@ -114,46 +140,57 @@ export default function LandingPage() {
             ))}
           </div>
         ) : filteredShops.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredShops.map((shop) => (
-              <Link
-                key={shop.id}
-                to={`/shop/${shop.shopSlug}`}
-                className="group bg-white rounded-3xl p-6 border border-neutral-100 shadow-sm hover:shadow-2xl hover:shadow-rose-500/10 hover:-translate-y-2 transition-all duration-500"
-              >
-                <div className="aspect-square bg-neutral-50 rounded-2xl mb-6 flex items-center justify-center relative overflow-hidden group-hover:bg-rose-50 transition-colors">
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-tr from-rose-500/5 to-transparent transition-opacity"></div>
-                  <Store className="h-16 w-16 text-neutral-200 group-hover:text-rose-500 group-hover:scale-110 transition-all duration-500" />
-                </div>
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {paginatedShops.map((shop) => (
+                <Link
+                  key={shop.id}
+                  to={`/shop/${shop.shopSlug}`}
+                  className="group bg-white rounded-3xl p-6 border border-neutral-100 shadow-sm hover:shadow-2xl hover:shadow-rose-500/10 hover:-translate-y-2 transition-all duration-500"
+                >
+                  <div className="aspect-square bg-neutral-50 rounded-2xl mb-6 flex items-center justify-center relative overflow-hidden group-hover:bg-rose-50 transition-colors">
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-tr from-rose-500/5 to-transparent transition-opacity"></div>
+                    <Store className="h-16 w-16 text-neutral-200 group-hover:text-rose-500 group-hover:scale-110 transition-all duration-500" />
+                  </div>
 
-                <div className="flex flex-col gap-1">
-                  <h4 className="font-black text-lg text-neutral-900 group-hover:text-rose-600 transition-colors truncate">
-                    {shop.shopName}
-                  </h4>
-                  <p className="text-xs text-neutral-400 font-medium uppercase tracking-widest truncate">
-                    @{shop.shopSlug}
-                  </p>
-                  {shop.ownerName && (
-                    <p className="text-xs text-neutral-500 mt-1">
-                      โดย {shop.ownerName}
+                  <div className="flex flex-col gap-1">
+                    <h4 className="font-black text-lg text-neutral-900 group-hover:text-rose-600 transition-colors truncate">
+                      {shop.shopName}
+                    </h4>
+                    <p className="text-xs text-neutral-400 font-medium uppercase tracking-widest truncate">
+                      @{shop.shopSlug}
                     </p>
-                  )}
-                </div>
+                    {shop.ownerName && (
+                      <p className="text-xs text-neutral-500 mt-1">
+                        โดย {shop.ownerName}
+                      </p>
+                    )}
+                  </div>
 
-                <div className="mt-6 pt-6 border-t border-neutral-50 flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
-                    <Package className="h-3.5 w-3.5 text-neutral-400" />
-                    <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">
-                      {shop.productCount} สินค้า
-                    </span>
+                  <div className="mt-6 pt-6 border-t border-neutral-50 flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <Package className="h-3.5 w-3.5 text-neutral-400" />
+                      <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">
+                        {shop.productCount} สินค้า
+                      </span>
+                    </div>
+                    <div className="w-8 h-8 rounded-full bg-neutral-50 flex items-center justify-center group-hover:bg-rose-600 transition-colors">
+                      <ArrowRight className="h-4 w-4 text-neutral-400 group-hover:text-white transition-colors" />
+                    </div>
                   </div>
-                  <div className="w-8 h-8 rounded-full bg-neutral-50 flex items-center justify-center group-hover:bg-rose-600 transition-colors">
-                    <ArrowRight className="h-4 w-4 text-neutral-400 group-hover:text-white transition-colors" />
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
+                </Link>
+              ))}
+            </div>
+
+            <div className="mt-12 bg-white rounded-3xl border border-neutral-100 px-6 shadow-sm">
+              <Pagination
+                pageIndex={pageIndex}
+                pageSize={pageSize}
+                totalCount={filteredShops.length}
+                onPageChange={setPageIndex}
+              />
+            </div>
+          </>
         ) : (
           <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-neutral-300">
             <Store className="h-12 w-12 text-neutral-300 mx-auto mb-4" />

@@ -49,7 +49,7 @@ export default function AdminProducts() {
       } else if (err.response?.data?.message) {
         message = err.response.data.message;
       }
-      
+
       if (message.includes('ออเดอร์') || message.toLowerCase().includes('order') || message.toLowerCase().includes('pending')) {
         setError('ไม่สามารถลบสินค้าได้: สินค้านี้มีคำสั่งซื้อที่ค้างอยู่ กรุณาจัดการคำสั่งซื้อให้เสร็จสิ้นหรือยกเลิกก่อนดำเนินการลบ');
       } else {
@@ -69,7 +69,7 @@ export default function AdminProducts() {
         <img
           src={getImageUrl(row.original.image_url)}
           alt={row.original.name}
-          className="w-12 h-12 rounded-xl object-cover bg-neutral-100 border border-neutral-200"
+          className="w-12 h-12 rounded-xl object-cover bg-back border border-neutral-back"
         />
       ),
     },
@@ -104,11 +104,10 @@ export default function AdminProducts() {
       header: 'สถานะคลังสินค้า',
       meta: { align: 'right' },
       cell: ({ row }) => (
-        <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium border ${
-          row.original.stock > 0 
-            ? 'bg-emerald-50 text-emerald-700 border-emerald-100' 
-            : 'bg-rose-50 text-rose-700 border-rose-100'
-        }`}>
+        <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium border ${row.original.stock > 0
+          ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+          : 'bg-rose-50 text-rose-700 border-rose-100'
+          }`}>
           {row.original.stock > 0 ? `มีสินค้า (${row.original.stock})` : 'สินค้าหมด'}
         </span>
       ),
