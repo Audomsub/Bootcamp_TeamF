@@ -30,7 +30,7 @@ public class AuthController {
      * Unified login endpoint for all roles.
      * Returns token + role so the frontend can redirect to the correct dashboard.
      */
-    @PostMapping({"/login", "/api/login"})
+    @PostMapping("/login")
     public ResponseEntity<AdminLoginResponse> login(@RequestBody Map<String, String> loginRequest) {
         String email = loginRequest.get("email");
         String password = loginRequest.get("password");
@@ -50,7 +50,7 @@ public class AuthController {
      * Reseller registration endpoint.
      * After registration, the reseller must wait for Admin approval.
      */
-    @PostMapping({"/register", "/api/register"})
+    @PostMapping("/register")
     public ResponseEntity<String> register(@Valid @RequestBody ResellerAuthRequest request) {
         String result = authService.resellerRegister(request);
         if ("สมัครสำเร็จ กรุณารอการอนุมัติจาก Admin".equals(result)) {

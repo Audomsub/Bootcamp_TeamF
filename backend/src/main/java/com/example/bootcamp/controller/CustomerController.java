@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-
 @RestController
 @RequestMapping("/customer")
 @CrossOrigin(origins = "*", allowedHeaders = "*", maxAge = 3600)
@@ -28,7 +27,7 @@ public class CustomerController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "15") int size) {
 
-        Sort sort = Sort.by(Sort.Direction.DESC, "product.stock").and(Sort.by(Sort.Direction.ASC, "id"));
+        Sort sort = Sort.by(Sort.Direction.ASC, "id");
         Pageable pageable = PageRequest.of(page, size, sort);
         ShopFrontResponse shopFrontResponse = customerService.getShopFront(slug, pageable);
 
@@ -85,7 +84,6 @@ public class CustomerController {
         }
     }
 
-
     @GetMapping("/shop")
     public ResponseEntity<?> getShops() {
         return ResponseEntity.ok(customerService.getAllShops());
@@ -97,7 +95,8 @@ public class CustomerController {
     }
 
     /**
-     * API #1: แสดงร้าน reseller ที่มีสถานะ approved ทั้งหมด (สำหรับหน้าแรกของเว็บไซต์)
+     * API #1: แสดงร้าน reseller ที่มีสถานะ approved ทั้งหมด
+     * (สำหรับหน้าแรกของเว็บไซต์)
      */
     @GetMapping("/approved-shops")
     public ResponseEntity<?> getApprovedShops() {
@@ -114,14 +113,15 @@ public class CustomerController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "15") int size) {
 
-        Sort sort = Sort.by(Sort.Direction.DESC, "product.stock").and(Sort.by(Sort.Direction.ASC, "id"));
+        Sort sort = Sort.by(Sort.Direction.ASC, "id");
         Pageable pageable = PageRequest.of(page, size, sort);
         ShopFrontResponse shopFrontResponse = customerService.getApprovedShopProducts(slug, pageable);
 
         if (shopFrontResponse == null) {
-            return ResponseEntity.status(404).body(java.util.Map.of("message", "ไม่พบร้านค้านี้ หรือร้านค้ายังไม่ได้รับการอนุมัติ"));
+            return ResponseEntity.status(404)
+                    .body(java.util.Map.of("message", "ไม่พบร้านค้านี้ หรือร้านค้ายังไม่ได้รับการอนุมัติ"));
         }
         return ResponseEntity.ok(shopFrontResponse);
     }
-    
+
 }

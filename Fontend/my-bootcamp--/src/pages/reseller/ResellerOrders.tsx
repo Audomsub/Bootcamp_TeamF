@@ -82,7 +82,7 @@ export default function ResellerOrders() {
       cell: ({ row }) => (
         <div>
           <p className="font-bold text-neutral-900 text-sm mb-0.5">{row.original.customer_name}</p>
-          <p className="text-sm font-bold text-neutral-600 tracking-tight">{row.original.customer_phone}</p>
+          <p className="text-sm font-bold text-neutral-500 tracking-tight">{row.original.customer_phone}</p>
         </div>
       ),
     },
@@ -138,7 +138,7 @@ export default function ResellerOrders() {
       accessorKey: 'created_at',
       header: 'วันที่สั่งซื้อ',
       cell: ({ row }) => (
-        <span className="text-sm font-bold text-neutral-600">{formatDate(row.original.created_at)}</span>
+        <span className="text-sm font-bold text-neutral-500">{formatDate(row.original.created_at)}</span>
       ),
     },
   ];

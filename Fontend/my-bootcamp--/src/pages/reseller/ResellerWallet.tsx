@@ -41,7 +41,7 @@ export default function ResellerWallet() {
           </div>
           <div>
             <p className="font-semibold text-neutral-800">กำไรจากคำสั่งซื้อ</p>
-            <p className="text-xs font-medium text-neutral-500 mt-0.5">
+            <p className="text-xs font-bold text-neutral-700 mt-0.5">
               รหัสออเดอร์: <span className="text-primary-600">{row.original.order?.order_number}</span>
             </p>
           </div>
@@ -52,7 +52,7 @@ export default function ResellerWallet() {
       accessorKey: 'created_at',
       header: 'วันและเวลา',
       cell: ({ row }) => (
-        <span className="text-sm font-medium text-neutral-500">
+        <span className="text-sm font-bold text-neutral-800">
           {formatDateTime(row.original.created_at)}
         </span>
       ),
@@ -102,8 +102,8 @@ export default function ResellerWallet() {
       {/* Transaction History */}
       <div className="glass-card bg-white/80 border-white/60 shadow-xl rounded-[2rem] p-6 sm:p-8">
         <div className="mb-6">
-          <h2 className="text-lg font-bold text-neutral-900">ประวัติการทำรายการ</h2>
-          <p className="text-sm font-medium text-neutral-500 mt-1">รายการเงินเข้า-ออกจากกระเป๋าเงินของคุณ</p>
+          <h2 className="text-lg font-bold text-black uppercase tracking-tight">ประวัติการทำรายการ</h2>
+          <p className="text-sm font-medium text-neutral-700 mt-1">รายการเงินเข้า-ออกจากกระเป๋าเงินของคุณ</p>
         </div>
         <DataTable
           columns={columns}

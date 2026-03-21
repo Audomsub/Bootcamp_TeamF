@@ -39,13 +39,13 @@ const mapDashboard = (d: BackendDashboard): AdminDashboardStats => ({
 
 export const dashboardService = {
   getAdminStats: async (_params?: { period?: string; startDate?: string; endDate?: string }) => {
-    const res = await api.get<BackendDashboard>('/admin/dashboard');
+    const res = await api.get<BackendDashboard>('admin/dashboard');
     const mapped = mapDashboard(res.data);
     return { data: { data: mapped } };
   },
 
   getResellerStats: async (params?: { period?: string; startDate?: string; endDate?: string }) => {
-    const res = await api.get<any>('/reseller/dashboard', { params });
+    const res = await api.get<any>('reseller/dashboard', { params });
     const d = res.data;
 
     const mapped: ResellerDashboardStats = {

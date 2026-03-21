@@ -41,6 +41,7 @@ public class CustomerService {
     @Autowired
     private EmailService emailService;
 
+    @jakarta.transaction.Transactional
     public ShopFrontResponse getShopFront(String slug, Pageable pageable) {
         Optional<ShopsEntity> shopsEntity = shopRepository.findByShopSlug(slug);
 
@@ -53,6 +54,11 @@ public class CustomerService {
 
         List<ShopProductResponse> shopProductResponses = new ArrayList<>();
         for (ShopProductsEntity shopProductsEntity : shopProductsPage.getContent()) {
+            // Null check for product relation
+            if (shopProductsEntity.getProduct() == null) {
+                continue;
+            }
+            
             ShopProductResponse shopProductResponse = new ShopProductResponse(
                     shopProductsEntity.getProduct().getId(),
                     shopProductsEntity.getProduct().getProductName(),
@@ -62,9 +68,12 @@ public class CustomerService {
                     shopProductsEntity.getProduct().getDescription());
             shopProductResponses.add(shopProductResponse);
         }
+        
+        String ownerEmail = (currentShop.getUser() != null) ? currentShop.getUser().getEmail() : "unknown";
+        
         return new ShopFrontResponse(
                 currentShop.getShopName(),
-                currentShop.getUser().getEmail(),
+                ownerEmail,
                 shopProductResponses,
                 shopProductsPage.getTotalPages(),
                 shopProductsPage.getTotalElements(),
@@ -296,7 +305,7 @@ public class CustomerService {
         ShopsEntity currentShop = shopsEntity.get();
 
         // Check if the shop owner is approved
-        if (currentShop.getUser().getStatus() != UsersEntity.Status.approved) {
+        if (currentShop.getUser() == null || currentShop.getUser().getStatus() != UsersEntity.Status.approved) {
             return null;
         }
 
@@ -304,6 +313,11 @@ public class CustomerService {
 
         List<ShopProductResponse> shopProductResponses = new ArrayList<>();
         for (ShopProductsEntity shopProductsEntity : shopProductsPage.getContent()) {
+            // Null check for product relation
+            if (shopProductsEntity.getProduct() == null) {
+                continue;
+            }
+            
             ShopProductResponse shopProductResponse = new ShopProductResponse(
                     shopProductsEntity.getProduct().getId(),
                     shopProductsEntity.getProduct().getProductName(),
@@ -313,9 +327,12 @@ public class CustomerService {
                     shopProductsEntity.getProduct().getDescription());
             shopProductResponses.add(shopProductResponse);
         }
+        
+        String ownerEmail = (currentShop.getUser() != null) ? currentShop.getUser().getEmail() : "unknown";
+        
         return new ShopFrontResponse(
                 currentShop.getShopName(),
-                currentShop.getUser().getEmail(),
+                ownerEmail,
                 shopProductResponses,
                 shopProductsPage.getTotalPages(),
                 shopProductsPage.getTotalElements(),

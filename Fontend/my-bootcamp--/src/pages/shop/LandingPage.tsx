@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, Store, ArrowRight, ShoppingBag, User, UserPlus, Package } from 'lucide-react';
-import { orderService } from '@/services/order.service';
+import { shopService } from '@/services/shop.service';
 
 interface Shop {
   id: number;
@@ -20,7 +20,7 @@ export default function LandingPage() {
     const fetchShops = async () => {
       try {
         // Use new API that only returns approved reseller shops
-        const data = await orderService.getApprovedShops();
+        const data = await shopService.getApprovedShops();
         setShops(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error('Failed to fetch approved shops:', error);

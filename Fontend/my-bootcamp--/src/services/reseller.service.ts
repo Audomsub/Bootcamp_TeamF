@@ -37,16 +37,16 @@ const mapUser = (u: any): ResellerUser => ({
 export const resellerService = {
   // GET /admin/resellers
   getAll: async (_params?: { page?: number; status?: string }) => {
-    const res = await api.get<BackendUser[]>('/admin/resellers');
+    const res = await api.get<BackendUser[]>('admin/resellers');
     const mapped = res.data.map(mapUser);
     return { data: { data: { data: mapped } } };
   },
 
   // POST /admin/reseller/{id}/status?status=approved
   approve: (id: number) =>
-    api.post(`/admin/reseller/${id}/status`, null, { params: { status: 'approved' } }),
+    api.post(`admin/reseller/${id}/status`, null, { params: { status: 'approved' } }),
 
   // POST /admin/reseller/{id}/status?status=rejected
   reject: (id: number) =>
-    api.post(`/admin/reseller/${id}/status`, null, { params: { status: 'rejected' } }),
+    api.post(`admin/reseller/${id}/status`, null, { params: { status: 'rejected' } }),
 };

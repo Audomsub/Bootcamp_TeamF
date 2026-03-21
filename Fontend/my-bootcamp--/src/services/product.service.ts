@@ -27,7 +27,7 @@ const mapProduct = (p: BackendProduct): Product => ({
 export const productService = {
   getAll: async (params?: { page?: number; size?: number }) => {
     // Spring Boot returns a Page object when paginated
-    const res = await api.get<{ content: BackendProduct[] }>('/admin/products', { 
+    const res = await api.get<{ content: BackendProduct[] }>('admin/products', { 
       params: {
         page: params?.page || 0,
         size: params?.size || 100 // Load 100 per page for admin for better UX without too much clicking
@@ -49,7 +49,7 @@ export const productService = {
 
   getById: async (id: number) => {
     // Since admin API doesn't have get by id, fetch all and filter
-    const res = await api.get<{ content?: BackendProduct[] }>('/admin/products');
+    const res = await api.get<{ content?: BackendProduct[] }>('admin/products');
     const productsArray = Array.isArray(res.data) ? res.data : (res.data.content || []);
     const product = productsArray.find(p => p.id === id);
     if (!product) throw new Error('Product not found');
@@ -57,7 +57,7 @@ export const productService = {
   },
 
   create: (data: FormData) => {
-    return api.post('/admin/products/add', data, {
+    return api.post('admin/products/add', data, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -65,7 +65,7 @@ export const productService = {
   },
 
   update: (id: number, data: FormData) => {
-    return api.put(`/admin/products/edit/${id}`, data, {
+    return api.put(`admin/products/edit/${id}`, data, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -73,5 +73,5 @@ export const productService = {
   },
 
   delete: (id: number) =>
-    api.delete(`/admin/products/delete/${id}`),
+    api.delete(`admin/products/delete/${id}`),
 };

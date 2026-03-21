@@ -259,7 +259,7 @@ export default function ResellerLayout() {
             <div className="h-10 w-px bg-neutral-200/50 hidden sm:block"></div>
 
             {/* Notification Bell */}
-            <button 
+            <button
               onClick={handleNotificationClick}
               className="relative group p-2.5 rounded-2xl bg-white border border-neutral-100 shadow-sm hover:border-accent-500 transition-all duration-300 active:scale-95"
             >
@@ -272,10 +272,7 @@ export default function ResellerLayout() {
             </button>
 
             <div className="h-10 w-px bg-neutral-200/50 hidden sm:block"></div>
-            <div className="flex flex-col items-end ">
-              <span className="text-[9px] font-black text-neutral-400 uppercase tracking-widest leading-none">โหมดการทำงาน</span>
-              <span className="text-[11px] font-bold text-neutral-900 dark:text-white mt-1 uppercase">ปกติ</span>
-            </div>
+
           </div>
         </header>
 

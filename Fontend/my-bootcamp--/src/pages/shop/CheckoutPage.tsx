@@ -58,15 +58,19 @@ export default function CheckoutPage() {
     try {
       setLoading(true);
       const response = await shopService.getBySlug(shopSlug);
-      // Backend returns ShopFrontResponse, we just need basic shop info or handle it
-      const data = response.data;
+      
+      // Handle potential response.data wrapping
+      const data = response?.data || response;
+      if (!data) throw new Error('No shop data received');
+
       setShop({
-        id: (data as any).id || 1, // Fallback if ID is missing in ShopFrontResponse
+        id: data.id || 1,
         user_id: 0,
-        shop_name: (data as any).shopName || "ร้านค้า",
+        shop_name: data.shopName || "ร้านค้า",
         shop_slug: shopSlug
       });
     } catch (err) {
+      console.error('[CheckoutPage] Error loading shop data:', err);
       setError("ไม่พบข้อมูลร้านค้าในระบบ กรุณาลองใหม่อีกครั้ง");
       setShop(null);
     } finally {

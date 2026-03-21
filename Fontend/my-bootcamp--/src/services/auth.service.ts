@@ -8,10 +8,10 @@ import type {
 
 export const authService = {
   login: (data: LoginCredentials) =>
-    api.post<{ token: string; email: string; role: string; message: string; user?: any; shop?: any }>('/login', data),
+    api.post<{ token: string; email: string; role: string; message: string; user?: any; shop?: any }>('login', data),
 
   register: (data: RegisterData) =>
-    api.post<string>('/register', data),
+    api.post<string>('register', data),
 
   logout: () => {
     localStorage.removeItem('token');

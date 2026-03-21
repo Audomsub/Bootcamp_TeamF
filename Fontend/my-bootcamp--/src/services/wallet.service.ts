@@ -3,10 +3,10 @@ import type { Wallet, WalletLog, ApiResponse } from '@/types';
 
 export const walletService = {
   getWallet: () =>
-    api.get<ApiResponse<Wallet>>('/reseller/wallet'),
+    api.get<ApiResponse<Wallet>>('reseller/wallet'),
 
   getWalletLogs: async (params?: { page?: number }) => {
-    const res = await api.get<any>('/reseller/wallet/logs', { params });
+    const res = await api.get<any>('reseller/wallet/logs', { params });
     // Spring Data Page structure returned in response directly sometimes, 
     // but looking at ResellerWalletController, it returns ResellerWalletResponse.
     const data = res.data;

@@ -41,7 +41,7 @@ export const orderService = {
   // Admin - GET /admin/orders
   getAllOrders: async (params?: { page?: number; size?: number; status?: string }) => {
     // Backend returns Page<AdminOrderResponse>
-    const res = await api.get('/admin/orders', { params });
+    const res = await api.get('admin/orders', { params });
     const content = res.data.content || [];
     const mapped = content.map(mapOrder);
 
@@ -58,11 +58,11 @@ export const orderService = {
 
   // Admin - POST /admin/orders/status?status=shipped
   updateStatus: (id: number, status: string) =>
-    api.post('/admin/orders/status', { orderId: id }, { params: { status: status.toLowerCase() } }),
+    api.post('admin/orders/status', { orderId: id }, { params: { status: status.toLowerCase() } }),
 
   // Reseller
   getMyOrders: async (params?: { page?: number; size?: number }) => {
-    const res = await api.get('/reseller/orders', { params });
+    const res = await api.get('reseller/orders', { params });
     // Spring Data Page structure: { content: [], totalElements: ..., ... }
     const content = res.data.content || [];
     const mapped = content.map((o: any) => ({
@@ -102,10 +102,10 @@ export const orderService = {
     customerPhone: string;
     customerAddress: string;
     items: { productId: number; quantity: number }[];
-  }) => api.post(`/customer/shop/${slug}/checkout`, data),
+  }) => api.post(`customer/shop/${slug}/checkout`, data),
 
   trackOrder: async (orderNumber: string) => {
-    const res = await api.get('/customer/track-order', { params: { orderNumber } });
+    const res = await api.get('customer/track-order', { params: { orderNumber } });
     const o = res.data;
     if (!o) return res;
 
@@ -139,33 +139,17 @@ export const orderService = {
   },
 
   getOrderById: (slug: string, id: number) =>
-    api.get(`/customer/shop/${slug}/order/${id}`),
+    api.get(`customer/shop/${slug}/order/${id}`),
 
   simulatePayment: (slug: string, orderId: number) =>
-    api.post(`/customer/shop/${slug}/payment/${orderId}`),
+    api.post(`customer/shop/${slug}/payment/${orderId}`),
 
-  getShops: async () => {
-    const res = await api.get('/customer/shop');
-    return res.data;
-  },
-
-  /** API #1: Get all reseller shops with approved status (for landing page) */
-  getApprovedShops: async () => {
-    const res = await api.get('/customer/approved-shops');
-    return Array.isArray(res.data) ? res.data : [];
-  },
-
-  /** API #2: Get products of a specific approved shop by slug (for shop detail page) */
-  getApprovedShopProducts: async (slug: string, page: number = 0, size: number = 15) => {
-    const res = await api.get(`/customer/approved-shops/${slug}/products`, { params: { page, size } });
-    return res.data || null;
-  },
 
   getUnreadNotificationsCount: async () => {
-    const res = await api.get('/reseller/orders/unread-count');
+    const res = await api.get('reseller/orders/unread-count');
     return res.data as number;
   },
 
   markNotificationsAsRead: () =>
-    api.post('/reseller/orders/mark-read'),
+    api.post('reseller/orders/mark-read'),
 };

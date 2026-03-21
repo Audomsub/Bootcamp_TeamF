@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Store, ShoppingCart, CheckCircle2, Package, ArrowRight, Sparkles, Star, MapPin, Search, X } from 'lucide-react';
 import { LoadingSpinner, EmptyState, Pagination } from '@/components/ui/shared';
 import { Modal } from '@/components/ui/modal';
-import { orderService } from '@/services/order.service';
+import { shopService } from '@/services/shop.service';
 import { formatCurrency, getImageUrl } from '@/lib/utils';
 import { useCart } from '@/contexts/CartContext';
 
@@ -39,26 +39,51 @@ export default function ShopPage() {
   }, [slug]);
 
   const loadShop = async (shopSlug: string, page: number) => {
+    console.log('%c [ShopPage] v2.0 - loadShop starting...', 'color: white; background: #ff2b5e; padding: 4px 8px; border-radius: 4px;', { shopSlug, page });
     try {
       if (page === 0) setLoading(true);
       else setLoadingMore(true);
 
-      const response = await orderService.getApprovedShopProducts(shopSlug, page, 15);
-      // Handle various response patterns (Axios-wrapped, direct body, or missing data)
-      const rawData = (response as any)?.data || response;
-      const data = (rawData as any)?.data || rawData || {};
-      if (data && data.shopName) {
-        setShopName(data.shopName);
-        setProducts(data.productResponses || []); // Always replace
+      const response = await shopService.getApprovedShopProducts(shopSlug, page, 15);
+      console.log('[ShopPage] Response received:', response);
+
+      if (!response) {
+        console.warn('[ShopPage] No response from service');
+        setShopName('');
+        return;
+      }
+
+      // Handle any wrapping: response.data or response
+      let data: any = response;
+      if (response && typeof response === 'object') {
+        if ('data' in response && response.data) {
+          data = response.data;
+        }
+      }
+
+      // Secondary data wrap check
+      if (data && data.data && !data.shopName && !data.shop_name) {
+        data = data.data;
+      }
+
+      console.log('[ShopPage] Normalized Data:', data);
+
+      const foundName = data?.shopName || data?.shop_name || data?.name || '';
+      const foundProducts = data?.productResponses || data?.products || [];
+
+      if (foundName) {
+        setShopName(foundName);
+        setProducts(foundProducts);
         setPagination({
           totalPages: data.totalPages || 0,
           totalElements: data.totalElements || 0,
           currentPage: data.currentPage || 0
         });
-        if (data.resellerEmail) {
-          setResellerEmail(data.resellerEmail);
+        if (data.resellerEmail || data.email) {
+          setResellerEmail(data.resellerEmail || data.email);
         }
       } else {
+        console.warn('[ShopPage] Shop name not found in data:', data);
         setShopName('');
       }
     } catch (err) {

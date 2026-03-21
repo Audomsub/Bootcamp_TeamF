@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -16,6 +16,7 @@ type LoginForm = z.infer<typeof loginSchema>;
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -23,15 +24,33 @@ export default function Login() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
   });
 
+  // Use useEffect to set the form value once it's mounted
+  useEffect(() => {
+    const savedEmail = localStorage.getItem('remember_email');
+    if (savedEmail) {
+      setRememberMe(true);
+      setValue('email', savedEmail);
+    }
+  }, [setValue]);
+
   const onSubmit = async (data: LoginForm) => {
     try {
       setError('');
       const response = await authService.login(data);
+      
+      // Save or remove email according to rememberMe preference
+      if (rememberMe) {
+        localStorage.setItem('remember_email', data.email);
+      } else {
+        localStorage.removeItem('remember_email');
+      }
+
       const { token, role, email, user, shop } = response.data;
 
       const userRole = role?.toLowerCase() || '';
@@ -202,6 +221,33 @@ export default function Login() {
                 {errors.password && (
                   <p className="mt-2 text-xs font-medium text-red-500 ml-1">{errors.password.message}</p>
                 )}
+              </div>
+
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2 cursor-pointer group">
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      className="sr-only"
+                    />
+                    <div className={`w-5 h-5 rounded-lg border-2 transition-all duration-300 flex items-center justify-center ${
+                      rememberMe 
+                        ? 'bg-neutral-900 border-neutral-900 group-hover:bg-neutral-800' 
+                        : 'bg-white border-neutral-200 group-hover:border-neutral-300'
+                    }`}>
+                      {rememberMe && (
+                        <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 text-white fill-none stroke-[4] stroke-current">
+                          <path d="M20 6L9 17L4 12" />
+                        </svg>
+                      )}
+                    </div>
+                  </div>
+                  <span className="text-sm font-medium text-neutral-600 group-hover:text-neutral-900 transition-colors">
+                    จดจำบัญชีผู้ใช้
+                  </span>
+                </label>
               </div>
 
               <div className="pt-2">
