@@ -44,7 +44,9 @@ export default function ShopPage() {
       else setLoadingMore(true);
 
       const response = await orderService.getApprovedShopProducts(shopSlug, page, 15);
-      const data = (response.data as any).data || response.data;
+      // Handle various response patterns (Axios-wrapped, direct body, or missing data)
+      const rawData = (response as any)?.data || response;
+      const data = (rawData as any)?.data || rawData || {};
 
       if (data && data.shopName) {
         setShopName(data.shopName);

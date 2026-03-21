@@ -46,7 +46,7 @@ public class SecurityConfig {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
-                .requestMatchers("/customer/**");
+                .requestMatchers("/customer/**", "/api/customer/**");
     }
 
     @Bean
@@ -58,14 +58,14 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // ─── Public: Customer-facing endpoints ──────────────────
-                        .requestMatchers("/customer/**").permitAll()
+                        .requestMatchers("/customer/**", "/api/customer/**").permitAll()
 
                         // ─── Allow CORS preflight ───────────────────────────────
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                         // ─── Public: Auth endpoints ─────────────────────────────
-                        .requestMatchers(HttpMethod.POST, "/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/login", "/api/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/register", "/api/register").permitAll()
 
                         // ─── Public: Static Resources ──────────────────────────
                         .requestMatchers("/", "/index.html", "/*.js", "/*.css", "/*.png", "/*.svg", "/*.ico",

@@ -40,3 +40,7 @@ logging:
   level:
     org.hibernate.SQL: WARN     # ซ่อน SQL log ที่ไม่จำเป็น (เปลี่ยนเป็น DEBUG ถ้าอยากดู)
     com.example.bootcamp: INFO
+
+jwt:
+  # Secret key สำหรับ JWT (อย่างน้อย 32 ตัวอักษร)
+  secret: "9a72d734a7d9162f1c4e93fb29544d6423472d734a7d9162f1c4e93fb29544d64" # สามารถเปลี่ยนเป็นคีย์อื่นที่ปลอดภัยกว่าได้
