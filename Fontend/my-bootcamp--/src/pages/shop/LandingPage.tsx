@@ -21,7 +21,7 @@ export default function LandingPage() {
       try {
         // Use new API that only returns approved reseller shops
         const data = await orderService.getApprovedShops();
-        setShops(data || []);
+        setShops(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error('Failed to fetch approved shops:', error);
       } finally {

@@ -44,7 +44,7 @@ export default function ShopPage() {
       else setLoadingMore(true);
 
       const response = await orderService.getApprovedShopProducts(shopSlug, page, 15);
-      const data = (response.data as any).data || response.data;
+      const data = response;
 
       if (data && data.shopName) {
         setShopName(data.shopName);
