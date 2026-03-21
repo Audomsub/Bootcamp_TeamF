@@ -152,13 +152,13 @@ export const orderService = {
   /** API #1: Get all reseller shops with approved status (for landing page) */
   getApprovedShops: async () => {
     const res = await api.get('/customer/approved-shops');
-    return res.data;
+    return Array.isArray(res.data) ? res.data : [];
   },
 
   /** API #2: Get products of a specific approved shop by slug (for shop detail page) */
   getApprovedShopProducts: async (slug: string, page: number = 0, size: number = 15) => {
     const res = await api.get(`/customer/approved-shops/${slug}/products`, { params: { page, size } });
-    return res.data;
+    return res.data || null;
   },
 
   getUnreadNotificationsCount: async () => {
