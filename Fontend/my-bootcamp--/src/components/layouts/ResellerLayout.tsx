@@ -16,6 +16,7 @@ import {
   Bell,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { orderService } from '@/services/order.service';
 
 const navItems = [
   { to: '/reseller/dashboard', icon: LayoutDashboard, label: 'แดชบอร์ด' },
@@ -46,13 +47,43 @@ export default function ResellerLayout() {
 
   /*system time*/
   const [time, setTime] = useState(new Date());
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const fetchUnreadCount = async () => {
+    try {
+      const count = await orderService.getUnreadNotificationsCount();
+      setUnreadCount(count);
+    } catch (error) {
+      console.error('Failed to fetch unread count:', error);
+    }
+  };
+
   useEffect(() => {
     const timer = setInterval(() => {
       setTime(new Date());
     }, 1000);
 
-    return () => clearInterval(timer);
+    fetchUnreadCount();
+    const notificationTimer = setInterval(fetchUnreadCount, 30000); // Check every 30s
+
+    return () => {
+      clearInterval(timer);
+      clearInterval(notificationTimer);
+    };
   }, []);
+
+  const handleNotificationClick = async () => {
+    try {
+      if (unreadCount > 0) {
+        await orderService.markNotificationsAsRead();
+        setUnreadCount(0);
+      }
+      navigate('/reseller/orders');
+    } catch (error) {
+      console.error('Failed to mark notifications as read:', error);
+      navigate('/reseller/orders');
+    }
+  };
 
 
   return (
@@ -226,11 +257,18 @@ export default function ResellerLayout() {
             <div className="h-10 w-px bg-neutral-200/50 hidden sm:block"></div>
             <ThemeToggle />
             <div className="h-10 w-px bg-neutral-200/50 hidden sm:block"></div>
-            
+
             {/* Notification Bell */}
-            <button className="relative group p-2.5 rounded-2xl bg-white border border-neutral-100 shadow-sm hover:border-accent-500 transition-all duration-300">
+            <button 
+              onClick={handleNotificationClick}
+              className="relative group p-2.5 rounded-2xl bg-white border border-neutral-100 shadow-sm hover:border-accent-500 transition-all duration-300 active:scale-95"
+            >
               <Bell className="h-5 w-5 text-neutral-500 group-hover:text-accent-600" />
-              <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white shadow-sm ring-4 ring-rose-500/10"></span>
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center bg-rose-500 rounded-full text-[10px] font-black text-white border-2 border-white shadow-sm ring-4 ring-rose-500/10 animate-in zoom-in duration-300">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
             </button>
 
             <div className="h-10 w-px bg-neutral-200/50 hidden sm:block"></div>

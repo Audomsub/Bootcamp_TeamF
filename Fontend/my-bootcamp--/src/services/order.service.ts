@@ -44,7 +44,7 @@ export const orderService = {
     const res = await api.get('/admin/orders', { params });
     const content = res.data.content || [];
     const mapped = content.map(mapOrder);
-    
+
     return {
       data: {
         content: mapped,
@@ -84,7 +84,7 @@ export const orderService = {
         };
       }),
     }));
-    
+
     return {
       data: {
         content: mapped,
@@ -114,7 +114,7 @@ export const orderService = {
       id: 0,
       order_number: o.orderNumber,
       shop_id: 0,
-      customer_name: o.customerName || '-', 
+      customer_name: o.customerName || '-',
       customer_phone: o.customerPhone || '-',
       shipping_address: o.shippingAddress,
       total_amount: o.totalAmount,
@@ -145,7 +145,15 @@ export const orderService = {
     api.post(`/shop/${slug}/payment/${orderId}`),
 
   getShops: async () => {
-    const res = await api.get('/shops');
+    const res = await api.get('/shop');
     return res.data;
   },
+
+  getUnreadNotificationsCount: async () => {
+    const res = await api.get('/reseller/orders/unread-count');
+    return res.data as number;
+  },
+
+  markNotificationsAsRead: () =>
+    api.post('/reseller/orders/mark-read'),
 };
