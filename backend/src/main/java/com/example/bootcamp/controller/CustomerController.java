@@ -10,6 +10,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*", maxAge = 3600)
@@ -91,8 +94,14 @@ public class CustomerController {
         return ResponseEntity.ok(customerService.getAllCatalog(pageable));
     }
 
-    @GetMapping("/shops")
+    @GetMapping("/shop")
     public ResponseEntity<?> getShops() {
         return ResponseEntity.ok(customerService.getAllShops());
     }
+
+    @GetMapping("/shops2")
+    public ResponseEntity<?> getShops2() {
+        return ResponseEntity.ok(customerService.getAllShopWithProducts());
+    }
+    
 }

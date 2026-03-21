@@ -233,4 +233,28 @@ public class CustomerService {
         }
         return result;
     }
+
+    public List<java.util.Map<String , Object>> getAllShopWithProducts() {
+        List<ShopsEntity> shops = shopRepository.findAll();
+        List<java.util.Map<String, Object>> result = new ArrayList<>();
+        for (ShopsEntity shop : shops) {
+            java.util.Map<String, Object> map = new java.util.HashMap<>();
+            map.put("id", shop.getId());
+            map.put("shopName", shop.getShopName());
+            map.put("shopSlug", shop.getShopSlug());
+
+            List<ShopProductsEntity> shopProducts = shopProductRepository.findByShopId(shop.getId(), Pageable.unpaged()).getContent();
+            List<java.util.Map<String, Object>> products = new ArrayList<>();
+            for (ShopProductsEntity sp : shopProducts) {
+                java.util.Map<String, Object> productMap = new java.util.HashMap<>();
+                productMap.put("id", sp.getProduct().getId());
+                productMap.put("productName", sp.getProduct().getProductName());
+                productMap.put("sellingPrice", sp.getSellingPrice());
+                products.add(productMap);
+            }
+            map.put("products", products);
+            result.add(map);
+        }
+        return result;
+    }
 }
