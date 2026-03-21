@@ -64,6 +64,7 @@ public class CustomerService {
         }
         return new ShopFrontResponse(
                 currentShop.getShopName(),
+                currentShop.getUser().getEmail(),
                 shopProductResponses,
                 shopProductsPage.getTotalPages(),
                 shopProductsPage.getTotalElements(),
@@ -314,6 +315,7 @@ public class CustomerService {
         }
         return new ShopFrontResponse(
                 currentShop.getShopName(),
+                currentShop.getUser().getEmail(),
                 shopProductResponses,
                 shopProductsPage.getTotalPages(),
                 shopProductsPage.getTotalElements(),

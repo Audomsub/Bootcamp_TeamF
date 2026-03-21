@@ -19,7 +19,7 @@ public class OrdersEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @OneToMany(mappedBy = "order" , cascade = CascadeType.ALL , fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OrderItemsEntity> orderItems;
 
     @Column(name = "order_number", nullable = false, unique = true, length = 50)
@@ -51,6 +51,9 @@ public class OrdersEntity {
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "is_read_by_reseller", nullable = false)
+    private boolean isReadByReseller = false;
 
     public enum Status {
         pending,
@@ -144,5 +147,13 @@ public class OrdersEntity {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public boolean isReadByReseller() {
+        return isReadByReseller;
+    }
+
+    public void setReadByReseller(boolean readByReseller) {
+        isReadByReseller = readByReseller;
     }
 }
