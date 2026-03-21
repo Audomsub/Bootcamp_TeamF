@@ -44,7 +44,7 @@ export const orderService = {
     const res = await api.get('/admin/orders', { params });
     const content = res.data.content || [];
     const mapped = content.map(mapOrder);
-    
+
     return {
       data: {
         content: mapped,
@@ -84,7 +84,7 @@ export const orderService = {
         };
       }),
     }));
-    
+
     return {
       data: {
         content: mapped,
@@ -105,7 +105,7 @@ export const orderService = {
   }) => api.post(`/shop/${slug}/checkout`, data),
 
   trackOrder: async (orderNumber: string) => {
-    const res = await api.get('/track-order', { params: { orderNumber } });
+    const res = await api.get('/customer/track-order', { params: { orderNumber } });
     const o = res.data;
     if (!o) return res;
 
@@ -114,7 +114,7 @@ export const orderService = {
       id: 0,
       order_number: o.orderNumber,
       shop_id: 0,
-      customer_name: o.customerName || '-', 
+      customer_name: o.customerName || '-',
       customer_phone: o.customerPhone || '-',
       shipping_address: o.shippingAddress,
       total_amount: o.totalAmount,

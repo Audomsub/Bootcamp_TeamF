@@ -12,24 +12,23 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/customer")
 @CrossOrigin(origins = "*", allowedHeaders = "*", maxAge = 3600)
 public class CustomerController {
 
     @Autowired
     private CustomerService customerService;
 
-
-
     @GetMapping("/shop/{slug}")
     public ResponseEntity<?> getShopDetail(
             @PathVariable String slug,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "15") int size) {
-        
+
         Sort sort = Sort.by(Sort.Direction.DESC, "product.stock").and(Sort.by(Sort.Direction.ASC, "id"));
         Pageable pageable = PageRequest.of(page, size, sort);
         ShopFrontResponse shopFrontResponse = customerService.getShopFront(slug, pageable);
-        
+
         if (shopFrontResponse == null) {
             return ResponseEntity.status(404).body("ไม่พบร้านค้านี้");
         }
@@ -43,10 +42,10 @@ public class CustomerController {
             java.util.Map<String, Object> data = new java.util.HashMap<>();
             data.put("id", order.getId());
             data.put("orderNumber", order.getOrderNumber());
-            
+
             java.util.Map<String, Object> response = new java.util.HashMap<>();
             response.put("data", data);
-            
+
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(java.util.Map.of("message", e.getMessage()));
@@ -87,7 +86,8 @@ public class CustomerController {
     public ResponseEntity<org.springframework.data.domain.Page<com.example.bootcamp.entity.ProductsEntity>> getCatalog(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by("id").descending());
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size,
+                org.springframework.data.domain.Sort.by("id").descending());
         return ResponseEntity.ok(customerService.getAllCatalog(pageable));
     }
 }

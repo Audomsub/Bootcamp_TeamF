@@ -23,9 +23,9 @@ import java.util.List;
  * Public endpoints (no auth required):
  * - POST /login — Unified login for Admin & Reseller
  * - POST /register — Reseller registration
- * - GET /shop/** — Customer storefront (public)
- * - GET /track-order — Customer order tracking (public)
- * - GET /catalog — Public product catalog
+ * - GET /customer/shop/** — Customer storefront (public)
+ * - GET /customer/track-order — Customer order tracking (public)
+ * - GET /customer/catalog — Public product catalog
  * - OPTIONS /** — CORS preflight
  *
  * Protected endpoints:
@@ -63,10 +63,9 @@ public class SecurityConfig {
                         .permitAll()
 
                         // ─── Public: Customer-facing endpoints ──────────────────
-                        .requestMatchers(HttpMethod.GET, "/shop/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/shop/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/track-order").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/catalog").permitAll()
+                        .requestMatchers("/customer/shop/**").permitAll()
+                        .requestMatchers("/customer/track-order", "/customer/track-order/**").permitAll()
+                        .requestMatchers("/customer/catalog").permitAll()
 
                         // ─── Protected: Admin (ROLE_ADMIN required) ─────────────
                         .requestMatchers("/admin/**").hasRole("ADMIN")
