@@ -1,0 +1,48 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: bootcamp_db
+
+  datasource:
+    url: jdbc:postgresql://10.202.10.36:5432/bootcamp_db
+    username: dev_dew
+    password: password
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    open-in-view: false          # ปิด warning open-in-view
+    show-sql: true
+    hibernate:
+      ddl-auto: none           # schema ถูก manage ด้วย SQL เอง
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:your-email@gmail.com}
+    password: ${MAIL_PASSWORD:your-app-password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+logging:
+  level:
+    org.hibernate.SQL: WARN     # ซ่อน SQL log ที่ไม่จำเป็น (เปลี่ยนเป็น DEBUG ถ้าอยากดู)
+    com.example.bootcamp: INFO
+
+jwt:
+  # Secret key สำหรับ JWT (อย่างน้อย 32 ตัวอักษร)
+  secret: "9a72d734a7d9162f1c4e93fb29544d6423472d734a7d9162f1c4e93fb29544d64" # สามารถเปลี่ยนเป็นคีย์อื่นที่ปลอดภัยกว่าได้
