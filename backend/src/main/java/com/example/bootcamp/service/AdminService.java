@@ -1,9 +1,12 @@
 package com.example.bootcamp.service;
 
-import com.example.bootcamp.dto.Response.AdminOrderResponse;
 import com.example.bootcamp.dto.Response.AdminDashboardResponse;
+import com.example.bootcamp.dto.Response.AdminOrderResponse;
+import com.example.bootcamp.dto.Response.AdminResellerResponse;
 import com.example.bootcamp.entity.OrdersEntity;
+import com.example.bootcamp.entity.ShopsEntity;
 import com.example.bootcamp.entity.UsersEntity;
+import com.example.bootcamp.repository.ShopRepository;
 import com.example.bootcamp.entity.WalletsEntity;
 import com.example.bootcamp.entity.WalletLogsEntity;
 import com.example.bootcamp.repository.OrderRepository;
@@ -18,12 +21,16 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AdminService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ShopRepository shopRepository;
 
     @Autowired
     private OrderRepository orderRepository;
@@ -34,9 +41,32 @@ public class AdminService {
     @Autowired
     private WalletLogRepository walletLogRepository;
 
-    public List<UsersEntity> getAllReseller() {
+    public List<AdminResellerResponse> getAllReseller() {
         // Return only resellers (role=reseller), pending status first
-        return userRepository.findByRoleOrderByStatusAscCreatedAtDesc(UsersEntity.Role.reseller);
+        List<UsersEntity> resellers = userRepository.findByRoleOrderByStatusAscCreatedAtDesc(UsersEntity.Role.reseller);
+        List<AdminResellerResponse> response = new ArrayList<>();
+
+        for (UsersEntity user : resellers) {
+            Optional<ShopsEntity> shopOpt = shopRepository.findByUserId(user.getId());
+            
+            AdminResellerResponse.ShopInfo shopInfo = null;
+            if (shopOpt.isPresent()) {
+                shopInfo = AdminResellerResponse.ShopInfo.builder()
+                        .shop_name(shopOpt.get().getShopName())
+                        .build();
+            }
+
+            response.add(AdminResellerResponse.builder()
+                    .id(user.getId())
+                    .name(user.getName())
+                    .email(user.getEmail())
+                    .phone(user.getPhone())
+                    .status(user.getStatus().name())
+                    .created_at(user.getCreatedAt())
+                    .shop(shopInfo)
+                    .build());
+        }
+        return response;
     }
 
     @Transactional

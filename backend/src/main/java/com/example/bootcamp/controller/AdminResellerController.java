@@ -1,5 +1,6 @@
 package com.example.bootcamp.controller;
 
+import com.example.bootcamp.dto.Response.AdminResellerResponse;
 import com.example.bootcamp.entity.UsersEntity;
 import com.example.bootcamp.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,7 @@ public class AdminResellerController {
      * List all resellers (pending first, then approved, then rejected).
      */
     @GetMapping("/resellers")
-    public ResponseEntity<List<UsersEntity>> getAllResellers() {
+    public ResponseEntity<List<AdminResellerResponse>> getAllResellers() {
         return ResponseEntity.ok(adminService.getAllReseller());
     }
 
